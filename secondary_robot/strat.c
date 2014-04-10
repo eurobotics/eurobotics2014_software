@@ -361,6 +361,7 @@ uint8_t strat_main(void)
 	uint16_t old_spdd, old_spda;
 
 	static uint8_t mamooth_done =0;
+	static uint8_t other_mamooth =0;
 	static uint8_t fresco_done =0;
 	static uint8_t state = 0;
  
@@ -386,8 +387,16 @@ uint8_t strat_main(void)
 			trajectory_goto_forward_xy_abs (&mainboard.traj, 
 										COLOR_X(BEGIN_MAMOOTH_X), BEGIN_LINE_Y);
 			err = wait_traj_end(TRAJ_FLAGS_NO_NEAR);
+			if(err & END_OBSTACLE)
+			{
+				state=21;
+				other_mamooth=1;
+				break;
+			}
+
 			if (!TRAJ_SUCCESS(err))
 					ERROUT(err);
+			
 
 
 			trajectory_a_abs (&mainboard.traj, COLOR_A_ABS(-90));
@@ -406,6 +415,18 @@ uint8_t strat_main(void)
 			mamooth_done=1;
 			state ++;			
 			break;
+
+		
+		case 21:
+			beaconboard.opponent_x = COLOR_X(750);
+			beaconboard.opponent_y = 600;
+
+			sensor_obstacle_disable();
+			goto_and_avoid_forward(	COLOR_X(BEGIN_FRESCO_X), BEGIN_LINE_Y,TRAJ_FLAGS_NO_NEAR,TRAJ_FLAGS_NO_NEAR);
+			sensor_obstacle_enable();
+			state=4;
+			break;
+
 
 		/* goto in front of fresco */
 		case 3:
@@ -470,7 +491,45 @@ uint8_t strat_main(void)
 			if (!TRAJ_SUCCESS(err))
 					ERROUT(err);
 
+			if(other_mamooth==1)
+			{
+				state=31;
+				break;
+			}
 			state ++;
+			break;
+
+		case 31:
+
+			trajectory_goto_forward_xy_abs (&mainboard.traj, 
+										COLOR_X(BEGIN_FRESCO_X), 430);
+			err = wait_traj_end(TRAJ_FLAGS_STD);
+			//if (!TRAJ_SUCCESS(err))
+			//		ERROUT(err);
+
+
+			trajectory_goto_forward_xy_abs (&mainboard.traj, 
+										COLOR_X(3000-BEGIN_MAMOOTH_X), BEGIN_LINE_Y);
+			err = wait_traj_end(TRAJ_FLAGS_NO_NEAR);
+
+			//if (!TRAJ_SUCCESS(err))
+			//		ERROUT(err);
+			
+
+
+			trajectory_a_abs (&mainboard.traj, COLOR_A_ABS(-90));
+			err = wait_traj_end(TRAJ_FLAGS_SMALL_DIST);
+			if (!TRAJ_SUCCESS(err))
+					ERROUT(err);
+			pwm_servo_set(&gen.pwm_servo_oc3, SERVO_SHOOT_POS_UP);
+			pwm_servo_set(&gen.pwm_servo_oc4, SERVO_SHOOT_POS_DOWN);
+			time_wait_ms(1000);
+
+			trajectory_goto_forward_xy_abs (&mainboard.traj, 
+										COLOR_X(3000-300), BEGIN_LINE_Y);
+			err = wait_traj_end(TRAJ_FLAGS_NO_NEAR);
+
+			state++;
 			break;
 
 		default:

@@ -94,10 +94,11 @@
 #define O_LENGTH 500
 #endif
 
+#define IM_SECONDARY_ROBOT
 #ifdef IM_SECONDARY_ROBOT
 /* /!\ half size */
 #define ROBOT_2ND_WIDTH  ((330/2)+OBS_CLERANCE)
-#define ROBOT_2ND_LENGTH ((282/2)+OBS_CLERANCE)
+#define ROBOT_2ND_LENGTH ((150/2)+OBS_CLERANCE)
 #else
 /* /!\ half size */
 #define ROBOT_2ND_WIDTH  ((230/2)+OBS_CLERANCE)

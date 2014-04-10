@@ -280,13 +280,15 @@ uint8_t combs_wait_end(combs_t *combs)
 /**** sticks funcions *********************************************************/
 uint16_t stick_ax12_pos[STICK_TYPE_MAX][STICK_MODE_MAX] = {
 	[STICK_TYPE_RIGHT][STICK_MODE_HIDE] 				= POS_STICK_R_HIDE,
-	[STICK_TYPE_RIGHT][STICK_MODE_PUSH_FIRE] 			= POS_STICK_R_PUSH_FIRE,
+	//[STICK_TYPE_RIGHT][STICK_MODE_PUSH_FIRE] 			= POS_STICK_R_PUSH_FIRE,
+	[STICK_TYPE_RIGHT][STICK_MODE_PUSH_FIRE] 			= POS_STICK_R_PUSH_TORCH_FIRE,
 	[STICK_TYPE_RIGHT][STICK_MODE_PUSH_TORCH_FIRE]	= POS_STICK_R_PUSH_TORCH_FIRE,
 	[STICK_TYPE_RIGHT][STICK_MODE_CLEAN_FLOOR] 		= POS_STICK_R_CLEAN_FLOOR,
 	[STICK_TYPE_RIGHT][STICK_MODE_CLEAN_HEART] 		= POS_STICK_R_CLEAN_HEART,
 
 	[STICK_TYPE_LEFT][STICK_MODE_HIDE] 					= POS_STICK_L_HIDE,
-	[STICK_TYPE_LEFT][STICK_MODE_PUSH_FIRE] 			= POS_STICK_L_PUSH_FIRE,
+	//[STICK_TYPE_LEFT][STICK_MODE_PUSH_FIRE] 			= POS_STICK_L_PUSH_FIRE,
+	[STICK_TYPE_LEFT][STICK_MODE_PUSH_FIRE] 			= POS_STICK_L_PUSH_TORCH_FIRE,
 	[STICK_TYPE_LEFT][STICK_MODE_PUSH_TORCH_FIRE]	= POS_STICK_L_PUSH_TORCH_FIRE,
 	[STICK_TYPE_LEFT][STICK_MODE_CLEAN_FLOOR] 		= POS_STICK_L_CLEAN_FLOOR,
 	[STICK_TYPE_LEFT][STICK_MODE_CLEAN_HEART] 		= POS_STICK_L_CLEAN_HEART,
@@ -304,6 +306,8 @@ uint8_t stick_set_mode(stick_t *stick, uint8_t mode, int16_t pos_offset)
 	else
 		ax12_id = AX12_ID_STICK_L;
 		
+	ax12_user_write_byte(&gen.ax12, ax12_id, AA_TORQUE_ENABLE, 0xFF);
+
 	/* set ax12 possitions depends on mode and type */
 	if(mode >= STICK_MODE_MAX) {
 		ACTUATORS_ERROR("Unknow %s STICK MODE", stick->type == STICK_TYPE_RIGHT? "RIGHT":"LEFT");
@@ -333,6 +337,14 @@ uint8_t stick_set_mode(stick_t *stick, uint8_t mode, int16_t pos_offset)
 	/* apply to ax12 */
 	err = ax12_user_write_int(&gen.ax12, ax12_id, AA_GOAL_POSITION_L, stick->ax12_pos);
 
+
+	if(mode!=STICK_MODE_HIDE)	
+	{
+		time_wait_ms(200);
+		ax12_user_write_byte(&gen.ax12, ax12_id, AA_TORQUE_ENABLE, 0x00);
+	}
+
+
 	/* update time for timeout and reset blocking */
 	stick->time_us = time_get_us2();
 	stick->blocking = 0;
@@ -348,9 +360,15 @@ int8_t stick_check_mode_done(stick_t *stick)
 	uint16_t ax12_pos;
 	uint8_t ax12_id;
 
+
+
 	/* ax12 position pulling */
 	if(time_get_us2() - us < AX12_PULLING_TIME_us)
 		return 0;
+
+
+
+	ax12_user_write_byte(&gen.ax12, ax12_id, AA_TORQUE_ENABLE, 0x00);
 
 	/* update time */
 	us = time_get_us2();

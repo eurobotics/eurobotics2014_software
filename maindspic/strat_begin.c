@@ -389,7 +389,7 @@ uint8_t strat_begin_alcabot (void)
 		break;
 
 		/* m torch 1*/
-      case 9:
+      case 99:
 #define M_TORCH_1_Y_STICK 	(AREA_Y - 600)
 #define M_TORCH_X_STICK		(CENTER_X - 480)
 
