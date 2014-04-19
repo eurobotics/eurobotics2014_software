@@ -143,11 +143,11 @@ uint8_t strat_harvest_fruits(int16_t x, int16_t y)
 
 	i2c_slavedspic_mode_stick ( I2C_STICK_TYPE_LEFT,
  										 I2C_STICK_MODE_HIDE, 0);
-	i2cproto_wait_update ();
+	//i2cproto_wait_update ();
 	i2c_slavedspic_mode_stick ( I2C_STICK_TYPE_RIGHT,
  										 I2C_STICK_MODE_HIDE, 0);
 
-	i2cproto_wait_update ();
+	//i2cproto_wait_update ();
 	wait_press_key();
 
 	/* go to hug the tree ready for harvesting */

@@ -301,6 +301,9 @@ struct strat_infos {
 	uint8_t opp_current_zone;
 	uint8_t opp2_current_zone;
 
+	uint8_t opp_score;
+	uint8_t opp_tree_fruits_inside;
+
 	/* secondary robot structure */ 
 	
 

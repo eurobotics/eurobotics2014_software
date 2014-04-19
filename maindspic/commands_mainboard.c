@@ -1466,6 +1466,39 @@ parse_pgm_inst_t cmd_dump_fruits = {
 		NULL,
 	},
 };
+/* update_zones */
+
+/* this structure is filled when strat_update_zones is parsed successfully */
+struct cmd_update_zones_result {
+	fixed_string_t arg0;
+};
+
+/* function called when cmd_update_zones is parsed successfully */
+static void cmd_update_zones_parsed(__attribute__((unused)) void *parsed_result,
+			    __attribute__((unused)) void *data)
+{
+	struct cmd_update_zones_result *res = parsed_result;
+	 strat_update_zones(); 
+
+}
+
+prog_char str_update_zones_arg0[] = "update_zones";
+parse_pgm_token_string_t cmd_update_zones_arg0 = TOKEN_STRING_INITIALIZER(struct cmd_update_zones_result, arg0, str_update_zones_arg0);
+
+prog_char help_update_zones[] = "update_zones";
+parse_pgm_inst_t cmd_update_zones = {
+	.f = cmd_update_zones_parsed,  /* function to call */
+	.data = NULL,      /* 2nd arg of func */
+	.help_str = help_update_zones,
+	.tokens = {        /* token list, NULL terminated */
+		(prog_void *)&cmd_update_zones_arg0,
+		NULL,
+	},
+};
+
+
+
+
 
 
 
