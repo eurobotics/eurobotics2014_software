@@ -118,8 +118,9 @@ extern parse_pgm_inst_t cmd_stick;
 extern parse_pgm_inst_t cmd_harvest_fruits;
 extern parse_pgm_inst_t cmd_dump_fruits;
 
-#ifdef notyet /* TODO 2014*/
 extern parse_pgm_inst_t cmd_slavedspic;
+
+#ifdef notyet /* TODO 2014*/
 extern parse_pgm_inst_t cmd_sensor_robot;
 #endif
 

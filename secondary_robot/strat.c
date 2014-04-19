@@ -386,7 +386,16 @@ uint8_t strat_main(void)
 		case 1:
 			trajectory_goto_forward_xy_abs (&mainboard.traj, 
 										COLOR_X(BEGIN_MAMOOTH_X), BEGIN_LINE_Y);
-			err = wait_traj_end(TRAJ_FLAGS_NO_NEAR);
+#define SIM_END_OBSTACLE
+#ifdef SIM_END_OBSTACLE
+    while (!x_is_more_than(750/2));
+    strat_hardstop();
+    DEBUG (E_USER_STRAT, "End obstacle");
+    err = END_OBSTACLE;
+#else
+		err = wait_traj_end(TRAJ_FLAGS_NO_NEAR);
+#endif
+
 			if(err & END_OBSTACLE)
 			{
 				state=21;
@@ -408,8 +417,10 @@ uint8_t strat_main(void)
 
 		/* shoot */
 		case 2:
+#ifndef HOST_VERSION
 			pwm_servo_set(&gen.pwm_servo_oc3, SERVO_SHOOT_POS_UP);
 			pwm_servo_set(&gen.pwm_servo_oc4, SERVO_SHOOT_POS_DOWN);
+#endif
 			time_wait_ms(1000);
 
 			mamooth_done=1;
@@ -420,6 +431,8 @@ uint8_t strat_main(void)
 		case 21:
 			beaconboard.opponent_x = COLOR_X(750);
 			beaconboard.opponent_y = 600;
+      beaconboard.opponent_a = 90;
+      beaconboard.opponent_d = 1000;
 
 			sensor_obstacle_disable();
 			goto_and_avoid_forward(	COLOR_X(BEGIN_FRESCO_X), BEGIN_LINE_Y,TRAJ_FLAGS_NO_NEAR,TRAJ_FLAGS_NO_NEAR);
@@ -521,8 +534,10 @@ uint8_t strat_main(void)
 			err = wait_traj_end(TRAJ_FLAGS_SMALL_DIST);
 			if (!TRAJ_SUCCESS(err))
 					ERROUT(err);
+#ifndef HOST_VERSION
 			pwm_servo_set(&gen.pwm_servo_oc3, SERVO_SHOOT_POS_UP);
 			pwm_servo_set(&gen.pwm_servo_oc4, SERVO_SHOOT_POS_DOWN);
+#endif
 			time_wait_ms(1000);
 
 			trajectory_goto_forward_xy_abs (&mainboard.traj, 

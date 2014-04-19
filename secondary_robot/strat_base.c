@@ -313,7 +313,9 @@ void strat_limit_speed_disable(void)
 /* called periodically */
 void strat_limit_speed(void)
 {
-#define SPEED_MIN	(20.0)
+/* FIXME */
+#define SPEED_MIN	(2000.0) 
+//#define SPEED_MIN	(20.0) 
 
 #ifdef TWO_OPPONENTS
 #ifdef ROBOT_2ND
@@ -486,6 +488,13 @@ void strat_start(void)
 		printf_P(PSTR("Ready, unplug start switch to start\r\n"));
 		/* while start sw plugged */
 		while (!sensor_get(S_START));
+	}
+#else
+	printf_P(PSTR("Press a key\r\n"));
+	while (! cmdline_keypressed());
+	for (i=3; i>0; i--) {
+		printf_P(PSTR("%d\r\n"), i);
+		time_wait_ms(1000);
 	}
 #endif
 

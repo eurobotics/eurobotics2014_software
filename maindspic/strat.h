@@ -358,7 +358,7 @@ void strat_event_disable(void);
 
 /* harvest fruits from trees */
 uint8_t strat_harvest_fruits(int16_t x, int16_t y);
-uint8_t strat_leave_fruits();
+uint8_t strat_leave_fruits(void);
 
 /********************************************
  * in strat_fire.c 

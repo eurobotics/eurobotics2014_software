@@ -214,6 +214,7 @@ def random_opp_xy():
 
 
 # go in playground area
+"""
 print("go_in_area_1.png", 250, 250, 45, 2300, 1600, -1500, 0, -1500, 0, -1500, 0)
 graph("go_in_area_1.png", 250, 250, 0, 2300, 1600, -1500, 0, -1500, 0, -1500, 0)
 print("go_in_area_2.png", 250, 1000, 0, 2300, 1000, -1500, 0, -1500, 0, -1500, 0)
@@ -226,8 +227,13 @@ print("go_in_area_5.png", 1500, 240, 0, 680, 1600, -1500, 0, -1500, 0, -1500, 0)
 graph("go_in_area_5.png", 1500, 240, 0, 680, 1600, -1500, 0, -1500, 0, -1500, 0)
 print("go_in_area_6.png", 2300, 240, 0, 2000, 1400, -1500, 0, -1500, 0, -1500, 0)
 graph("go_in_area_6.png", 2300, 240, 0, 2000, 1400, -1500, 0, -1500, 0, -1500, 0)
+"""
 
+graph("alcala_avoid_a.png", 2249,450,179, 1705,450, 2250, 600, -1000, 0, 400, 400)
+graph("alcala_avoid_b.png", 2625,450,179, 1705,450, 2250, 600, -1000, 0, 400, 400)
+graph("alcala_avoid_c.png", 2800,450,179, 1705,450, 2250, 600, -1000, 0, 400, 400)
 
+"""
 random
 random.seed(0)
 for i in range(200):
@@ -240,4 +246,4 @@ for i in range(200):
     print (name, stx, sty, 0, enx, eny, op1x, op1y, op2x, op2y, robot_2nd_x, robot_2nd_y)
     graph(name, stx, sty, 0, enx, eny, op1x, op1y, op2x, op2y, robot_2nd_x, robot_2nd_y)
 
-   
+"""   

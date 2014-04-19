@@ -306,6 +306,7 @@ void robotsim_update(void)
 	else if (cmd[0] == 'b')
 		robotsim_blocking = 1;
 */
+#if 1
 	if (cmd[0] == 'o') {
 		if (sscanf(cmd, "opp_1 %d %d", &oppx, &oppy) == 2) {
 			abs_xy_to_rel_da(oppx, oppy, &oppd, &oppa);
@@ -331,6 +332,7 @@ void robotsim_update(void)
 		}
 	}
 
+
   /* XXX HACK, pos from the robot mate */
 	if (cmd[0] == 'r') {
 		if (sscanf(cmd, "r2nd %d %d %d", &oppx, &oppy, &oppa_abs) == 3) {
@@ -346,7 +348,7 @@ void robotsim_update(void)
 			IRQ_UNLOCK(flags);
 		}
 	}
-
+#endif
 	x = position_get_x_double(&mainboard.pos);
 	y = position_get_y_double(&mainboard.pos);
 	a = position_get_a_rad_double(&mainboard.pos);
@@ -394,9 +396,9 @@ void robotsim_pwm(void *arg, int32_t val)
 {
 	//	printf("%p, %d\n", arg, val);
 	if (arg == LEFT_MOTOR)
-		l_pwm = (val / (1.55*3));
+		l_pwm = (val * (1.25));
 	else if (arg == RIGHT_MOTOR)
-		r_pwm = (val / (1.55*3));
+		r_pwm = (val * (1.25));
 }
 
 int32_t robotsim_encoder_get(void *arg)

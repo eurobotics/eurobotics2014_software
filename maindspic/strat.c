@@ -116,10 +116,10 @@ struct strat_infos strat_infos = {
 
 
    /*zones[W] =			     		{type, 				x, 			y, 			x_down, 	x_up,	y_down, 	y_up,	init_x, 					init_y, 					init_a, 	prio, 			flags, 	robot };                            */
-    .zones[ZONE_TREE_1]=        	{ZONE_TYPE_TREE, 	TREE_1_X, 	TREE_1_Y, 	0, 		400,  1100,    1500, TREE_D_INIT,  			TREE_1_Y-20,   			0,			ZONE_PRIO_40, 	0,			MAIN_ROBOT},
-    .zones[ZONE_TREE_2]=        	{ZONE_TYPE_TREE, 	TREE_2_X, 	TREE_2_Y, 	500, 		900,  1600,    2000, TREE_2_X+40,  				AREA_Y-TREE_D_INIT-30,  -90, 		ZONE_PRIO_40, 	0,			MAIN_ROBOT},
-    .zones[ZONE_TREE_3]=        	{ZONE_TYPE_TREE, 	TREE_3_X, 	TREE_3_Y, 	2100, 	2500, 1600,    2000,	TREE_3_X+40,  				AREA_Y-TREE_D_INIT-30,  -90, 		ZONE_PRIO_40, 	0,			MAIN_ROBOT},
-    .zones[ZONE_TREE_4]=        	{ZONE_TYPE_TREE, 	TREE_4_X, 	TREE_4_Y, 	2600, 	3000, 1100,    1500, AREA_X-TREE_D_INIT, 	TREE_4_Y-20,   			180, 		ZONE_PRIO_40, 	0,			MAIN_ROBOT},
+    .zones[ZONE_TREE_1]=        	{ZONE_TYPE_TREE, 	TREE_1_X, 	TREE_1_Y, 	0, 		400,  1100,    1500, TREE_D_INIT,  			TREE_1_Y,   			0,			ZONE_PRIO_40, 	0,			MAIN_ROBOT},
+    .zones[ZONE_TREE_2]=        	{ZONE_TYPE_TREE, 	TREE_2_X, 	TREE_2_Y, 	500, 		900,  1600,    2000, TREE_2_X,  				AREA_Y-TREE_D_INIT,  -90, 		ZONE_PRIO_40, 	0,			MAIN_ROBOT},
+    .zones[ZONE_TREE_3]=        	{ZONE_TYPE_TREE, 	TREE_3_X, 	TREE_3_Y, 	2100, 	2500, 1600,    2000,	TREE_3_X,  				AREA_Y-TREE_D_INIT,  -90, 		ZONE_PRIO_40, 	0,			MAIN_ROBOT},
+    .zones[ZONE_TREE_4]=        	{ZONE_TYPE_TREE, 	TREE_4_X, 	TREE_4_Y, 	2600, 	3000, 1100,    1500, AREA_X-TREE_D_INIT, 	TREE_4_Y,   			180, 		ZONE_PRIO_40, 	0,			MAIN_ROBOT},
 
     .zones[ZONE_HEART_FIRE_1]=  {ZONE_TYPE_HEART_FIRE, HEART_FIRE_1_X, HEART_FIRE_1_Y, 0, 250,  1750, 2000   ,400 ,  1800,   255,  ZONE_PRIO_40, 0 ,MAIN_ROBOT},
     .zones[ZONE_HEART_FIRE_2]= {ZONE_TYPE_HEART_FIRE, HEART_FIRE_2_X, HEART_FIRE_2_Y, 1350, 1650,  900,    1200   , 1100,  1100,   255,  ZONE_PRIO_40, 0 ,MAIN_ROBOT},
@@ -141,10 +141,10 @@ struct strat_infos strat_infos = {
  
     .zones[ZONE_BASKET_1]=        {ZONE_TYPE_BASKET, BASKET_1_X, BASKET_1_Y, 400, 1100,  0,    500   , 750,  BASKET_D_INIT,   -90,  0, 0 ,MAIN_ROBOT},
     .zones[ZONE_BASKET_2]=        {ZONE_TYPE_BASKET, BASKET_2_X, BASKET_2_Y, 1900, 2600,  0,    500   , 2250,  BASKET_D_INIT,   -90,  0, 0 ,MAIN_ROBOT},
-	.zones[ZONE_MAMOOTH_1]=       {ZONE_TYPE_MAMOOTH, MAMOOTH_1_X, MAMOOTH_1_Y, 400, 1100,  0,    500   , 750,  600,   -90,  ZONE_PRIO_0, 0 ,SEC_ROBOT},
-    .zones[ZONE_MAMOOTH_2]=       {ZONE_TYPE_MAMOOTH, MAMOOTH_2_X, MAMOOTH_2_Y, 1900, 2600,  0,    500   , 2250,  600,   -90,  ZONE_PRIO_0, 0 ,SEC_ROBOT},
+	.zones[ZONE_MAMOOTH_1]=       {ZONE_TYPE_MAMOOTH, MAMOOTH_1_X, MAMOOTH_1_Y, 400, 1100,  0,    500   , 750,  600,   -90,  ZONE_PRIO_40, 0 ,SEC_ROBOT},
+    .zones[ZONE_MAMOOTH_2]=       {ZONE_TYPE_MAMOOTH, MAMOOTH_2_X, MAMOOTH_2_Y, 1900, 2600,  0,    500   , 2250,  600,   -90,  ZONE_PRIO_40, 0 ,SEC_ROBOT},
 
-    .zones[ZONE_FRESCO]=          {ZONE_TYPE_FRESCO, FRESCO_X, FRESCO_Y, 1100, 1900,  0,    500   , 1500,  300,   -90,  ZONE_PRIO_0, 0 ,SEC_ROBOT},
+    .zones[ZONE_FRESCO]=          {ZONE_TYPE_FRESCO, FRESCO_X, FRESCO_Y, 1100, 1900,  0,    500   , 1500,  300,   -90,  ZONE_PRIO_40, 0 ,SEC_ROBOT},
     .zones[ZONE_HOME_YELLOW]=        {ZONE_TYPE_HOME, HOME_RED_X, HOME_RED_Y, 0, 400,  0,    690   , 2800,  600,   -90,  ZONE_PRIO_0, 0 ,BOTH_ROBOTS},
     .zones[ZONE_HOME_RED]=     {ZONE_TYPE_HOME, HOME_YELLOW_X, HOME_YELLOW_Y, 2600, 3000,  0,   690   , 200,  600,   -90,  ZONE_PRIO_0, 0 ,BOTH_ROBOTS},
 };
@@ -379,24 +379,12 @@ uint8_t strat_main(void)
 	// AVOID ZONES IN CURRENT STRATEGY
 	strat_infos.zones[ZONE_TORCH_2].flags |= ZONE_AVOID;
 	strat_infos.zones[ZONE_TORCH_4].flags |= ZONE_AVOID;
-	strat_infos.zones[ZONE_TORCH_1].flags |= ZONE_AVOID;
-	strat_infos.zones[ZONE_TORCH_3].flags |= ZONE_AVOID;
 	strat_infos.zones[ZONE_MOBILE_TORCH_2].flags |= ZONE_AVOID;
-	strat_infos.zones[ZONE_MOBILE_TORCH_1].flags |= ZONE_AVOID;
 	strat_infos.zones[ZONE_BASKET_1].flags |= ZONE_AVOID;
 	strat_infos.zones[ZONE_FIRE_4].flags |= ZONE_AVOID;
-	strat_infos.zones[ZONE_FIRE_3].flags |= ZONE_AVOID;
-	strat_infos.zones[ZONE_FIRE_2].flags |= ZONE_AVOID;
-	strat_infos.zones[ZONE_FIRE_1].flags |= ZONE_AVOID;
-	strat_infos.zones[ZONE_FIRE_5].flags |= ZONE_AVOID;
-	strat_infos.zones[ZONE_FIRE_6].flags |= ZONE_AVOID;
 	strat_infos.zones[ZONE_HEART_FIRE_1].flags |= ZONE_AVOID;
 	strat_infos.zones[ZONE_HEART_FIRE_2].flags |= ZONE_AVOID;
 	strat_infos.zones[ZONE_HEART_FIRE_3].flags |= ZONE_AVOID;
-	strat_infos.zones[ZONE_TREE_1].flags |= ZONE_AVOID;
-	strat_infos.zones[ZONE_TREE_4].flags |= ZONE_AVOID;
-	strat_infos.zones[ZONE_HOME_RED].flags |= ZONE_AVOID;
-	strat_infos.zones[ZONE_HOME_YELLOW].flags |= ZONE_AVOID;
 	
 	for(i=0; i<ZONES_MAX; i++)
 	{
