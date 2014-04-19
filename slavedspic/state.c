@@ -257,11 +257,11 @@ retry_hide_left:
 
 		err = stick_wait_end(&slavedspic.stick_l);
 
-		/*if((err & END_BLOCKING) && (nb_tries < STICK_MODES_NB_TRIES)) {
+		if((err & END_BLOCKING) && (nb_tries < STICK_MODES_NB_TRIES)) {
 			nb_tries ++;
 			time_wait_ms (200);
 			goto retry_hide_left;
-		}*/
+		}
 		/* set right */
 		nb_tries = 0;
 
@@ -272,11 +272,11 @@ retry_right:
 
 		err = stick_wait_end(&slavedspic.stick_r);
 
-		/*if((err & END_BLOCKING) && (nb_tries < STICK_MODES_NB_TRIES)) {
+		if((err & END_BLOCKING) && (nb_tries < STICK_MODES_NB_TRIES)) {
 			nb_tries ++;
 			time_wait_ms (200);
 			goto retry_right;
-		}*/
+		}
 	}	
 	else if(mainboard_command.stick.type == I2C_STICK_TYPE_LEFT) {
 		/* hide the other */
@@ -286,11 +286,11 @@ retry_hide_right:
 
 		err = stick_wait_end(&slavedspic.stick_r);
 
-		/*if((err & END_BLOCKING) && (nb_tries < STICK_MODES_NB_TRIES)) {
+		if((err & END_BLOCKING) && (nb_tries < STICK_MODES_NB_TRIES)) {
 			nb_tries ++;
 			time_wait_ms (200);
 			goto retry_hide_right;
-		}*/
+		}
 		/* set right */
 		nb_tries = 0;
 
@@ -301,11 +301,11 @@ retry_left:
 
 		err = stick_wait_end(&slavedspic.stick_l);
 
-		/*if((err & END_BLOCKING) && (nb_tries < STICK_MODES_NB_TRIES)) {
+		if((err & END_BLOCKING) && (nb_tries < STICK_MODES_NB_TRIES)) {
 			nb_tries ++;
 			time_wait_ms (200);
 			goto retry_left;
-		}*/
+		}
 	}	
 
 	if(err & END_BLOCKING)
