@@ -20,10 +20,16 @@
  *  Olivier MATZ <zer0@droids-corp.org> 
  */
 
-/*   *  Copyright Robotics Association of Coslada, Eurobotics Engineering (2011) *  Javier Baliñas Santos <javier@arc-robots.org> * *  Code ported to family of microcontrollers dsPIC from *  commands.c,v 1.2 2009/05/27 20:04:07 zer0 Exp. */
+/*  
+ *  Copyright Robotics Association of Coslada, Eurobotics Engineering (2011)
+ *  Javier Baliñas Santos <javier@arc-robots.org>
+ *
+ *  Code ported to family of microcontrollers dsPIC from
+ *  commands.c,v 1.2 2009/05/27 20:04:07 zer0 Exp.
+ */
 
 #include <stdlib.h>
-#include <aversive\pgmspace.h>
+#include <aversive/pgmspace.h>
 #include <parse.h>
 
 /* commands_gen.c */

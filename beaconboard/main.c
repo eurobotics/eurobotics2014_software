@@ -24,9 +24,9 @@
 #include <string.h>
 
 #include <aversive.h>
-#include <aversive\pgmspace.h>
-#include <aversive\wait.h>
-#include <aversive\error.h>
+#include <aversive/pgmspace.h>
+#include <aversive/wait.h>
+#include <aversive/error.h>
 
 #include <configuration_bits_config.h>
 
@@ -36,7 +36,7 @@
 
 #include <timer.h>
 #include <scheduler.h>
-#include <time.h>
+#include <clock_time.h>
 
 #include <pid.h>
 #include <quadramp.h>

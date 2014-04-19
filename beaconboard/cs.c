@@ -32,13 +32,13 @@
 #include <string.h>
 
 #include <aversive.h>
-#include <aversive\error.h>
+#include <aversive/error.h>
 
 #include <encoders_dspic.h>
 #include <pwm_mc.h>
 #include <timer.h>
 #include <scheduler.h>
-#include <time.h>
+#include <clock_time.h>
 
 #include <pid.h>
 #include <quadramp.h>

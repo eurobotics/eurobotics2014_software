@@ -20,18 +20,24 @@
  *  Olivier MATZ <zer0@droids-corp.org> 
  */
 
-/*   *  Copyright Robotics Association of Coslada, Eurobotics Engineering (2011) *  Javier Baliñas Santos <javier@arc-robots.org> * *  Code ported to family of microcontrollers dsPIC from *  commands_beacon.c,v 1.4 2009/05/27 20:04:07 zer0 Exp. */
+/*  
+ *  Copyright Robotics Association of Coslada, Eurobotics Engineering (2011)
+ *  Javier Baliñas Santos <javier@arc-robots.org>
+ *
+ *  Code ported to family of microcontrollers dsPIC from
+ *  commands_beacon.c,v 1.4 2009/05/27 20:04:07 zer0 Exp.
+ */
 
 #include <stdio.h>
 #include <string.h>
 
-#include <aversive\pgmspace.h>
-#include <aversive\wait.h>
-#include <aversive\error.h>
+#include <aversive/pgmspace.h>
+#include <aversive/wait.h>
+#include <aversive/error.h>
 
 #include <uart.h>
 #include <pwm_mc.h>
-#include <time.h>
+#include <clock_time.h>
 #include <encoders_dspic.h>
 
 #include <scheduler.h>

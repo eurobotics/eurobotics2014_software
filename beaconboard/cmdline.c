@@ -20,20 +20,26 @@
  *
  */
 
-/*   *  Copyright Robotics Association of Coslada, Eurobotics Engineering (2011) *  Javier Baliñas Santos <javier@arc-robots.org> * *  Code ported to family of microcontrollers dsPIC from *  cmdline.c,v 1.2 2009/04/07 20:03:48 zer0 Exp. */
+/*  
+ *  Copyright Robotics Association of Coslada, Eurobotics Engineering (2011)
+ *  Javier Baliñas Santos <javier@arc-robots.org>
+ *
+ *  Code ported to family of microcontrollers dsPIC from
+ *  cmdline.c,v 1.2 2009/04/07 20:03:48 zer0 Exp.
+ */
 
 #include <stdio.h>
 #include <stdarg.h>
 #include <string.h>
 
 #include <aversive.h>
-#include <aversive\error.h>
+#include <aversive/error.h>
 
 #include <parse.h>
 #include <rdline.h>
 #include <uart.h>
 #include <pwm_mc.h>
-#include <time.h>
+#include <clock_time.h>
 
 #include <pid.h>
 #include <quadramp.h>

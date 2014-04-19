@@ -410,7 +410,8 @@ uint8_t strat_main(void)
 }
 
 void strat_update_zones(void) 
-{	
+{
+#if 0
 	while(1){
 	int8_t i,status;
 	int16_t x_opp, y_opp;
@@ -509,6 +510,7 @@ void strat_update_zones(void)
 	}
 		printf_P("OPP_SCORE :%d\n",strat_infos.opp_score);
 	}
+#endif
 }
 
 #endif /* HOST_VERSION_OA_TEST */

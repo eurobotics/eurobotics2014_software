@@ -1478,7 +1478,7 @@ static void cmd_update_zones_parsed(__attribute__((unused)) void *parsed_result,
 			    __attribute__((unused)) void *data)
 {
 	struct cmd_update_zones_result *res = parsed_result;
-	 strat_update_zones(); 
+	 //strat_update_zones();
 
 }
 

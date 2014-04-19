@@ -1,0 +1,372 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configurationDescriptor version="62">
+  <logicalFolder name="root" displayName="root" projectFiles="true">
+    <logicalFolder name="HeaderFiles"
+                   displayName="Header Files"
+                   projectFiles="true">
+      <logicalFolder name="__configs" displayName="__configs" projectFiles="true">
+        <itemPath>../uart_config.h</itemPath>
+        <itemPath>../autoconf.h</itemPath>
+        <itemPath>../configuration_bits_config.h</itemPath>
+        <itemPath>../encoders_dspic_config.h</itemPath>
+        <itemPath>../error_config.h</itemPath>
+        <itemPath>../oscillator_config.h</itemPath>
+        <itemPath>../pid_config.h</itemPath>
+        <itemPath>../rdline_config.h</itemPath>
+        <itemPath>../scheduler_config.h</itemPath>
+        <itemPath>../time_config.h</itemPath>
+      </logicalFolder>
+      <logicalFolder name="__mains" displayName="__mains" projectFiles="true">
+        <itemPath>../main.h</itemPath>
+        <itemPath>../sensor.h</itemPath>
+        <itemPath>../../common/i2c_commands.h</itemPath>
+        <itemPath>../cs.h</itemPath>
+        <itemPath>../beacon.h</itemPath>
+        <itemPath>../cmdline.h</itemPath>
+        <itemPath>../beacon_calib.h</itemPath>
+      </logicalFolder>
+      <logicalFolder name="bd" displayName="bd" projectFiles="true">
+        <itemPath>../../libs/aversive4dspic/modules/devices/robot/blocking_detection_manager/blocking_detection_manager.h</itemPath>
+      </logicalFolder>
+      <logicalFolder name="cirbuf" displayName="cirbuf" projectFiles="true">
+        <itemPath>../../libs/aversive4dspic/modules/base/cirbuf/cirbuf.h</itemPath>
+      </logicalFolder>
+      <logicalFolder name="control_system_manager"
+                     displayName="control_system_manager"
+                     projectFiles="true">
+        <itemPath>../../libs/aversive4dspic/modules/devices/control_system/control_system_manager/control_system_manager.h</itemPath>
+      </logicalFolder>
+      <logicalFolder name="encoders_dspic"
+                     displayName="encoders_dspic"
+                     projectFiles="true">
+        <itemPath>../../libs/aversive4dspic/modules/devices/encoders/dspic/encoders_dspic/encoders_dspic.h</itemPath>
+      </logicalFolder>
+      <logicalFolder name="error" displayName="error" projectFiles="true">
+        <itemPath>../../libs/aversive4dspic/modules/debug/error/error.h</itemPath>
+        <itemPath>../../libs/aversive4dspic/modules/debug/error/general_errors.h</itemPath>
+      </logicalFolder>
+      <logicalFolder name="include" displayName="include" projectFiles="true">
+        <itemPath>../../libs/aversive4dspic/include/aversive.h</itemPath>
+        <itemPath>../../libs/aversive4dspic/include/aversive/errno.h</itemPath>
+        <itemPath>../../libs/aversive4dspic/include/aversive/error.h</itemPath>
+        <itemPath>../../libs/aversive4dspic/include/aversive/irq_lock.h</itemPath>
+        <itemPath>../../libs/aversive4dspic/include/aversive/list.h</itemPath>
+        <itemPath>../../libs/aversive4dspic/include/aversive/parts.h</itemPath>
+        <itemPath>../../libs/aversive4dspic/include/aversive/pgmspace.h</itemPath>
+        <itemPath>../../libs/aversive4dspic/include/aversive/queue.h</itemPath>
+        <itemPath>../../libs/aversive4dspic/include/aversive/timers.h</itemPath>
+        <itemPath>../../libs/aversive4dspic/include/aversive/types.h</itemPath>
+        <itemPath>../../libs/aversive4dspic/include/aversive/wait.h</itemPath>
+        <itemPath>../../libs/aversive4dspic/include/aversive/dspic/inttypes.h</itemPath>
+        <itemPath>../../libs/aversive4dspic/include/aversive/dspic/stdint.h</itemPath>
+      </logicalFolder>
+      <logicalFolder name="oscillator" displayName="oscillator" projectFiles="true">
+        <itemPath>../../libs/aversive4dspic/modules/hardware/dspic/oscillator/oscillator.h</itemPath>
+      </logicalFolder>
+      <logicalFolder name="parse" displayName="parse" projectFiles="true">
+        <itemPath>../../libs/aversive4dspic/modules/ihm/parse/parse.h</itemPath>
+        <itemPath>../../libs/aversive4dspic/modules/ihm/parse/parse_num.h</itemPath>
+        <itemPath>../../libs/aversive4dspic/modules/ihm/parse/parse_string.h</itemPath>
+      </logicalFolder>
+      <logicalFolder name="pid" displayName="pid" projectFiles="true">
+        <itemPath>../../libs/aversive4dspic/modules/devices/control_system/filters/pid/pid.h</itemPath>
+      </logicalFolder>
+      <logicalFolder name="pwm_mc" displayName="pwm_mc" projectFiles="true">
+        <itemPath>../../libs/aversive4dspic/modules/hardware/dspic/pwm_mc/pwm_mc.h</itemPath>
+      </logicalFolder>
+      <logicalFolder name="quadramp" displayName="quadramp" projectFiles="true">
+        <itemPath>../../libs/aversive4dspic/modules/devices/control_system/filters/quadramp/quadramp.h</itemPath>
+      </logicalFolder>
+      <logicalFolder name="rdline" displayName="rdline" projectFiles="true">
+        <itemPath>../../libs/aversive4dspic/modules/ihm/rdline/rdline.h</itemPath>
+      </logicalFolder>
+      <logicalFolder name="scheduler" displayName="scheduler" projectFiles="true">
+        <itemPath>../../libs/aversive4dspic/modules/base/scheduler/scheduler_private.h</itemPath>
+        <itemPath>../../libs/aversive4dspic/modules/base/scheduler/scheduler.h</itemPath>
+      </logicalFolder>
+      <logicalFolder name="time" displayName="time" projectFiles="true">
+        <itemPath>../../libs/aversive4dspic/modules/base/time/clock_time.h</itemPath>
+      </logicalFolder>
+      <logicalFolder name="uart" displayName="uart" projectFiles="true">
+        <itemPath>../../libs/aversive4dspic/modules/comm/dspic/uart/uart.h</itemPath>
+        <itemPath>../../libs/aversive4dspic/modules/comm/dspic/uart/uart_defs.h</itemPath>
+        <itemPath>../../libs/aversive4dspic/modules/comm/dspic/uart/uart_private.h</itemPath>
+      </logicalFolder>
+      <logicalFolder name="vt100" displayName="vt100" projectFiles="true">
+        <itemPath>../../libs/aversive4dspic/modules/ihm/vt100/vt100.h</itemPath>
+      </logicalFolder>
+    </logicalFolder>
+    <logicalFolder name="LinkerScript"
+                   displayName="Linker Files"
+                   projectFiles="true">
+    </logicalFolder>
+    <logicalFolder name="SourceFiles"
+                   displayName="Source Files"
+                   projectFiles="true">
+      <logicalFolder name="__mains" displayName="__mains" projectFiles="true">
+        <itemPath>../cmdline.c</itemPath>
+        <itemPath>../commands.c</itemPath>
+        <itemPath>../commands_cs.c</itemPath>
+        <itemPath>../commands_gen.c</itemPath>
+        <itemPath>../cs.c</itemPath>
+        <itemPath>../main.c</itemPath>
+        <itemPath>../sensor.c</itemPath>
+        <itemPath>../beacon.c</itemPath>
+        <itemPath>../commands_beaconboard.c</itemPath>
+        <itemPath>../beacon_calib.c</itemPath>
+      </logicalFolder>
+      <logicalFolder name="bd" displayName="bd" projectFiles="true">
+        <itemPath>../../libs/aversive4dspic/modules/devices/robot/blocking_detection_manager/blocking_detection_manager.c</itemPath>
+      </logicalFolder>
+      <logicalFolder name="cirbuf" displayName="cirbuf" projectFiles="true">
+        <itemPath>../../libs/aversive4dspic/modules/base/cirbuf/cirbuf_get_tail.c</itemPath>
+        <itemPath>../../libs/aversive4dspic/modules/base/cirbuf/cirbuf.c</itemPath>
+        <itemPath>../../libs/aversive4dspic/modules/base/cirbuf/cirbuf_add_buf_head.c</itemPath>
+        <itemPath>../../libs/aversive4dspic/modules/base/cirbuf/cirbuf_add_buf_tail.c</itemPath>
+        <itemPath>../../libs/aversive4dspic/modules/base/cirbuf/cirbuf_add_head.c</itemPath>
+        <itemPath>../../libs/aversive4dspic/modules/base/cirbuf/cirbuf_add_tail.c</itemPath>
+        <itemPath>../../libs/aversive4dspic/modules/base/cirbuf/cirbuf_align.c</itemPath>
+        <itemPath>../../libs/aversive4dspic/modules/base/cirbuf/cirbuf_del_buf_head.c</itemPath>
+        <itemPath>../../libs/aversive4dspic/modules/base/cirbuf/cirbuf_del_buf_tail.c</itemPath>
+        <itemPath>../../libs/aversive4dspic/modules/base/cirbuf/cirbuf_del_head.c</itemPath>
+        <itemPath>../../libs/aversive4dspic/modules/base/cirbuf/cirbuf_del_tail.c</itemPath>
+        <itemPath>../../libs/aversive4dspic/modules/base/cirbuf/cirbuf_get_buf_head.c</itemPath>
+        <itemPath>../../libs/aversive4dspic/modules/base/cirbuf/cirbuf_get_buf_tail.c</itemPath>
+        <itemPath>../../libs/aversive4dspic/modules/base/cirbuf/cirbuf_get_head.c</itemPath>
+      </logicalFolder>
+      <logicalFolder name="control_system_manager"
+                     displayName="control_system_manager"
+                     projectFiles="true">
+        <itemPath>../../libs/aversive4dspic/modules/devices/control_system/control_system_manager/control_system_manager.c</itemPath>
+      </logicalFolder>
+      <logicalFolder name="encoders_dspic"
+                     displayName="encoders_dspic"
+                     projectFiles="true">
+        <itemPath>../../libs/aversive4dspic/modules/devices/encoders/dspic/encoders_dspic/encoders_dspic.c</itemPath>
+      </logicalFolder>
+      <logicalFolder name="error" displayName="error" projectFiles="true">
+        <itemPath>../../libs/aversive4dspic/modules/debug/error/error.c</itemPath>
+      </logicalFolder>
+      <logicalFolder name="oscillator" displayName="oscillator" projectFiles="true">
+        <itemPath>../../libs/aversive4dspic/modules/hardware/dspic/oscillator/oscillator.c</itemPath>
+      </logicalFolder>
+      <logicalFolder name="parse" displayName="parse" projectFiles="true">
+        <itemPath>../../libs/aversive4dspic/modules/ihm/parse/parse.c</itemPath>
+        <itemPath>../../libs/aversive4dspic/modules/ihm/parse/parse_num.c</itemPath>
+        <itemPath>../../libs/aversive4dspic/modules/ihm/parse/parse_string.c</itemPath>
+      </logicalFolder>
+      <logicalFolder name="pid" displayName="pid" projectFiles="true">
+        <itemPath>../../libs/aversive4dspic/modules/devices/control_system/filters/pid/pid.c</itemPath>
+      </logicalFolder>
+      <logicalFolder name="pwm_mc" displayName="pwm_mc" projectFiles="true">
+        <itemPath>../../libs/aversive4dspic/modules/hardware/dspic/pwm_mc/pwm_mc.c</itemPath>
+      </logicalFolder>
+      <logicalFolder name="quadramp" displayName="quadramp" projectFiles="true">
+        <itemPath>../../libs/aversive4dspic/modules/devices/control_system/filters/quadramp/quadramp.c</itemPath>
+      </logicalFolder>
+      <logicalFolder name="rdline" displayName="rdline" projectFiles="true">
+        <itemPath>../../libs/aversive4dspic/modules/ihm/rdline/rdline.c</itemPath>
+      </logicalFolder>
+      <logicalFolder name="scheduler" displayName="scheduler" projectFiles="true">
+        <itemPath>../../libs/aversive4dspic/modules/base/scheduler/scheduler.c</itemPath>
+        <itemPath>../../libs/aversive4dspic/modules/base/scheduler/scheduler_add.c</itemPath>
+        <itemPath>../../libs/aversive4dspic/modules/base/scheduler/scheduler_del.c</itemPath>
+        <itemPath>../../libs/aversive4dspic/modules/base/scheduler/scheduler_dump.c</itemPath>
+        <itemPath>../../libs/aversive4dspic/modules/base/scheduler/scheduler_interrupt.c</itemPath>
+      </logicalFolder>
+      <logicalFolder name="time" displayName="time" projectFiles="true">
+        <itemPath>../../libs/aversive4dspic/modules/base/time/time.c</itemPath>
+      </logicalFolder>
+      <logicalFolder name="uart" displayName="uart" projectFiles="true">
+        <itemPath>../../libs/aversive4dspic/modules/comm/dspic/uart/uart_setconf.c</itemPath>
+        <itemPath>../../libs/aversive4dspic/modules/comm/dspic/uart/uart.c</itemPath>
+        <itemPath>../../libs/aversive4dspic/modules/comm/dspic/uart/uart_dev_io.c</itemPath>
+        <itemPath>../../libs/aversive4dspic/modules/comm/dspic/uart/uart_recv.c</itemPath>
+        <itemPath>../../libs/aversive4dspic/modules/comm/dspic/uart/uart_recv_nowait.c</itemPath>
+        <itemPath>../../libs/aversive4dspic/modules/comm/dspic/uart/uart_send.c</itemPath>
+        <itemPath>../../libs/aversive4dspic/modules/comm/dspic/uart/uart_send_nowait.c</itemPath>
+        <itemPath>../../libs/aversive4dspic/modules/comm/dspic/uart/uart_events.c</itemPath>
+      </logicalFolder>
+      <logicalFolder name="vt100" displayName="vt100" projectFiles="true">
+        <itemPath>../../libs/aversive4dspic/modules/ihm/vt100/vt100.c</itemPath>
+      </logicalFolder>
+    </logicalFolder>
+    <logicalFolder name="ExternalFiles"
+                   displayName="Important Files"
+                   projectFiles="false">
+      <itemPath>Makefile</itemPath>
+    </logicalFolder>
+  </logicalFolder>
+  <sourceRootList>
+    <Elem>..</Elem>
+    <Elem>../../libs/aversive4dspic/modules/base/time</Elem>
+  </sourceRootList>
+  <projectmakefile>Makefile</projectmakefile>
+  <confs>
+    <conf name="default" type="2">
+      <toolsSet>
+        <developmentServer>localhost</developmentServer>
+        <targetDevice>dsPIC33FJ64MC804</targetDevice>
+        <targetHeader></targetHeader>
+        <targetPluginBoard></targetPluginBoard>
+        <platformTool>ICD3PlatformTool</platformTool>
+        <languageToolchain>C30</languageToolchain>
+        <languageToolchainVersion></languageToolchainVersion>
+        <platform>2</platform>
+      </toolsSet>
+      <compileType>
+        <linkerTool>
+          <linkerLibItems>
+          </linkerLibItems>
+        </linkerTool>
+        <loading>
+          <useAlternateLoadableFile>false</useAlternateLoadableFile>
+          <alternateLoadableFile></alternateLoadableFile>
+        </loading>
+      </compileType>
+      <makeCustomizationType>
+        <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
+        <makeCustomizationPreStep></makeCustomizationPreStep>
+        <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
+        <makeCustomizationPostStep></makeCustomizationPostStep>
+        <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+        <makeCustomizationEnableLongLines>false</makeCustomizationEnableLongLines>
+        <makeCustomizationNormalizeHexFile>false</makeCustomizationNormalizeHexFile>
+      </makeCustomizationType>
+      <C30>
+        <property key="code-model" value="default"/>
+        <property key="const-model" value="default"/>
+        <property key="data-model" value="default"/>
+        <property key="enable-all-warnings" value="true"/>
+        <property key="enable-ansi-std" value="false"/>
+        <property key="enable-ansi-warnings" value="false"/>
+        <property key="enable-fatal-warnings" value="false"/>
+        <property key="enable-large-arrays" value="false"/>
+        <property key="enable-omit-frame-pointer" value="false"/>
+        <property key="enable-procedural-abstraction" value="false"/>
+        <property key="enable-short-double" value="false"/>
+        <property key="enable-symbols" value="false"/>
+        <property key="enable-unroll-loops" value="false"/>
+        <property key="extra-include-directories"
+                  value="..;../../libs/aversive4dspic/include;../../libs/aversive4dspic/include/aversive;../../libs/aversive4dspic/include/aversive/dspic;../../libs/aversive4dspic/modules/base/cirbuf;../../libs/aversive4dspic/modules/base/scheduler;../../libs/aversive4dspic/modules/base/math/fixed_point;../../libs/aversive4dspic/modules/base/math/geometry;../../libs/aversive4dspic/modules/base/math/vect2;../../libs/aversive4dspic/modules/base/time;../../libs/aversive4dspic/modules/debug;../../libs/aversive4dspic/modules/debug/error;../../libs/aversive4dspic/modules/debug/diagnostic;../../libs/aversive4dspic/modules/comm/dspic/uart;../../libs/aversive4dspic/modules/ihm/parse;../../libs/aversive4dspic/modules/ihm/rdline;../../libs/aversive4dspic/modules/ihm/vt100;../../libs/aversive4dspic/modules/hardware/dspic/oscillator;../../libs/aversive4dspic/modules/hardware/dspic/pwm_mc;../../libs/aversive4dspic/modules/devices/control_system/filters/pid;../../libs/aversive4dspic/modules/devices/encoders/dspic/encoders_dspic;../../libs/aversive4dspic/modules/devices/control_system/filters/quadramp;../../libs/aversive4dspic/modules/devices/control_system/control_system_manager;../../libs/aversive4dspic/modules/devices/robot/blocking_detection_manager;../../common;."/>
+        <property key="isolate-each-function" value="false"/>
+        <property key="optimization-level" value="s"/>
+        <property key="post-instruction-scheduling" value="default"/>
+        <property key="pre-instruction-scheduling" value="default"/>
+        <property key="preprocessor-macros" value=""/>
+        <property key="scalar-model" value="default"/>
+      </C30>
+      <C30-AS>
+        <property key="assembler-symbols" value=""/>
+        <property key="expand-macros" value="false"/>
+        <property key="extra-include-directories-for-assembler" value="..;;."/>
+        <property key="extra-include-directories-for-preprocessor" value=""/>
+        <property key="false-conditionals" value="false"/>
+        <property key="keep-locals" value="false"/>
+        <property key="list-assembly" value="false"/>
+        <property key="list-section-info" value="false"/>
+        <property key="list-source" value="false"/>
+        <property key="list-symbols" value="false"/>
+        <property key="oXC16asm-list-to-file" value="false"/>
+        <property key="omit-debug-dirs" value="false"/>
+        <property key="omit-forms" value="false"/>
+        <property key="preprocessor-macros" value=""/>
+        <property key="relax" value="false"/>
+        <property key="warning-level" value="emit-warnings"/>
+        <appendMe value="-g"/>
+      </C30-AS>
+      <C30-LD>
+        <property key="boot-eeprom" value="no_eeprom"/>
+        <property key="boot-flash" value="no_flash"/>
+        <property key="boot-ram" value="no_ram"/>
+        <property key="boot-write-protect" value="no_write_protect"/>
+        <property key="enable-check-sections" value="false"/>
+        <property key="enable-data-init" value="true"/>
+        <property key="enable-default-isr" value="true"/>
+        <property key="enable-handles" value="true"/>
+        <property key="enable-pack-data" value="true"/>
+        <property key="extra-lib-directories" value="..;."/>
+        <property key="general-code-protect" value="no_code_protect"/>
+        <property key="general-write-protect" value="no_write_protect"/>
+        <property key="generate-cross-reference-file" value="true"/>
+        <property key="heap-size" value="0"/>
+        <property key="input-libraries" value=""/>
+        <property key="linker-symbols" value=""/>
+        <property key="map-file" value="&quot;${DISTDIR}/beaconboard.X.${IMAGE_TYPE}.map&quot;"/>
+        <property key="preprocessor-macros" value=""/>
+        <property key="remove-unused-sections" value="false"/>
+        <property key="report-memory-usage" value="true"/>
+        <property key="secure-eeprom" value="no_eeprom"/>
+        <property key="secure-flash" value="no_flash"/>
+        <property key="secure-ram" value="no_ram"/>
+        <property key="secure-write-protect" value="no_write_protect"/>
+        <property key="stack-size" value=""/>
+        <property key="symbol-stripping" value=""/>
+        <property key="trace-symbols" value=""/>
+        <property key="warn-section-align" value="true"/>
+      </C30-LD>
+      <C30Global>
+        <property key="fast-math" value="false"/>
+        <property key="legacy-libc" value="false"/>
+        <property key="output-file-format" value="elf"/>
+      </C30Global>
+      <ICD3PlatformTool>
+        <property key="ADC 1" value="true"/>
+        <property key="AutoSelectMemRanges" value="auto"/>
+        <property key="CRC" value="true"/>
+        <property key="DAC 1" value="true"/>
+        <property key="DUAL COMPARATOR" value="true"/>
+        <property key="ECAN 1" value="true"/>
+        <property key="Freeze All Other Peripherals" value="true"/>
+        <property key="I2C1" value="true"/>
+        <property key="INPUT CAPTURE 1" value="true"/>
+        <property key="INPUT CAPTURE 2" value="true"/>
+        <property key="INPUT CAPTURE 7" value="true"/>
+        <property key="INPUT CAPTURE 8" value="true"/>
+        <property key="OUTPUT COMPARE 1" value="true"/>
+        <property key="OUTPUT COMPARE 2" value="true"/>
+        <property key="OUTPUT COMPARE 3" value="true"/>
+        <property key="OUTPUT COMPARE 8" value="true"/>
+        <property key="PARALLEL MASTER/SLAVE PORT" value="true"/>
+        <property key="PWM 1" value="true"/>
+        <property key="PWM 2" value="true"/>
+        <property key="REAL TIME CLOCK AND CALENDAR" value="true"/>
+        <property key="SPI 1" value="true"/>
+        <property key="SPI 2" value="true"/>
+        <property key="SecureSegment.SegmentProgramming" value="FullChipProgramming"/>
+        <property key="TIMER1" value="true"/>
+        <property key="TIMER2" value="true"/>
+        <property key="TIMER3" value="true"/>
+        <property key="TIMER4" value="true"/>
+        <property key="TIMER5" value="true"/>
+        <property key="ToolFirmwareFilePath"
+                  value="Press to browse for a specific firmware version"/>
+        <property key="ToolFirmwareOption.UseLatestFirmware" value="true"/>
+        <property key="UART 1" value="true"/>
+        <property key="UART 2" value="true"/>
+        <property key="debugoptions.useswbreakpoints" value="false"/>
+        <property key="hwtoolclock.frcindebug" value="false"/>
+        <property key="memories.aux" value="false"/>
+        <property key="memories.bootflash" value="false"/>
+        <property key="memories.configurationmemory" value="true"/>
+        <property key="memories.eeprom" value="true"/>
+        <property key="memories.flashdata" value="true"/>
+        <property key="memories.id" value="true"/>
+        <property key="memories.programmemory" value="true"/>
+        <property key="memories.programmemory.end" value="0xabff"/>
+        <property key="memories.programmemory.start" value="0x0"/>
+        <property key="poweroptions.powerenable" value="false"/>
+        <property key="programoptions.eraseb4program" value="true"/>
+        <property key="programoptions.preserveeeprom" value="false"/>
+        <property key="programoptions.preserveprogramrange" value="false"/>
+        <property key="programoptions.preserveprogramrange.end" value="0xabff"/>
+        <property key="programoptions.preserveprogramrange.start" value="0x0"/>
+        <property key="programoptions.preserveuserid" value="false"/>
+        <property key="programoptions.testmodeentrymethod" value="VPPFirst"/>
+        <property key="programoptions.usehighvoltageonmclr" value="false"/>
+        <property key="programoptions.uselvpprogramming" value="false"/>
+        <property key="voltagevalue" value="3.25"/>
+      </ICD3PlatformTool>
+    </conf>
+  </confs>
+</configurationDescriptor>

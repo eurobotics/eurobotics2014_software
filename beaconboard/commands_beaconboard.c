@@ -31,13 +31,13 @@
 #include <stdio.h>
 #include <string.h>
 
-#include <aversive\pgmspace.h>
-#include <aversive\wait.h>
-#include <aversive\error.h>
+#include <aversive/pgmspace.h>
+#include <aversive/wait.h>
+#include <aversive/error.h>
 
 #include <uart.h>
 #include <pwm_mc.h>
-#include <time.h>
+#include <clock_time.h>
 
 #include <pid.h>
 #include <quadramp.h>
@@ -146,15 +146,15 @@ struct cmd_color_result {
 static void cmd_color_parsed(void *parsed_result, void *data)
 {
 	struct cmd_color_result *res = (struct cmd_color_result *) parsed_result;
-	if (!strcmp_P(res->color, PSTR("purple"))) {
-		beaconboard.our_color = I2C_COLOR_PURPLE;
+	if (!strcmp_P(res->color, PSTR("yellow"))) {
+		beaconboard.our_color = I2C_COLOR_YELLOW;
 	}
 	else if (!strcmp_P(res->color, PSTR("red"))) {
 		beaconboard.our_color = I2C_COLOR_RED;
 	}
 	else if (!strcmp_P(res->color, PSTR("show"))) {
-		if(beaconboard.our_color == I2C_COLOR_PURPLE)
-			printf("color is PURPLE\n\r");
+		if(beaconboard.our_color == I2C_COLOR_YELLOW)
+			printf("color is YELLOW\n\r");
 		else
 			printf("color is RED\n\r");
 		
@@ -164,7 +164,7 @@ static void cmd_color_parsed(void *parsed_result, void *data)
 
 prog_char str_color_arg0[] = "color";
 parse_pgm_token_string_t cmd_color_arg0 = TOKEN_STRING_INITIALIZER(struct cmd_color_result, arg0, str_color_arg0);
-prog_char str_color_color[] = "purple#red#show";
+prog_char str_color_color[] = "yellow#red#show";
 parse_pgm_token_string_t cmd_color_color = TOKEN_STRING_INITIALIZER(struct cmd_color_result, color, str_color_color);
 
 prog_char help_color[] = "Set our color";

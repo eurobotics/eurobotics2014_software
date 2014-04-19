@@ -25,9 +25,9 @@
 #include <math.h>
 
 #include <aversive.h>
-#include <aversive\pgmspace.h>
-#include <aversive\wait.h>
-#include <aversive\error.h>
+#include <aversive/pgmspace.h>
+#include <aversive/wait.h>
+#include <aversive/error.h>
 
 #include <uart.h>
 #include <i2c.h>
@@ -38,7 +38,7 @@
 #include <timer.h>
 #include <scheduler.h>
 #include <pid.h>
-#include <time.h>
+#include <clock_time.h>
 #include <quadramp.h>
 #include <control_system_manager.h>
 

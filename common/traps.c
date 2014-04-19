@@ -52,7 +52,7 @@
 **********************************************************************/
 
 #if defined(__dsPIC33F__)
-#include "p33fxxxx.h"
+#include "p33Fxxxx.h"
 #elif defined(__PIC24H__)
 #include "p24hxxxx.h"
 #endif
