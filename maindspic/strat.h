@@ -25,15 +25,12 @@
 
 /* compilation flavours */
 //#define HOMOLOGATION
-//#define DEMO_MODE
 
 /* area */
 #define AREA_X 3000
 #define AREA_Y 2000
 
-
-
-/* position of the tokens */
+/* position of the elements */
 #define TREE_1_X			0
 #define TREE_1_Y			1300
 #define TREE_2_X			700
@@ -42,12 +39,14 @@
 #define TREE_3_Y			2000
 #define TREE_4_X			3000
 #define TREE_4_Y			1300
-#define HEART_FIRE_1_X		140
-#define HEART_FIRE_1_Y		1860
-#define HEART_FIRE_2_X		1500
-#define HEART_FIRE_2_Y		1050
-#define HEART_FIRE_3_X		2860
-#define HEART_FIRE_3_Y		1860
+
+#define HEART_1_X		    140
+#define HEART_1_Y		    1860
+#define HEART_2_X		    1500
+#define HEART_2_Y		    1050
+#define HEART_3_X		    2860
+#define HEART_3_Y		    1860
+
 #define FIRE_1_X			400
 #define FIRE_1_Y			1100
 #define FIRE_2_X			900
@@ -60,6 +59,7 @@
 #define FIRE_5_Y			1600
 #define FIRE_6_X			2600
 #define FIRE_6_Y			1100
+
 #define TORCH_1_X			0
 #define TORCH_1_Y			800
 #define TORCH_2_X			1300
@@ -69,26 +69,31 @@
 #define TORCH_4_X			3000
 #define TORCH_4_Y			800
 
-#define MOBILE_TORCH_1_X		900
-#define MOBILE_TORCH_1_Y		1100
-#define MOBILE_TORCH_2_X		2100
-#define MOBILE_TORCH_2_Y		1100
-#define BASKET_1_X		750
-#define BASKET_1_Y		150
-#define BASKET_2_X		2250
-#define BASKET_2_Y		150
-#define MAMOOTH_1_X		700
-#define MAMOOTH_1_Y		0
-#define MAMOOTH_2_X		2300
-#define MAMOOTH_2_Y		0
+#define M_TORCH_1_X	        900
+#define M_TORCH_1_Y	        1100
+#define M_TORCH_2_X	        2100
+#define M_TORCH_2_Y	        1100
+
+#define BASKET_1_X		    750
+#define BASKET_1_Y		    150
+#define BASKET_2_X		    2250
+#define BASKET_2_Y		    150
+
+#define MAMOOTH_1_X		    700
+#define MAMOOTH_1_Y		    0
+#define MAMOOTH_2_X		    2300
+#define MAMOOTH_2_Y		    0  
+
 #define FRESCO_X			1500
 #define FRESCO_Y			0
-#define HOME_RED_X		2800
-#define HOME_RED_Y		300
-#define HOME_YELLOW_X		200
-#define HOME_YELLOW_Y		300
 
-#define HEART_FIRE_2_RAD	150
+//#define HOME_RED_X		    2800
+//#define HOME_RED_Y		    300
+
+//#define HOME_YELLOW_X		200
+//#define HOME_YELLOW_Y		300
+
+#define HEART_2_RAD	150
 
 /* convert coords according to our color */
 #define COLOR_Y(y)     (y)
@@ -110,20 +115,20 @@
 #define CENTER_Y 1000
 
 #define SIDE_REAR		I2C_SIDE_REAR
-#define SIDE_FRONT 	I2C_SIDE_FRONT 
+#define SIDE_FRONT 	    I2C_SIDE_FRONT 
 #define SIDE_MAX		I2C_SIDE_MAX
 
 #define OPPOSITE_SIDE(side) ((side==I2C_SIDE_FRONT)? (I2C_SIDE_REAR) : (I2C_SIDE_FRONT))	
 
-#define GO_FORWARD	0
-#define GO_BACKWARD	1
+#define GO_FORWARD	    0
+#define GO_BACKWARD	    1
 
 /* useful traj flags */
-#define TRAJ_SUCCESS(f) 				(f & (END_TRAJ|END_NEAR))
-#define TRAJ_BLOCKING(f) 				(f & (END_BLOCKING))
+#define TRAJ_SUCCESS(f) 			(f & (END_TRAJ|END_NEAR))
+#define TRAJ_BLOCKING(f) 			(f & (END_BLOCKING))
 
-#define TRAJ_FLAGS_STD 					(END_TRAJ|END_BLOCKING|END_NEAR|END_OBSTACLE|END_INTR|END_TIMER)
-#define TRAJ_FLAGS_NO_TIMER 			(END_TRAJ|END_BLOCKING|END_NEAR|END_OBSTACLE|END_INTR)
+#define TRAJ_FLAGS_STD 				(END_TRAJ|END_BLOCKING|END_NEAR|END_OBSTACLE|END_INTR|END_TIMER)
+#define TRAJ_FLAGS_NO_TIMER 		(END_TRAJ|END_BLOCKING|END_NEAR|END_OBSTACLE|END_INTR)
 #define TRAJ_FLAGS_NO_NEAR 			(END_TRAJ|END_BLOCKING|END_OBSTACLE|END_INTR|END_TIMER)
 #define TRAJ_FLAGS_NO_NEAR_NO_TIMER (END_TRAJ|END_BLOCKING|END_OBSTACLE|END_INTR)
 #define TRAJ_FLAGS_SMALL_DIST 		(END_TRAJ|END_BLOCKING|END_INTR)
@@ -162,10 +167,10 @@
 #endif
 
 //Do not change
-#define SPEED_DIST_SLOW 		  2000.
-#define SPEED_ANGLE_SLOW 		  2000.
+#define SPEED_DIST_SLOW 		2000.
+#define SPEED_ANGLE_SLOW 		2000.
 #define SPEED_DIST_VERY_SLOW 	500.
-#define SPEED_ANGLE_VERY_SLOW 500.
+#define SPEED_ANGLE_VERY_SLOW   500.
 
 #endif
 
@@ -174,9 +179,9 @@
 #define ZONE_TREE_2       	1
 #define ZONE_TREE_3			2
 #define ZONE_TREE_4			3
-#define ZONE_HEART_FIRE_1	4
-#define ZONE_HEART_FIRE_2  	5
-#define ZONE_HEART_FIRE_3 	6
+#define ZONE_HEART_1	4
+#define ZONE_HEART_2  	5
+#define ZONE_HEART_3 	6
 #define ZONE_FIRE_1   	    7
 #define ZONE_FIRE_2	        8
 #define ZONE_FIRE_3	        9
@@ -187,16 +192,25 @@
 #define ZONE_TORCH_2		14
 #define ZONE_TORCH_3		15
 #define ZONE_TORCH_4        16
-#define ZONE_MOBILE_TORCH_1 17
-#define ZONE_MOBILE_TORCH_2 18
+#define ZONE_M_TORCH_1 17
+#define ZONE_M_TORCH_2 18
 #define ZONE_BASKET_1       19
 #define ZONE_BASKET_2       20
 #define ZONE_MAMOOTH_1      21
 #define ZONE_MAMOOTH_2      22
 #define ZONE_FRESCO      	23
-#define ZONE_HOME_RED       24
-#define ZONE_HOME_YELLOW    25
-#define ZONES_MAX		    26
+//#define ZONE_HOME_RED       24
+//#define ZONE_HOME_YELLOW    25
+#define ZONES_MAX		    24
+
+/* max number of each elements */
+#define TREE_NB_MAX     4
+#define FIRE_NB_MAX     6
+#define HEART_NB_MAX    3
+#define TORCH_NB_MAX    4
+#define MTORCH_NB_MAX   2
+#define MAMOOTH_NB_MAX  2
+#define BASKET_NB_MAX   2
 
 
 /************************************************************* 
@@ -215,27 +229,26 @@ struct bbox {
 struct conf {
 
 /* depends on flags the robot
- * do one things or anothers */
+ * will do different things */
 	uint8_t flags;
-  #define ENABLE_R2ND_POS				  1 /* TODO: set by command */
-	#define ENABLE_DOWN_SIDE_ZONES	2
+#define CONF_FLAG_XXX   1
 };
 
 
-
+/* strat structure */
 typedef struct {
 	/* type */
 	uint16_t type;
-	#define ZONE_TYPE_TREE					0
-	#define ZONE_TYPE_FIRE					1
-	#define ZONE_TYPE_HEART_FIRE				2
-	#define ZONE_TYPE_TORCH					3
-	#define ZONE_TYPE_MOBILE_TORCH				4
-	#define ZONE_TYPE_FRESCO					5
-	#define ZONE_TYPE_MAMOOTH					6
-	#define ZONE_TYPE_BASKET					7
-	#define ZONE_TYPE_HOME					8
-	#define ZONE_TYPE_MAX					9
+	#define ZONE_TYPE_TREE			0
+	#define ZONE_TYPE_FIRE			1
+	#define ZONE_TYPE_HEART	2
+	#define ZONE_TYPE_TORCH			3
+	#define ZONE_TYPE_M_TORCH	4
+	#define ZONE_TYPE_FRESCO		5
+	#define ZONE_TYPE_MAMOOTH		6
+	#define ZONE_TYPE_BASKET		7
+	#define ZONE_TYPE_HOME			8
+	#define ZONE_TYPE_MAX			9
 
 	/* target point */
 	int16_t x;
@@ -250,7 +263,6 @@ typedef struct {
 	/* init point */
 	int16_t init_x;
 	int16_t init_y;
-	int16_t init_a;
 
 	/* priority */
 	uint8_t prio;
@@ -268,63 +280,60 @@ typedef struct {
 	#define ZONE_PRIO_MAX	   100
 
 	uint16_t flags;
-	#define ZONE_CHECKED		    	1
-	#define ZONE_CHECKED_OPP		2
+	#define ZONE_CHECKED	 	1
+	#define ZONE_CHECKED_OPP	2
 	#define ZONE_SEC_ROBOT	   	4
-	#define ZONE_AVOID		    	8
+	#define ZONE_AVOID		   	8
   
 	/* which robots can perform this action */
-	#define MAIN_ROBOT 0
-	#define SEC_ROBOT 1
-	#define BOTH_ROBOTS 2
 	uint8_t robot;
+	#define MAIN_ROBOT  0
+	#define SEC_ROBOT   1
+	#define BOTH_ROBOTS 2
 	
-} strat_zones;
+} strat_zones_t;
 
-
+/* information about strat stuff */
 struct strat_infos {
 	uint8_t dump_enabled;
 	uint8_t debug_step;
-	struct conf conf;
 	struct bbox area_bbox;
 
+    /* strat configuration */
+	struct conf conf;
+
 	/* points areas */
-	strat_zones zones[ZONES_MAX];
-	
+	strat_zones_t zones[ZONES_MAX];
 	
 	/* our zone position */
 	uint8_t current_zone;
 	uint8_t goto_zone;
 	uint8_t last_zone;
 
+	/* state of the robot */
+	uint8_t harvested_trees;     /* One unity per harvested tree */
+	uint8_t fires_inside; 		 /* One unity per fire inside */
+	uint8_t spears_inside;
+
 	/* opponent zone position */
 	uint8_t opp_current_zone;
 	uint8_t opp2_current_zone;
 
-	uint8_t opp_score;
-	uint8_t opp_tree_fruits_inside;
-
-	/* secondary robot structure */ 
-	
-
 	/* opponent statistics */
+	uint8_t opp_score;
+	uint8_t opp_harvested_trees;
 	uint32_t opp_time_zone_ms;
-
-	/* state of the robot */
-	uint8_t tree_fruits_inside; /* One unity per harvested tree */
-	uint8_t fires_inside; 		 /* One unity per fire inside */
-	uint8_t net_inside;
-	uint8_t spears_inside;
 };
 
 extern struct strat_infos strat_infos;
+
+/* get zone struct index */
 extern char numzone2name[ZONES_MAX + 1][3];
+
+/* points we get from each zone */
 extern uint8_t strat_zones_points[ZONES_MAX];
 
-
-
 #ifndef HOST_VERSION_OA_TEST
-
 
 /************************************************************* 
  * Functions headers of strat files
@@ -333,8 +342,6 @@ extern uint8_t strat_zones_points[ZONES_MAX];
 /********************************************
  * in strat.c 
  *******************************************/
-#define AREA_BBOX_6X5	0
-#define AREA_BBOX_4X4	1
 void strat_set_bounding_box(uint8_t type);
 
 void strat_dump_infos(const char *caller);
@@ -352,8 +359,6 @@ uint8_t strat_begin_alcabot (void);
 void strat_event(void *dummy);
 void strat_event_enable(void);
 void strat_event_disable(void);
-
-
 
 /********************************************
  * in strat_fruits.c 
@@ -392,13 +397,14 @@ void state_debug_wait_key_pressed(void);
 uint8_t strat_smart(void);
 void recalculate_priorities(void);
 
+/* tracking of zones where opp has been working */
+void strat_opp_tracking (void);
+
 /* homologation */
 void strat_homologation(void);
 
 #else /* HOST_VERSION_OA_TEST */
 
-#define AREA_BBOX_6X5	0
-#define AREA_BBOX_4X4	1
 void strat_set_bounding_box(uint8_t type);
 
 #endif /* HOST_VERSION_OA_TEST */

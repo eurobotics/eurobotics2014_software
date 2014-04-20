@@ -121,7 +121,7 @@ uint8_t strat_is_valid_zone(uint8_t zone_num)
 
 	if(strat_infos.zones[zone_num].type==ZONE_TYPE_BASKET)
 	{
-		if(strat_infos.tree_fruits_inside==0) 
+		if(strat_infos.harvested_trees==0) 
 			return 0;
 	}
 
@@ -149,7 +149,7 @@ int8_t strat_get_new_zone(void)
 			zone_num = i;
 		}
 
-		if((time_get_s() > 75) && (strat_infos.tree_fruits_inside))
+		if((time_get_s() > 75) && (strat_infos.harvested_trees))
 			zone_num = ZONE_BASKET_2;
 	}
 
@@ -251,15 +251,15 @@ uint8_t strat_work_on_zone(uint8_t zone_num)
 		/* take fire from the torch */
 			break;
 			
-		case ZONE_HEART_FIRE_1:
-		case ZONE_HEART_FIRE_2:
-		case ZONE_HEART_FIRE_3:
+		case ZONE_HEART_1:
+		case ZONE_HEART_2:
+		case ZONE_HEART_3:
 		/* leave fire on heart of fire */
 		/* pick up fire from heart of fire */
 			break;
 			
-		case ZONE_MOBILE_TORCH_1:
-		case ZONE_MOBILE_TORCH_2:
+		case ZONE_M_TORCH_1:
+		case ZONE_M_TORCH_2:
 		/* leave fire on mobile torch */
 		/* pick up fire from heart of fire */
 			break;
@@ -312,7 +312,7 @@ void recalculate_priorities(void)
 		/* 3. Points we can get now in this zone */
 		switch(strat_infos.zones[zone_num].type)
 		{
-			case ZONE_TYPE_HEART_FIRE:
+			case ZONE_TYPE_HEART:
 				if(strat_infos.zones[zone_num].flags & ZONE_CHECKED_OPP)
 					strat_zones_points[zone_num]=4;
 					
@@ -336,7 +336,7 @@ void recalculate_priorities(void)
 					strat_zones_points[zone_num]=0;
 				break;
 				
-			case ZONE_TYPE_MOBILE_TORCH:
+			case ZONE_TYPE_M_TORCH:
 				if(strat_infos.zones[zone_num].flags & ZONE_CHECKED_OPP)
 					strat_zones_points[zone_num]=0;
 				break;
@@ -345,7 +345,7 @@ void recalculate_priorities(void)
 				
 			case ZONE_TYPE_BASKET:
 				/* Save fruits on basket */
-				strat_zones_points[zone_num]=strat_infos.tree_fruits_inside*3;
+				strat_zones_points[zone_num]=strat_infos.harvested_trees*3;
 				
 				/* Opponent has given us toxic fruits */
 				// XXX Remove toxic fruits available???
@@ -413,13 +413,7 @@ uint8_t strat_smart(void)
 		
 	if(zone_num == -1) {
 		printf_P(PSTR("No zone is found\r\n"));
-		printf_P(PSTR("Down side zones enabled\r\n"));	
-		strat_infos.conf.flags |= ENABLE_DOWN_SIDE_ZONES;	
-		strat_infos.conf.flags |= ENABLE_R2ND_POS;
 
-		/* Enable all paths */
-		printf_P(PSTR("All possible paths enabled\r\n"));	
-		strat_set_bounding_box(-1);	
 		return END_TRAJ;
 	}
 
@@ -460,6 +454,110 @@ uint8_t strat_smart(void)
 	}
 }
 
+void strat_opp_tracking (void) 
+{
+#if 0
+    while(1){
+    int8_t i,status;
+    int16_t x_opp, y_opp;
+    uint8_t flags;
+    /* get opponent position, return if not there */
+
+    if(get_opponent_xy(&x_opp, &y_opp) == -1)
+        return;
+
+    /* get actual zone */
+    for(i = 0; i <  ZONES_MAX; i++)
+    {
+            status=opponent1_is_in_area(strat_infos.zones[i].x_up, strat_infos.zones[i].y_up,
+                                     strat_infos.zones[i].x_down, strat_infos.zones[i].y_down);
+        if((status==1)&&!(strat_infos.zones[i].flags & ZONE_CHECKED_OPP)) {
+
+
+            switch(strat_infos.zones[i].type){
+
+                case ZONE_TYPE_TREE:
+
+                    strat_infos.opp_harvested_trees+=3;
+                    printf_P("Points_inside: %d\n",strat_infos.opp_harvested_trees);
+                    strat_infos.zones[i].flags |= ZONE_CHECKED_OPP;
+                    break;
+                case ZONE_TYPE_BASKET:
+                    if(strat_infos.opp_harvested_trees!=0){
+                        strat_infos.opp_score=strat_infos.opp_score+strat_infos.opp_harvested_trees;
+                        strat_infos.opp_harvested_trees=0;
+                    }
+                    printf_P("Points_inside: %d\n",strat_infos.opp_harvested_trees);
+                    break;
+                case ZONE_TYPE_TORCH:
+                case ZONE_M_TORCH_1:
+                case ZONE_TYPE_FIRE:
+                    strat_infos.zones[i].flags |= ZONE_CHECKED_OPP;
+                    strat_infos.opp_score++;
+                    break;
+                case ZONE_TYPE_HEART:
+                    strat_infos.zones[i].flags |= ZONE_CHECKED_OPP;
+                    break;
+                case ZONE_TYPE_FRESCO:
+                    strat_infos.opp_score+=6;
+                    strat_infos.zones[i].flags |= ZONE_CHECKED_OPP;
+                default:
+                    strat_infos.zones[i].flags |= ZONE_CHECKED_OPP;
+                    break;
+            }
+
+
+                printf_P("ZONE_CHECKED_OPP: %s\n",numzone2name[i]);
+                status=0;
+                break;
+        }
+    status=opponent2_is_in_area(strat_infos.zones[i].x_up, strat_infos.zones[i].y_up,
+                                     strat_infos.zones[i].x_down, strat_infos.zones[i].y_down);
+        if((status==1)&&!(strat_infos.zones[i].flags & ZONE_CHECKED_OPP)) {
+            switch(strat_infos.zones[i].type){
+
+                case ZONE_TYPE_TREE:
+
+                    strat_infos.opp_harvested_trees+=3;
+                    printf_P("Points_inside: %d\n",strat_infos.opp_harvested_trees);
+                    strat_infos.zones[i].flags |= ZONE_CHECKED_OPP;
+                    break;
+                case ZONE_TYPE_BASKET:
+                    if(strat_infos.opp_harvested_trees!=0){
+                        strat_infos.opp_score=strat_infos.opp_score+strat_infos.opp_harvested_trees;
+                        strat_infos.opp_harvested_trees=0;
+                        printf_P("Points_inside: %d\n",strat_infos.opp_harvested_trees);
+                    }
+                    break;
+                case ZONE_TYPE_TORCH:
+                case ZONE_M_TORCH_1:
+                case ZONE_TYPE_FIRE:
+                    strat_infos.zones[i].flags |= ZONE_CHECKED_OPP;
+                    strat_infos.opp_score++;
+                    break;
+                case ZONE_TYPE_HEART:
+                    strat_infos.zones[i].flags |= ZONE_CHECKED_OPP;
+                    break;
+                case ZONE_TYPE_FRESCO:
+                    strat_infos.opp_score+=6;
+                    strat_infos.zones[i].flags |= ZONE_CHECKED_OPP;
+                default:
+                    strat_infos.zones[i].flags |= ZONE_CHECKED_OPP;
+                    break;
+            }
+
+                printf_P("ZONE_CHECKED_OPP: %s\n",numzone2name[i]);
+                status=0;
+
+                break;
+        }
+        time_wait_ms (25);
+    }
+        printf_P("OPP_SCORE :%d\n",strat_infos.opp_score);
+    }
+#endif
+}
+
 
 /* Homologation */
 void strat_homologation(void)
@@ -478,7 +576,7 @@ void strat_homologation(void)
 		strat_infos.current_zone=-1;
 		strat_infos.goto_zone=i;
 		err = goto_and_avoid(COLOR_X(strat_infos.zones[i].init_x), strat_infos.zones[i].init_y,  TRAJ_FLAGS_STD, TRAJ_FLAGS_NO_NEAR);
-		trajectory_a_abs(&mainboard.traj, strat_infos.zones[i].init_a);
+		//trajectory_a_abs(&mainboard.traj, strat_infos.zones[i].init_a);
 		err = wait_traj_end(TRAJ_FLAGS_SMALL_DIST);
 		strat_infos.last_zone=strat_infos.current_zone;
 		strat_infos.goto_zone=-1;

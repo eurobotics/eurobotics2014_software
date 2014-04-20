@@ -59,10 +59,10 @@
 
 /* generic led toggle macro */
 #define LED_TOGGLE(port, bit) do {		\
-		if (port & _BV(bit))		\
-			port &= ~_BV(bit);	\
-		else				\
-			port |= _BV(bit);	\
+		if (port & _BV(bit))		    \
+			port &= ~_BV(bit);	        \
+		else				            \
+			port |= _BV(bit);	        \
 	} while(0)
 
 #ifdef HOST_VERSION
@@ -100,18 +100,15 @@
 
 /* robot dimensions */
 #define IM_SECONDARY_ROBOT
-#define ROBOT_LENGTH      	150.
+#define ROBOT_LENGTH      	    150.
 #define ROBOT_WIDTH 	    	230.
-
-#define ROBOT_CENTER_TO_FRONT 75.
-#define ROBOT_CENTER_TO_BACK  75.
-
+#define ROBOT_CENTER_TO_FRONT   75.
+#define ROBOT_CENTER_TO_BACK    75.
 #define ROBOT_HALF_LENGTH_FRONT ROBOT_CENTER_TO_FRONT
 #define ROBOT_HALF_LENGTH_REAR  ROBOT_CENTER_TO_BACK
 
 /* XXX obstacle clerance */
-#define OBS_CLERANCE       (137.+10.)
-
+#define OBS_CLERANCE            (137.+10.)
 
 /* Some calculus:
  * it is a 5000 imps -> 20000 because we see 1/4 period
@@ -119,10 +116,10 @@
  * 20000/163.5 -> 1201 imps/10 mm */
 
 /* increase it to go further */
-#define IMP_ENCODERS 		  	5000.0
-#define WHEEL_DIAMETER_MM 		53.0
-#define WHEEL_PERIM_MM 	    	(WHEEL_DIAMETER_MM * M_PI)
-#define IMP_COEF 			      10.0
+#define IMP_ENCODERS 		  	    5000.0
+#define WHEEL_DIAMETER_MM 		    53.0
+#define WHEEL_PERIM_MM 	    	    (WHEEL_DIAMETER_MM * M_PI)
+#define IMP_COEF 			        10.0
 #define DIST_IMP_MM 		    	(((IMP_ENCODERS*4) / WHEEL_PERIM_MM) * IMP_COEF)
 
 /* encoders handlers */
@@ -171,15 +168,15 @@
 #endif
 
 /* EVENTS PERIODS */
-#define EVENT_PERIOD_LED 			   1000000L
-#define EVENT_PERIOD_STRAT			  	25000L
-#define EVENT_PERIOD_BEACON_PULL		10000L
-#define EVENT_PERIOD_SENSORS		  	10000L
-#define EVENT_PERIOD_I2C_POLL		  	8000L
-#define EVENT_PERIOD_CS 			   5000L
+#define EVENT_PERIOD_LED 	        1000000L
+#define EVENT_PERIOD_STRAT		  	25000L
+#define EVENT_PERIOD_BEACON_PULL	10000L
+#define EVENT_PERIOD_SENSORS	  	10000L
+#define EVENT_PERIOD_I2C_POLL	  	8000L
+#define EVENT_PERIOD_CS 		    5000L
 
-#define CS_PERIOD ((EVENT_PERIOD_CS/SCHEDULER_UNIT)*SCHEDULER_UNIT) /* in microsecond */
-#define CS_HZ (1000000. / CS_PERIOD)
+#define CS_PERIOD   ((EVENT_PERIOD_CS/SCHEDULER_UNIT)*SCHEDULER_UNIT) /* in microsecond */
+#define CS_HZ       (1000000. / CS_PERIOD)
 
 
 /* dynamic logs */

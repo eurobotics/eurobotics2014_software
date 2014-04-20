@@ -892,6 +892,7 @@ uint8_t opponent2_is_in_area(int16_t x_up, int16_t y_up,
 			return 1;
 	}
 
+        return 1;
 }
 
 /*

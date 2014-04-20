@@ -45,3 +45,7 @@ libs/arc_eurobotics2010_code.rar
 Field.png
 Eurobot2014_Rules_EN_Final_Version.pdf
 maindspic/compiler_files
+beaconboard/beaconboard.X/build
+maindspic/maindspic.X/build
+beaconboard/beaconboard.X/dist
+maindspic/maindspic.X/dist

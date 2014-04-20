@@ -193,22 +193,22 @@ int16_t wt11_rdline (uint8_t *buff, uint16_t buff_size)
 #ifndef HOST_VERSION
     c = uart_recv_nowait(BT_UART);
 #else
-		c = robotsim_uart_recv_BT();  
+	 c = robotsim_uart_recv_BT();  
 #endif
   
     if (c == -1)
       return c;
 
-	  if (c == '\r' || c == '\n') {
+	  if ((char)c == '\r' || (char)c == '\n') {
 		  if (i!=0) {			
-			  buff[i] = '\0';
-        length = i;        
-			  i=0;
-        return length;
+			  	buff[i] = '\0';
+        	  	length = i;        
+		  		i=0;
+        		return length;
 		  }
 	  }
 	  else{
-		  buff[i++] = c;
+		  buff[i++] = (char)c;
       if (i>=buff_size)
 		    i = 0;
 	  }	
@@ -236,6 +236,13 @@ void __wt11_open_link(uint8_t mode, uint8_t *addr, uint8_t *link_id)
   else if (mode == WT11_MODE_MUX)
     wt11_send_mux(WT11_MUX_CTRL_CMD, data, size);
 
+  /* wait eco */
+  if (mode == WT11_MODE_NORMAL)
+    ret = WAIT_COND_OR_TIMEOUT(wt11_rdline (data, 128) > 0, WT11_ANS_TIMEOUT_ms);  
+  else if (mode == WT11_MODE_MUX)
+    ret = WAIT_COND_OR_TIMEOUT(wt11_recv_mux (NULL, data) > 0, WT11_ANS_TIMEOUT_ms);
+
+  DEBUG (E_USER_WT11, "%s", data);
 
   /* wait answer */
   if (mode == WT11_MODE_NORMAL)
@@ -243,11 +250,11 @@ void __wt11_open_link(uint8_t mode, uint8_t *addr, uint8_t *link_id)
   else if (mode == WT11_MODE_MUX)
     ret = WAIT_COND_OR_TIMEOUT(wt11_recv_mux (NULL, data) > 0, WT11_ANS_TIMEOUT_ms);
 
+  DEBUG (E_USER_WT11, "%s", data);
+
   if (ret == 0)
     ERROR (E_USER_WT11, "WT11 TIMEOUT %d", __LINE__);
   
-  DEBUG (E_USER_WT11, "%s", data);
-
   /* parse answer */
   ret = sscanf((char *)data, "CALL %d", (int *)&link_id);
   if(ret == 1)
@@ -259,11 +266,10 @@ void __wt11_open_link(uint8_t mode, uint8_t *addr, uint8_t *link_id)
   else if (mode == WT11_MODE_MUX)
     ret = WAIT_COND_OR_TIMEOUT(wt11_recv_mux (NULL, data) > 0, WT11_ANS_TIMEOUT_ms);
 
+  DEBUG (E_USER_WT11, "%s", data);
+
   if (ret == 0)
     ERROR (E_USER_WT11, "WT11 TIMEOUT %d", __LINE__);
-
-
-  DEBUG (E_USER_WT11, "%s", data);
 
   /* parse answer */
   ret = sscanf((char *)data, "CONNECT %d RFCOMM 1", (int *)&link_id);
@@ -271,6 +277,14 @@ void __wt11_open_link(uint8_t mode, uint8_t *addr, uint8_t *link_id)
 	  NOTICE(E_USER_WT11, "CONNECT %d RFCOMM 1 -SUCCESS-", link_id);						
   else
     NOTICE(E_USER_WT11, "CONNECT %d RFCOMM 1 -FAIL-", link_id);
+}
+
+inline void wt11_open_link(uint8_t *addr, uint8_t *link_id) {
+  __wt11_open_link(WT11_MODE_NORMAL, addr, link_id);
+}
+
+inline void wt11_open_link_mux(uint8_t *addr, uint8_t *link_id) {
+  __wt11_open_link(WT11_MODE_MUX, addr, link_id);
 }
 
 /* close serial link */
@@ -317,6 +331,14 @@ void __wt11_close_link(uint8_t mode, uint8_t link_id)
 	  NOTICE(E_USER_STRAT, "CLOSE %d -SUCCESS-", link_id);						
   else
     NOTICE(E_USER_WT11, "CLOSE %d -FAIL-", link_id);
+}
+
+inline void wt11_close_link(uint8_t link_id) {
+  __wt11_close_link(WT11_MODE_NORMAL, link_id);
+}
+
+inline void wt11_close_link_mux(uint8_t link_id) {
+  __wt11_close_link(WT11_MODE_MUX, link_id);
 }
 
 /* enable multiplexing mode */
@@ -375,9 +397,9 @@ void __wt11_reset (uint8_t mode)
   {
 	  /* change to cmd mode */
 	  wait_ms(1200);
-    wt11_send ((uint8_t *)"+++", 3);
+	  wt11_send ((uint8_t *)"+++", 3);
 	  wait_ms(1200);
-    wt11_send ((uint8_t *)"\n", 3);
+     wt11_send ((uint8_t *)"\n", 3);
   }
 
   /* RESET */
@@ -396,10 +418,20 @@ void __wt11_reset (uint8_t mode)
   else if (mode == WT11_MODE_MUX)
     ret = WAIT_COND_OR_TIMEOUT(wt11_recv_mux (NULL, data) > 0, WT11_ANS_TIMEOUT_ms);
 
+  DEBUG (E_USER_WT11, "%s", data);
+
   if (ret == 0)
     ERROR (E_USER_WT11, "WT11 TIMEOUT %d", __LINE__);
   else
     DEBUG (E_USER_WT11, "%s", data);
+}
+
+inline void wt11_reset (void) {
+  __wt11_reset ((uint8_t)WT11_MODE_NORMAL);
+}
+
+inline void wt11_reset_mux (void) {
+  __wt11_reset ((uint8_t)WT11_MODE_MUX);
 }
 
 

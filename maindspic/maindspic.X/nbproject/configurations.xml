@@ -168,6 +168,7 @@
         <itemPath>../strat_main.c</itemPath>
         <itemPath>../strat_treasure.c</itemPath>
         <itemPath>../strat_fruits.c</itemPath>
+        <itemPath>../wt11.c</itemPath>
       </logicalFolder>
       <logicalFolder name="bd" displayName="bd" projectFiles="true">
         <itemPath>../../libs/aversive4dspic/modules/devices/robot/blocking_detection_manager/blocking_detection_manager.c</itemPath>
@@ -313,7 +314,7 @@
         <targetDevice>dsPIC33FJ128MC804</targetDevice>
         <targetHeader></targetHeader>
         <targetPluginBoard></targetPluginBoard>
-        <platformTool>MCHVPlatformTool</platformTool>
+        <platformTool>ICD3PlatformTool</platformTool>
         <languageToolchain>C30</languageToolchain>
         <languageToolchainVersion></languageToolchainVersion>
         <platform>2</platform>
@@ -497,7 +498,7 @@
       </item>
       <C30>
         <property key="code-model" value="large-code"/>
-        <property key="const-model" value="default"/>
+        <property key="const-model" value="const-in-data"/>
         <property key="data-model" value="default"/>
         <property key="enable-all-warnings" value="true"/>
         <property key="enable-ansi-std" value="false"/>
@@ -572,8 +573,8 @@
         <property key="legacy-libc" value="false"/>
         <property key="output-file-format" value="elf"/>
       </C30Global>
-      <MCHVPlatformTool>
-      </MCHVPlatformTool>
+      <ICD3PlatformTool>
+      </ICD3PlatformTool>
     </conf>
   </confs>
 </configurationDescriptor>

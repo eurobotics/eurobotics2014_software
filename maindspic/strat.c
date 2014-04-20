@@ -66,34 +66,41 @@
 
 #else
 
+/** 
+   XXX 
+   strat.c is used for OA test for both robots.
+   We need define some robot dimensions here, depending on robot 
+ */
+
 #ifndef IM_SECONDARY_ROBOT
+
+/* XXX synchronized with maindspic/main.h */
+
 /* robot dimensions */
-#define ROBOT_LENGTH     281.5
-#define ROBOT_WIDTH 	   330.0
-
-#define ROBOT_CENTER_TO_FRONT 162.5
-#define ROBOT_CENTER_TO_BACK  119.0
-
+#define ROBOT_LENGTH            281.5
+#define ROBOT_WIDTH             330.0
+#define ROBOT_CENTER_TO_FRONT   162.5
+#define ROBOT_CENTER_TO_BACK    119.0
 #define ROBOT_HALF_LENGTH_FRONT ROBOT_CENTER_TO_FRONT
 #define ROBOT_HALF_LENGTH_REAR  ROBOT_CENTER_TO_BACK
 
 /* XXX obstacle clerance */
-#define OBS_CLERANCE       242.
+#define OBS_CLERANCE            (232.+10.)
 
 #else
+
+/* XXX synchronized with secondary_robot/main.h */
+
 /* robot dimensions */
-#define IM_SECONDARY_ROBOT
-#define ROBOT_LENGTH      150.
-#define ROBOT_WIDTH 	    230.
-
-#define ROBOT_CENTER_TO_FRONT 75.0
-#define ROBOT_CENTER_TO_BACK  75.0
-
+#define ROBOT_LENGTH      	    150.
+#define ROBOT_WIDTH 	    	230.
+#define ROBOT_CENTER_TO_FRONT   75.
+#define ROBOT_CENTER_TO_BACK    75.
 #define ROBOT_HALF_LENGTH_FRONT ROBOT_CENTER_TO_FRONT
 #define ROBOT_HALF_LENGTH_REAR  ROBOT_CENTER_TO_BACK
 
 /* XXX obstacle clerance */
-#define OBS_CLERANCE       147.
+#define OBS_CLERANCE            (137.+10.)
 
 #endif /* ! IM_SECONDARY_ROBOT */
 
@@ -105,52 +112,59 @@ static volatile uint8_t strat_running = 0;
 
 
 struct strat_infos strat_infos = { 
-	/* conf */
-	.conf = {
-		.flags = 0,
-	},
+    /* conf */
+    .conf = {
+        .flags = 0,
+    },
 
-#define TREE_D_INIT 			440
-#define BASKET_D_INIT 		(440 + 300)
+#define TREE_D_INIT             440
+#define BASKET_D_INIT         (440 + 300)
 
 
 
-   /*zones[W] =			     		{type, 				x, 			y, 			x_down, 	x_up,	y_down, 	y_up,	init_x, 					init_y, 					init_a, 	prio, 			flags, 	robot };                            */
-    .zones[ZONE_TREE_1]=        	{ZONE_TYPE_TREE, 	TREE_1_X, 	TREE_1_Y, 	0, 		400,  1100,    1500, TREE_D_INIT,  			TREE_1_Y,   			0,			ZONE_PRIO_40, 	0,			MAIN_ROBOT},
-    .zones[ZONE_TREE_2]=        	{ZONE_TYPE_TREE, 	TREE_2_X, 	TREE_2_Y, 	500, 		900,  1600,    2000, TREE_2_X,  				AREA_Y-TREE_D_INIT,  -90, 		ZONE_PRIO_40, 	0,			MAIN_ROBOT},
-    .zones[ZONE_TREE_3]=        	{ZONE_TYPE_TREE, 	TREE_3_X, 	TREE_3_Y, 	2100, 	2500, 1600,    2000,	TREE_3_X,  				AREA_Y-TREE_D_INIT,  -90, 		ZONE_PRIO_40, 	0,			MAIN_ROBOT},
-    .zones[ZONE_TREE_4]=        	{ZONE_TYPE_TREE, 	TREE_4_X, 	TREE_4_Y, 	2600, 	3000, 1100,    1500, AREA_X-TREE_D_INIT, 	TREE_4_Y,   			180, 		ZONE_PRIO_40, 	0,			MAIN_ROBOT},
+   /*zones[W] =                 {type,            x,            y,            x_down,   x_up,  y_down,    y_up,      init_x,                 init_y,                       prio,             flags,        robot };                            */
+    .zones[ZONE_TREE_1]=        {ZONE_TYPE_TREE,  TREE_1_X,     TREE_1_Y,     0,         400,    1100,    1500,      TREE_D_INIT,            TREE_1_Y,                     ZONE_PRIO_40,     0,            MAIN_ROBOT},
+    .zones[ZONE_TREE_2]=        {ZONE_TYPE_TREE,  TREE_2_X,     TREE_2_Y,     500,       900,    1600,    2000,      TREE_2_X,               AREA_Y-TREE_D_INIT,           ZONE_PRIO_40,     0,            MAIN_ROBOT},
+    .zones[ZONE_TREE_3]=        {ZONE_TYPE_TREE,  TREE_3_X,     TREE_3_Y,     2100,     2500,    1600,    2000,      TREE_3_X,               AREA_Y-TREE_D_INIT,           ZONE_PRIO_40,     0,            MAIN_ROBOT},
+    .zones[ZONE_TREE_4]=        {ZONE_TYPE_TREE,  TREE_4_X,     TREE_4_Y,     2600,     3000,    1100,    1500,      AREA_X-TREE_D_INIT,     TREE_4_Y,                     ZONE_PRIO_40,     0,            MAIN_ROBOT},
 
-    .zones[ZONE_HEART_FIRE_1]=  {ZONE_TYPE_HEART_FIRE, HEART_FIRE_1_X, HEART_FIRE_1_Y, 0, 250,  1750, 2000   ,400 ,  1800,   255,  ZONE_PRIO_40, 0 ,MAIN_ROBOT},
-    .zones[ZONE_HEART_FIRE_2]= {ZONE_TYPE_HEART_FIRE, HEART_FIRE_2_X, HEART_FIRE_2_Y, 1350, 1650,  900,    1200   , 1100,  1100,   255,  ZONE_PRIO_40, 0 ,MAIN_ROBOT},
-	.zones[ZONE_HEART_FIRE_3]=  {ZONE_TYPE_HEART_FIRE, HEART_FIRE_3_X, HEART_FIRE_3_Y, 2750,3000 ,  1750,   2000   ,2600 ,  1800,   255,  ZONE_PRIO_40, 0 ,MAIN_ROBOT},
-	.zones[ZONE_FIRE_1]=        {ZONE_TYPE_FIRE, FIRE_1_X, FIRE_1_Y, 100, 700,  800,    1400   , 630,  910,   50,  ZONE_PRIO_40, 0 ,BOTH_ROBOTS},
-	.zones[ZONE_FIRE_2]=        {ZONE_TYPE_FIRE, FIRE_2_X, FIRE_2_Y, 600, 1200,  300,    900   , 630,  910,   50,  ZONE_PRIO_40, 0 ,BOTH_ROBOTS},
-    .zones[ZONE_FIRE_3]=        {ZONE_TYPE_FIRE, FIRE_3_X, FIRE_3_Y, 600, 1200,  1300,    1900   , 1060,  1160,   30,  ZONE_PRIO_40, 0 ,BOTH_ROBOTS},
-    .zones[ZONE_FIRE_4]=        {ZONE_TYPE_FIRE, FIRE_4_X, FIRE_4_Y, 1800, 2400,  300,    900   , 2370,  910,   130,  ZONE_PRIO_40, 0 ,BOTH_ROBOTS},
-    .zones[ZONE_FIRE_5]=        {ZONE_TYPE_FIRE, FIRE_5_X, FIRE_5_Y, 1800, 2400,  1300,   1900   , 1940,  1160,   150,  ZONE_PRIO_40, 0 ,BOTH_ROBOTS},
-    .zones[ZONE_FIRE_6]=       {ZONE_TYPE_FIRE, FIRE_6_X, FIRE_6_Y, 2300, 2900,  800,  1400   , 2370,  910,   130,  ZONE_PRIO_40, 0 ,BOTH_ROBOTS},  
-	
-    .zones[ZONE_TORCH_1]=        {ZONE_TYPE_TORCH, TORCH_1_X, TORCH_1_Y, 0, 400,  600,    1000   , 340,  560,   50,  ZONE_PRIO_40, 0 ,MAIN_ROBOT},
-	.zones[ZONE_TORCH_2]=        {ZONE_TYPE_TORCH, TORCH_2_X, TORCH_2_Y, 1100, 1500,  1600,    2000   , 980,  1710,   170,  ZONE_PRIO_40, 0 ,MAIN_ROBOT},
-	.zones[ZONE_TORCH_3]=        {ZONE_TYPE_TORCH, TORCH_3_X, TORCH_3_Y, 1500, 1900,  1600,    2000   , 2020,  1710,   10,  ZONE_PRIO_40, 0 ,MAIN_ROBOT},
-    .zones[ZONE_TORCH_4]=        {ZONE_TYPE_TORCH, TORCH_4_X, TORCH_4_Y, 2600, 3000,  600,    1000   , 2660,  560,   130,  ZONE_PRIO_40, 0 ,MAIN_ROBOT},
+   /*zones[W] =                 {type,             x,         y,         x_down,    x_up,   y_down, y_up,  init_x,  init_y, prio,         flags,    robot };                            */
+    .zones[ZONE_HEART_1]=       {ZONE_TYPE_HEART,  HEART_1_X, HEART_1_Y, 0,         250,    1750,   2000   ,400 ,   1800,   ZONE_PRIO_40, 0,        MAIN_ROBOT},
+    .zones[ZONE_HEART_2]=       {ZONE_TYPE_HEART,  HEART_2_X, HEART_2_Y, 1350,      1650,   900,    1200   ,1100,   1100,   ZONE_PRIO_40, 0,        MAIN_ROBOT},
+    .zones[ZONE_HEART_3]=       {ZONE_TYPE_HEART,  HEART_3_X, HEART_3_Y, 2750,      3000 ,  1750,   2000   ,2600 ,  1800,   ZONE_PRIO_40, 0,        MAIN_ROBOT},
 
-    .zones[ZONE_MOBILE_TORCH_1]= {ZONE_TYPE_MOBILE_TORCH, MOBILE_TORCH_1_X, MOBILE_TORCH_1_Y, 600, 1200,    800, 1400   , 630,  910,   30,  ZONE_PRIO_0, 0 ,MAIN_ROBOT},
-    .zones[ZONE_MOBILE_TORCH_2]= {ZONE_TYPE_MOBILE_TORCH, MOBILE_TORCH_2_X, MOBILE_TORCH_2_Y, 1800, 2400,  800, 1400   , 2370,  910,   150,  ZONE_PRIO_0, 0 ,MAIN_ROBOT},
+   /*zones[W] =                 {type,           x,        y,        x_down,    x_up,   y_down, y_up,   init_x, init_y, prio,         flags,    robot };                            */
+    .zones[ZONE_FIRE_1]=        {ZONE_TYPE_FIRE, FIRE_1_X, FIRE_1_Y, 100,       700,    800,    1400,   630,    910,    ZONE_PRIO_40, 0,        BOTH_ROBOTS},
+    .zones[ZONE_FIRE_2]=        {ZONE_TYPE_FIRE, FIRE_2_X, FIRE_2_Y, 600,       1200,   300,    900,    630,    910,    ZONE_PRIO_40, 0,        BOTH_ROBOTS},
+    .zones[ZONE_FIRE_3]=        {ZONE_TYPE_FIRE, FIRE_3_X, FIRE_3_Y, 600,       1200,   1300,   1900,   1060,   1160,   ZONE_PRIO_40, 0,        BOTH_ROBOTS},
+    .zones[ZONE_FIRE_4]=        {ZONE_TYPE_FIRE, FIRE_4_X, FIRE_4_Y, 1800,      2400,   300,    900,    2370,   910,    ZONE_PRIO_40, 0,        BOTH_ROBOTS},
+    .zones[ZONE_FIRE_5]=        {ZONE_TYPE_FIRE, FIRE_5_X, FIRE_5_Y, 1800,      2400,   1300,   1900,   1940,   1160,   ZONE_PRIO_40, 0,        BOTH_ROBOTS},
+    .zones[ZONE_FIRE_6]=        {ZONE_TYPE_FIRE, FIRE_6_X, FIRE_6_Y, 2300,      2900,   800,    1400,   2370,   910,    ZONE_PRIO_40, 0,        BOTH_ROBOTS},  
+
+   /*zones[W] =                 {type,            x,         y,         x_down, x_up,   y_down, y_up,   init_x, init_y, prio,         flags,    robot };                            */
+    .zones[ZONE_TORCH_1]=       {ZONE_TYPE_TORCH, TORCH_1_X, TORCH_1_Y, 0,      400,    600,    1000,   340,    560,    ZONE_PRIO_40, 0,        MAIN_ROBOT},
+    .zones[ZONE_TORCH_2]=       {ZONE_TYPE_TORCH, TORCH_2_X, TORCH_2_Y, 1100,   1500,   1600,   2000,   980,    1710,   ZONE_PRIO_40, 0,        MAIN_ROBOT},
+    .zones[ZONE_TORCH_3]=       {ZONE_TYPE_TORCH, TORCH_3_X, TORCH_3_Y, 1500,   1900,   1600,   2000,   2020,   1710,   ZONE_PRIO_40, 0,        MAIN_ROBOT},
+    .zones[ZONE_TORCH_4]=       {ZONE_TYPE_TORCH, TORCH_4_X, TORCH_4_Y, 2600,   3000,   600,    1000,   2660,   560,    ZONE_PRIO_40, 0,        MAIN_ROBOT},
+
+   /*zones[W] =                 {type,              x,           y,           x_down,   x_up,   y_down, y_up,   init_x, init_y, prio,        flags, robot };                            */ 
+    .zones[ZONE_M_TORCH_1]=     {ZONE_TYPE_M_TORCH, M_TORCH_1_X, M_TORCH_1_Y, 600,      1200,   800,    1400,   630,    910,    ZONE_PRIO_0, 0,     MAIN_ROBOT},
+    .zones[ZONE_M_TORCH_2]=     {ZONE_TYPE_M_TORCH, M_TORCH_2_X, M_TORCH_2_Y, 1800,     2400,   800,    1400,   2370,   910,    ZONE_PRIO_0, 0,     MAIN_ROBOT},
  
-    .zones[ZONE_BASKET_1]=        {ZONE_TYPE_BASKET, BASKET_1_X, BASKET_1_Y, 400, 1100,  0,    500   , 750,  BASKET_D_INIT,   -90,  0, 0 ,MAIN_ROBOT},
-    .zones[ZONE_BASKET_2]=        {ZONE_TYPE_BASKET, BASKET_2_X, BASKET_2_Y, 1900, 2600,  0,    500   , 2250,  BASKET_D_INIT,   -90,  0, 0 ,MAIN_ROBOT},
-	.zones[ZONE_MAMOOTH_1]=       {ZONE_TYPE_MAMOOTH, MAMOOTH_1_X, MAMOOTH_1_Y, 400, 1100,  0,    500   , 750,  600,   -90,  ZONE_PRIO_40, 0 ,SEC_ROBOT},
-    .zones[ZONE_MAMOOTH_2]=       {ZONE_TYPE_MAMOOTH, MAMOOTH_2_X, MAMOOTH_2_Y, 1900, 2600,  0,    500   , 2250,  600,   -90,  ZONE_PRIO_40, 0 ,SEC_ROBOT},
+    .zones[ZONE_BASKET_1]=      {ZONE_TYPE_BASKET,  BASKET_1_X,  BASKET_1_Y,  400,      1100,   0,      500,    750,    BASKET_D_INIT,   ZONE_PRIO_0, 0,    MAIN_ROBOT},
+    .zones[ZONE_BASKET_2]=      {ZONE_TYPE_BASKET,  BASKET_2_X,  BASKET_2_Y,  1900,     2600,   0,      500,    2250,   BASKET_D_INIT,   ZONE_PRIO_0, 0,    MAIN_ROBOT},
 
-    .zones[ZONE_FRESCO]=          {ZONE_TYPE_FRESCO, FRESCO_X, FRESCO_Y, 1100, 1900,  0,    500   , 1500,  300,   -90,  ZONE_PRIO_40, 0 ,SEC_ROBOT},
-    .zones[ZONE_HOME_YELLOW]=        {ZONE_TYPE_HOME, HOME_RED_X, HOME_RED_Y, 0, 400,  0,    690   , 2800,  600,   -90,  ZONE_PRIO_0, 0 ,BOTH_ROBOTS},
-    .zones[ZONE_HOME_RED]=     {ZONE_TYPE_HOME, HOME_YELLOW_X, HOME_YELLOW_Y, 2600, 3000,  0,   690   , 200,  600,   -90,  ZONE_PRIO_0, 0 ,BOTH_ROBOTS},
+    .zones[ZONE_MAMOOTH_1]=     {ZONE_TYPE_MAMOOTH, MAMOOTH_1_X, MAMOOTH_1_Y, 400,  1100,  0,   500,    750,    600,    ZONE_PRIO_40, 0,    SEC_ROBOT},
+    .zones[ZONE_MAMOOTH_2]=     {ZONE_TYPE_MAMOOTH, MAMOOTH_2_X, MAMOOTH_2_Y, 1900, 2600,  0,   500,    2250,   600,    ZONE_PRIO_40, 0,    SEC_ROBOT},
+
+    .zones[ZONE_FRESCO]=        {ZONE_TYPE_FRESCO,  FRESCO_X,    FRESCO_Y,    1100, 1900,  0,   500,    1500,   300,    ZONE_PRIO_40, 0 ,   SEC_ROBOT},
+
+    //.zones[ZONE_HOME_YELLOW]=        {ZONE_TYPE_HOME, HOME_RED_X, HOME_RED_Y, 0, 400,  0,    690   , 2800,  600,   -90,  ZONE_PRIO_0, 0 ,BOTH_ROBOTS},
+    //.zones[ZONE_HOME_RED]=     {ZONE_TYPE_HOME, HOME_YELLOW_X, HOME_YELLOW_Y, 2600, 3000,  0,   690   , 200,  600,   -90,  ZONE_PRIO_0, 0 ,BOTH_ROBOTS},
 };
 
-
-uint8_t strat_zones_points[ZONES_MAX]= {3,3,3,3,0,0,0,1,1,1,1,1,1,1,1,1,1,2,2,0,0,6,6,6,0,0};
+/* point we get from each zone */
+uint8_t strat_zones_points[ZONES_MAX]= {3,3,3,3,0,0,0,1,1,1,1,1,1,1,1,1,1,2,2,0,0,6,6,6};
 
 /*************************************************************/
 
@@ -160,24 +174,24 @@ uint8_t strat_zones_points[ZONES_MAX]= {3,3,3,3,0,0,0,1,1,1,1,1,1,1,1,1,1,2,2,0,
 void strat_set_bounding_box(uint8_t type)
 {
 
-	strat_infos.area_bbox.x1 = OBS_CLERANCE;
-	strat_infos.area_bbox.x2 = 3000 - OBS_CLERANCE;
-	
-	strat_infos.area_bbox.y1 = OBS_CLERANCE + 300;
-	strat_infos.area_bbox.y2 = 2000 - OBS_CLERANCE;
+    strat_infos.area_bbox.x1 = OBS_CLERANCE;
+    strat_infos.area_bbox.x2 = 3000 - OBS_CLERANCE;
 
-	polygon_set_boundingbox(strat_infos.area_bbox.x1,
-				strat_infos.area_bbox.y1,
-				strat_infos.area_bbox.x2,
-				strat_infos.area_bbox.y2);
+    strat_infos.area_bbox.y1 = OBS_CLERANCE + 300;
+    strat_infos.area_bbox.y2 = 2000 - OBS_CLERANCE;
+
+    polygon_set_boundingbox(strat_infos.area_bbox.x1,
+                strat_infos.area_bbox.y1,
+                strat_infos.area_bbox.x2,
+                strat_infos.area_bbox.y2);
 
 #ifdef HOST_VERSION_OA_TEST
 
   printf("boundingbox at: %d %d %d %d\n", 
         strat_infos.area_bbox.x1,
-				strat_infos.area_bbox.y1,
-				strat_infos.area_bbox.x2,
-				strat_infos.area_bbox.y2);
+                strat_infos.area_bbox.y1,
+                strat_infos.area_bbox.x2,
+                strat_infos.area_bbox.y2);
 #endif
 }
 
@@ -186,31 +200,31 @@ void strat_set_bounding_box(uint8_t type)
 /* called before each strat, and before the start switch */
 void strat_preinit(void)
 {
-	time_reset();
-	interrupt_traj_reset();
-	mainboard.flags =  DO_ENCODERS | DO_CS | DO_RS |
-							 DO_POS | DO_BD | DO_POWER | DO_OPP;
+    time_reset();
+    interrupt_traj_reset();
+    mainboard.flags =  DO_ENCODERS | DO_CS | DO_RS |
+                             DO_POS | DO_BD | DO_POWER | DO_OPP;
 
-	/* XXX default conf */
-	//strat_infos.conf.flags |= ENABLE_R2ND_POS;
+    /* XXX default conf */
+    //strat_infos.conf.flags |= ENABLE_R2ND_POS;
 
 
-	strat_dump_conf();
-	strat_dump_infos(__FUNCTION__);
+    strat_dump_conf();
+    strat_dump_infos(__FUNCTION__);
 }
 
 /* display curret strat configuration */
 void strat_dump_conf(void)
 {
-	if (!strat_infos.dump_enabled)
-		return;
+    if (!strat_infos.dump_enabled)
+        return;
 
-	printf_P(PSTR("-- conf --\r\n"));
+    printf_P(PSTR("-- conf --\r\n"));
 
-	printf(" ENABLE_R2ND_POS is %s\n\r", strat_infos.conf.flags & ENABLE_R2ND_POS? "ON":"OFF");
-	printf(" ENABLE_DOWN_SIDE_ZONES is %s\n\r", strat_infos.conf.flags & ENABLE_DOWN_SIDE_ZONES? "ON":"OFF");
+    //printf(" ENABLE_R2ND_POS is %s\n\r", strat_infos.conf.flags & ENABLE_R2ND_POS? "ON":"OFF");
+    //printf(" ENABLE_DOWN_SIDE_ZONES is %s\n\r", strat_infos.conf.flags & ENABLE_DOWN_SIDE_ZONES? "ON":"OFF");
 
-	/* add here configuration dump */
+    /* add here configuration dump */
 }
 
 
@@ -219,9 +233,9 @@ char numzone2name[ZONES_MAX + 1][3] = {
 [ZONE_TREE_2]="t2",
 [ZONE_TREE_3]="t3",
 [ZONE_TREE_4]="t4",
-[ZONE_HEART_FIRE_1]="h1",
-[ZONE_HEART_FIRE_2]="h2",
-[ZONE_HEART_FIRE_3]="h3",
+[ZONE_HEART_1]="h1",
+[ZONE_HEART_2]="h2",
+[ZONE_HEART_3]="h3",
 [ZONE_FIRE_1]="f1",
 [ZONE_FIRE_2]="f2",
 [ZONE_FIRE_3]="f3",
@@ -232,286 +246,187 @@ char numzone2name[ZONES_MAX + 1][3] = {
 [ZONE_TORCH_2]="tr2",
 [ZONE_TORCH_3]="tr3",
 [ZONE_TORCH_4]="tr4",
-[ZONE_MOBILE_TORCH_1]="mt1",
-[ZONE_MOBILE_TORCH_2]="mt2",
+[ZONE_M_TORCH_1]="mt1",
+[ZONE_M_TORCH_2]="mt2",
 [ZONE_BASKET_1]="b1",
 [ZONE_BASKET_2]="b2",
 [ZONE_MAMOOTH_1]="m1",
 [ZONE_MAMOOTH_2]="m2",
 [ZONE_FRESCO]="fco",
-[ZONE_HOME_RED]="rd",
-[ZONE_HOME_YELLOW]="yll",
+//[ZONE_HOME_RED]="rd",
+//[ZONE_HOME_YELLOW]="yll",
 [ZONES_MAX] = "nll",
 };
 
 /* display current information about the state of the game */
 void strat_dump_infos(const char *caller)
 {
-	if (!strat_infos.dump_enabled)
-		return;
+    if (!strat_infos.dump_enabled)
+        return;
 
-	printf(PSTR("%s() dump strat infos:\r\n"), caller);
+    printf(PSTR("%s() dump strat infos:\r\n"), caller);
 
 
-	/* add here print infos */
+    /* add here print infos */
 }
 
 /* init current area state before a match. Dump update user conf
  * here */
 void strat_reset_infos(void)
 {
-	/* bounding box */
-	strat_set_bounding_box(mainboard.our_color);
-		
-	strat_infos.current_zone = ZONES_MAX;
-	strat_infos.goto_zone = ZONES_MAX;
-	strat_infos.last_zone = ZONES_MAX;
+    /* bounding box */
+    strat_set_bounding_box(mainboard.our_color);
 
-	/* add here other infos resets */
+    strat_infos.current_zone = ZONES_MAX;
+    strat_infos.goto_zone = ZONES_MAX;
+    strat_infos.last_zone = ZONES_MAX;
+
+    /* add here other infos resets */
 }
 
 void strat_event_enable(void)
 {
-	strat_running = 1;
+    strat_running = 1;
 }
 
 void strat_event_disable(void)
 {
-	strat_running = 0;
+    strat_running = 0;
 }
 
 /* call it just before launching the strat */
 void strat_init(void)
 {
-	strat_reset_infos();
+    strat_reset_infos();
 
-	/* we consider that the color is correctly set */
+    /* we consider that the color is correctly set */
 
-	strat_set_speed(SPEED_DIST_FAST, SPEED_ANGLE_FAST);
-	time_reset();
-	interrupt_traj_reset();
+    strat_set_speed(SPEED_DIST_FAST, SPEED_ANGLE_FAST);
+    time_reset();
+    interrupt_traj_reset();
 
-	/* init other devices (lasers...) */
-	i2c_slavedspic_mode_init();
+    /* init other devices (lasers...) */
+    i2c_slavedspic_mode_init();
 
-	/* used in strat_base for END_TIMER */
-	mainboard.flags = DO_ENCODERS | DO_CS | DO_RS | 
-		DO_POS | DO_BD | DO_TIMER | DO_POWER | DO_OPP;
+    /* used in strat_base for END_TIMER */
+    mainboard.flags = DO_ENCODERS | DO_CS | DO_RS |
+        DO_POS | DO_BD | DO_TIMER | DO_POWER | DO_OPP;
 }
 
 
 /* call it after each strat */
 void strat_exit(void)
 {
-	uint8_t flags;
+    uint8_t flags;
 
-	/* stop robot, disable timer */
-	mainboard.flags &= ~(DO_TIMER);
-	strat_hardstop();
-	time_reset();
+    /* stop robot, disable timer */
+    mainboard.flags &= ~(DO_TIMER);
+    strat_hardstop();
+    time_reset();
 
-	/* disable CS, and motors */
+    /* disable CS, and motors */
 #ifndef HOST_VERSION
-	IRQ_LOCK(flags);
-	mainboard.flags &= ~(DO_CS);
-	IRQ_UNLOCK(flags);
-	dac_mc_set(LEFT_MOTOR, 0);
-	dac_mc_set(RIGHT_MOTOR, 0);
+    IRQ_LOCK(flags);
+    mainboard.flags &= ~(DO_CS);
+    IRQ_UNLOCK(flags);
+    dac_mc_set(LEFT_MOTOR, 0);
+    dac_mc_set(RIGHT_MOTOR, 0);
 #endif
 
-	/* stop beacon */
-	IRQ_LOCK(flags);
-	mainboard.flags &= ~(DO_OPP);
-	IRQ_UNLOCK(flags);
-	beacon_cmd_beacon_off();
+    /* stop beacon */
+    IRQ_LOCK(flags);
+    mainboard.flags &= ~(DO_OPP);
+    IRQ_UNLOCK(flags);
+    beacon_cmd_beacon_off();
 
-	/* slavespic exit TODO 2014 */
-  //i2c_slavedspic_mode_turbine_blow(0);
-  //i2c_slavedspic_wait_ready();
+    /* slavespic exit TODO 2014 */
+    //i2c_slavedspic_mode_turbine_blow(0);
+    //i2c_slavedspic_wait_ready();
 
-	/* turn off other devices (lasers...) */
+    /* turn off other devices (lasers...) */
 
-	/* stop beacon */
-	beacon_cmd_beacon_off();
-	beacon_cmd_beacon_off();
-	beacon_cmd_beacon_off();
-	beacon_cmd_beacon_off();
+    /* stop beacon */
+    beacon_cmd_beacon_off();
+    beacon_cmd_beacon_off();
+    beacon_cmd_beacon_off();
+    beacon_cmd_beacon_off();
 
 }
 
 /* called periodically */
 void strat_event(void *dummy)
 {
-	/* XXX in parallel with main strat, 
-	 *	disable/enable events depends on case or protect with IRQ_LOCK.
-	 */
+    /* XXX in parallel with main strat,
+     *    disable/enable events depends on case or protect with IRQ_LOCK.
+     */
 
-	/* ignore when strat is not running */
-	if (strat_running == 0)
-		return;
+    /* ignore when strat is not running */
+    if (strat_running == 0)
+        return;
 
-	/* limit speed when opponent are close */
-	strat_limit_speed();
+    /* limit speed when opponent are close */
+    strat_limit_speed();
+
+    /* tracking of zones where opp has been working */
+    //strat_opp_tracking (void);
 
 }
 
 /* dump state (every 5 s max) XXX */
-#define DUMP_RATE_LIMIT(dump, last_print)		\
-	do {						\
-		if (time_get_s() - last_print > 5) {	\
-			dump();				\
-			last_print = time_get_s();	\
-		}					\
-	} while (0)
+#define DUMP_RATE_LIMIT(dump, last_print)        \
+    do {                        \
+        if (time_get_s() - last_print > 5) {    \
+            dump();                \
+            last_print = time_get_s();    \
+        }                    \
+    } while (0)
 
 
 #define ERROUT(e) do {\
-		err = e;			 \
-		goto end;		 \
-	} while(0)	
+        err = e;             \
+        goto end;         \
+    } while(0)
 
 
 /* Strat main loop */
 uint8_t strat_main(void)
 {
-	uint8_t err, i;
+    uint8_t err, i;
 
-	// AVOID ZONES IN CURRENT STRATEGY
-	strat_infos.zones[ZONE_TORCH_2].flags |= ZONE_AVOID;
-	strat_infos.zones[ZONE_TORCH_4].flags |= ZONE_AVOID;
-	strat_infos.zones[ZONE_MOBILE_TORCH_2].flags |= ZONE_AVOID;
-	strat_infos.zones[ZONE_BASKET_1].flags |= ZONE_AVOID;
-	strat_infos.zones[ZONE_FIRE_4].flags |= ZONE_AVOID;
-	strat_infos.zones[ZONE_HEART_FIRE_1].flags |= ZONE_AVOID;
-	strat_infos.zones[ZONE_HEART_FIRE_2].flags |= ZONE_AVOID;
-	strat_infos.zones[ZONE_HEART_FIRE_3].flags |= ZONE_AVOID;
-	
-	for(i=0; i<ZONES_MAX; i++)
-	{
-		if(strat_infos.zones[i].robot == SEC_ROBOT)
-			strat_infos.zones[i].flags |= ZONE_AVOID;
-	}
-	
-	printf_P(PSTR("Strat begin\r\n"));
-	do{
-		err = strat_begin_alcabot();
-	}while((err & END_RESERVED) == 0);
+    // AVOID ZONES IN CURRENT STRATEGY
+    strat_infos.zones[ZONE_TORCH_2].flags |= ZONE_AVOID;
+    strat_infos.zones[ZONE_TORCH_4].flags |= ZONE_AVOID;
+    strat_infos.zones[ZONE_M_TORCH_2].flags |= ZONE_AVOID;
+    strat_infos.zones[ZONE_BASKET_1].flags |= ZONE_AVOID;
+    strat_infos.zones[ZONE_FIRE_4].flags |= ZONE_AVOID;
+    strat_infos.zones[ZONE_HEART_1].flags |= ZONE_AVOID;
+    strat_infos.zones[ZONE_HEART_2].flags |= ZONE_AVOID;
+    strat_infos.zones[ZONE_HEART_3].flags |= ZONE_AVOID;
+
+    for(i=0; i<ZONES_MAX; i++)
+    {
+        if(strat_infos.zones[i].robot == SEC_ROBOT)
+            strat_infos.zones[i].flags |= ZONE_AVOID;
+    }
+
+    printf_P(PSTR("Strat begin\r\n"));
+    do{
+        err = strat_begin_alcabot();
+    }while((err & END_RESERVED) == 0);
 
    strat_limit_speed_enable ();
 
-	/* auto-play */
-	printf_P(PSTR("\r\n\r\nStrat smart\r\n"));
-	do{
-		err = strat_smart();
-	}while((err & END_TIMER) == 0);
-	
+    /* auto-play */
+    printf_P(PSTR("\r\n\r\nStrat smart\r\n"));
+    do{
+        err = strat_smart();
+    }while((err & END_TIMER) == 0);
+
    strat_exit();
    return 0;
 }
 
-void strat_update_zones(void) 
-{
-#if 0
-	while(1){
-	int8_t i,status;
-	int16_t x_opp, y_opp;
-	uint8_t flags;
-	/* get opponent position, return if not there */
-	
-	if(get_opponent_xy(&x_opp, &y_opp) == -1)
-		return;
-	
-	/* get actual zone */
-	for(i = 0; i <  ZONES_MAX; i++) 
-	{
-			status=opponent1_is_in_area(strat_infos.zones[i].x_up, strat_infos.zones[i].y_up,
-									 strat_infos.zones[i].x_down, strat_infos.zones[i].y_down);
-		if((status==1)&&!(strat_infos.zones[i].flags & ZONE_CHECKED_OPP)) { 
-			
 
-			switch(strat_infos.zones[i].type){
-			
-				case ZONE_TYPE_TREE:
-					
-					strat_infos.opp_tree_fruits_inside+=3;
-					printf_P("Points_inside: %d\n",strat_infos.opp_tree_fruits_inside);
-					strat_infos.zones[i].flags |= ZONE_CHECKED_OPP;
-					break;	
-				case ZONE_TYPE_BASKET:
-					if(strat_infos.opp_tree_fruits_inside!=0){
-						strat_infos.opp_score=strat_infos.opp_score+strat_infos.opp_tree_fruits_inside;
-						strat_infos.opp_tree_fruits_inside=0;
-					}					
-					printf_P("Points_inside: %d\n",strat_infos.opp_tree_fruits_inside);
-					break;
-				case ZONE_TYPE_TORCH:
-				case ZONE_MOBILE_TORCH_1:	
-				case ZONE_TYPE_FIRE:
-					strat_infos.zones[i].flags |= ZONE_CHECKED_OPP;
-					strat_infos.opp_score++;
-					break;
-				case ZONE_TYPE_HEART_FIRE:
-					strat_infos.zones[i].flags |= ZONE_CHECKED_OPP;
-					break;	
-				case ZONE_TYPE_FRESCO:
-					strat_infos.opp_score+=6;
-					strat_infos.zones[i].flags |= ZONE_CHECKED_OPP;
-				default:
-					strat_infos.zones[i].flags |= ZONE_CHECKED_OPP;
-					break;			
-			}
-			
-				
-				printf_P("ZONE_CHECKED_OPP: %s\n",numzone2name[i]);
-				status=0;
-				break;
-		}
-	status=opponent2_is_in_area(strat_infos.zones[i].x_up, strat_infos.zones[i].y_up,
-									 strat_infos.zones[i].x_down, strat_infos.zones[i].y_down);
-		if((status==1)&&!(strat_infos.zones[i].flags & ZONE_CHECKED_OPP)) { 
-			switch(strat_infos.zones[i].type){
-			
-				case ZONE_TYPE_TREE:
-					
-					strat_infos.opp_tree_fruits_inside+=3;
-					printf_P("Points_inside: %d\n",strat_infos.opp_tree_fruits_inside);
-					strat_infos.zones[i].flags |= ZONE_CHECKED_OPP;
-					break;	
-				case ZONE_TYPE_BASKET:
-					if(strat_infos.opp_tree_fruits_inside!=0){
-						strat_infos.opp_score=strat_infos.opp_score+strat_infos.opp_tree_fruits_inside;
-						strat_infos.opp_tree_fruits_inside=0;
-						printf_P("Points_inside: %d\n",strat_infos.opp_tree_fruits_inside);
-					}					
-					break;
-				case ZONE_TYPE_TORCH:
-				case ZONE_MOBILE_TORCH_1:	
-				case ZONE_TYPE_FIRE:
-					strat_infos.zones[i].flags |= ZONE_CHECKED_OPP;
-					strat_infos.opp_score++;
-					break;
-				case ZONE_TYPE_HEART_FIRE:
-					strat_infos.zones[i].flags |= ZONE_CHECKED_OPP;
-					break;	
-				case ZONE_TYPE_FRESCO:
-					strat_infos.opp_score+=6;
-					strat_infos.zones[i].flags |= ZONE_CHECKED_OPP;
-				default:
-					strat_infos.zones[i].flags |= ZONE_CHECKED_OPP;
-					break;			
-			}
-			
-				printf_P("ZONE_CHECKED_OPP: %s\n",numzone2name[i]);
-				status=0;
-				
-				break;
-		}
-		time_wait_ms (25);
-	}
-		printf_P("OPP_SCORE :%d\n",strat_infos.opp_score);
-	}
-#endif
-}
 
 #endif /* HOST_VERSION_OA_TEST */
 

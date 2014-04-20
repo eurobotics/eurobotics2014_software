@@ -344,6 +344,17 @@ int main(void)
   strat_event_enable();
 #endif
 
+	/* program WT-11 */
+#if 0
+	time_wait_ms (1000);
+	printf ("+++\n\r");	  
+	time_wait_ms (1000);
+	printf ("SET BT NAME Grosnik\n\r");	
+	time_wait_ms (1000);
+	printf ("SET BT AUTH * gomaespuminos\n\r");
+	time_wait_ms (1000);
+#endif
+  
 	/* process commands, never returns */
 	cmdline_interact();
 

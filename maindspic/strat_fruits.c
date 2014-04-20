@@ -235,9 +235,9 @@ end_harvesting:
 		time_wait_ms (200);
 	}
 
-	strat_infos.tree_fruits_inside++;
-	strat_infos.zones[ZONE_BASKET_2].prio += ZONE_PRIO_30*strat_infos.tree_fruits_inside;
-	printf_P(PSTR("I have harvested %d trees in total\r\n"), strat_infos.tree_fruits_inside);
+	strat_infos.harvested_trees++;
+	strat_infos.zones[ZONE_BASKET_2].prio += ZONE_PRIO_30*strat_infos.harvested_trees;
+	printf_P(PSTR("I have harvested %d trees in total\r\n"), strat_infos.harvested_trees);
 
 	/* hide tools */
 end:
@@ -381,7 +381,7 @@ uint8_t strat_leave_fruits(void)
 	   ERROUT(err);
 
 	/* update strat_infos */
-	strat_infos.tree_fruits_inside=0;
+	strat_infos.harvested_trees=0;
 	strat_infos.zones[ZONE_BASKET_1].prio=ZONE_PRIO_0;
 	strat_infos.zones[ZONE_BASKET_2].prio=ZONE_PRIO_0;
 

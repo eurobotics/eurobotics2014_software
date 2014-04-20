@@ -78,12 +78,12 @@ uint8_t strat_begin(void)
 	uint8_t zone_num=0;
 	#define ZONES_SEQUENCE_LENGTH 6
 	uint8_t zones_sequence[ZONES_SEQUENCE_LENGTH] = 						
-	{ZONE_TORCH_1,ZONE_FIRE_1,ZONE_FIRE_2,ZONE_MOBILE_TORCH_1,ZONE_FIRE_3,ZONE_TORCH_3};
+	{ZONE_TORCH_1,ZONE_FIRE_1,ZONE_FIRE_2,ZONE_M_TORCH_1,ZONE_FIRE_3,ZONE_TORCH_3};
 	
 	if(mainboard.our_color==I2C_COLOR_RED)
 	{
 		zones_sequence[0]=ZONE_TORCH_4; zones_sequence[1]=ZONE_FIRE_6; zones_sequence[2]=ZONE_FIRE_4; 
-		zones_sequence[3]=ZONE_MOBILE_TORCH_2; zones_sequence[4]=ZONE_FIRE_5; zones_sequence[5]=ZONE_TORCH_2; 
+		zones_sequence[3]=ZONE_M_TORCH_2; zones_sequence[4]=ZONE_FIRE_5; zones_sequence[5]=ZONE_TORCH_2; 
 	}
 	
 	for(zone_num=0; zone_num<ZONES_SEQUENCE_LENGTH; zone_num++)
@@ -94,7 +94,7 @@ uint8_t strat_begin(void)
 		strat_infos.current_zone=-1;
 		strat_infos.goto_zone=zones_sequence[zone_num];
 		err = goto_and_avoid(strat_infos.zones[zones_sequence[zone_num]].init_x, strat_infos.zones[zones_sequence[zone_num]].init_y,  TRAJ_FLAGS_STD, TRAJ_FLAGS_NO_NEAR);
-		trajectory_a_abs(&mainboard.traj, strat_infos.zones[zones_sequence[zone_num]].init_a);
+		//trajectory_a_abs(&mainboard.traj, strat_infos.zones[zones_sequence[zone_num]].init_a);
 		err = wait_traj_end(TRAJ_FLAGS_SMALL_DIST);
 		strat_infos.last_zone=strat_infos.current_zone;
 		strat_infos.goto_zone=-1;
@@ -187,7 +187,7 @@ uint8_t strat_begin_alcabot (void)
  											 I2C_STICK_MODE_PUSH_FIRE, 0);
 
 		trajectory_goto_forward_xy_abs (&mainboard.traj, 
-										COLOR_X (FIRE_1_X + (MOBILE_TORCH_1_X-FIRE_1_X)/2),
+										COLOR_X (FIRE_1_X + (M_TORCH_1_X-FIRE_1_X)/2),
 										FIRE_2_Y_STICK);
 
 		err = wait_traj_end(TRAJ_FLAGS_NO_NEAR);
@@ -213,8 +213,8 @@ uint8_t strat_begin_alcabot (void)
 		i2c_slavedspic_wait_ready();
 
 		trajectory_goto_forward_xy_abs (&mainboard.traj, 
-										COLOR_X (FIRE_1_X+(MOBILE_TORCH_1_X-FIRE_1_X)/2),
-										MOBILE_TORCH_1_Y+(FIRE_3_Y-MOBILE_TORCH_1_Y)/2);
+										COLOR_X (FIRE_1_X+(M_TORCH_1_X-FIRE_1_X)/2),
+										M_TORCH_1_Y+(FIRE_3_Y-M_TORCH_1_Y)/2);
 
 		err = wait_traj_end(TRAJ_FLAGS_NO_NEAR);
 		if (!TRAJ_SUCCESS(err))
@@ -248,7 +248,7 @@ uint8_t strat_begin_alcabot (void)
 
 		trajectory_goto_forward_xy_abs (&mainboard.traj, 
 										COLOR_X (M_TORCH_X_PUSH),
-										MOBILE_TORCH_1_Y+(FIRE_3_Y-MOBILE_TORCH_1_Y)/2);
+										M_TORCH_1_Y+(FIRE_3_Y-M_TORCH_1_Y)/2);
 		err = wait_traj_end(TRAJ_FLAGS_NO_NEAR);
 		if (!TRAJ_SUCCESS(err))
 				ERROUT(err);
@@ -272,7 +272,7 @@ uint8_t strat_begin_alcabot (void)
 		/* avoid heart fire 2 */
 		trajectory_goto_forward_xy_abs (&mainboard.traj, 
 										COLOR_X(CENTER_X),
-		HEART_FIRE_2_Y + HEART_FIRE_2_RAD +  ROBOT_WIDTH/2 + TORCH_2_D_MARGIN);
+		HEART_2_Y + HEART_2_RAD +  ROBOT_WIDTH/2 + TORCH_2_D_MARGIN);
 		
 		err = wait_traj_end(TRAJ_FLAGS_STD);
 		if (!TRAJ_SUCCESS(err))
@@ -280,8 +280,8 @@ uint8_t strat_begin_alcabot (void)
 
 		/* goto near fire 6 */
 		trajectory_goto_forward_xy_abs (&mainboard.traj, 
-										COLOR_X(MOBILE_TORCH_2_X+(FIRE_6_X-MOBILE_TORCH_2_X)/2),
-										MOBILE_TORCH_1_Y+(FIRE_3_Y-MOBILE_TORCH_1_Y)/2);	
+										COLOR_X(M_TORCH_2_X+(FIRE_6_X-M_TORCH_2_X)/2),
+										M_TORCH_1_Y+(FIRE_3_Y-M_TORCH_1_Y)/2);	
 		err = wait_traj_end(TRAJ_FLAGS_NO_NEAR);
 		if (!TRAJ_SUCCESS(err))
 				ERROUT(err);
@@ -305,7 +305,7 @@ uint8_t strat_begin_alcabot (void)
 #define FIRE_5_D_STICK	75
 		trajectory_goto_backward_xy_abs (&mainboard.traj, 
 								COLOR_X(FIRE_5_X - FIRE_5_D_STICK),
-								MOBILE_TORCH_1_Y + (FIRE_3_Y-MOBILE_TORCH_1_Y)/2);	
+								M_TORCH_1_Y + (FIRE_3_Y-M_TORCH_1_Y)/2);	
 		err = wait_traj_end(TRAJ_FLAGS_NO_NEAR);
 		if (!TRAJ_SUCCESS(err))
 				ERROUT(err);
@@ -368,8 +368,8 @@ uint8_t strat_begin_alcabot (void)
       case 8:
 #define FIRE_3_TIMEOUT	1000
 		trajectory_goto_forward_xy_abs (&mainboard.traj, 
-								COLOR_X(MOBILE_TORCH_1_X),
-								MOBILE_TORCH_1_Y);
+								COLOR_X(M_TORCH_1_X),
+								M_TORCH_1_Y);
 
 
 		WAIT_COND_OR_TIMEOUT(!x_is_more_than(1400),
@@ -429,7 +429,7 @@ uint8_t strat_begin_alcabot (void)
  											 I2C_STICK_MODE_HIDE, 0);
 		i2c_slavedspic_wait_ready();
 
-		strat_infos.zones[ZONE_MOBILE_TORCH_1].flags |= ZONE_CHECKED;
+		strat_infos.zones[ZONE_M_TORCH_1].flags |= ZONE_CHECKED;
 		state ++;
 		break;
 		
@@ -530,7 +530,7 @@ uint8_t strat_begin_alcabot_v2 (void)
  											 I2C_STICK_MODE_PUSH_FIRE, 0);
 
 		trajectory_goto_forward_xy_abs (&mainboard.traj, 
-										COLOR_X (FIRE_1_X + (MOBILE_TORCH_1_X-FIRE_1_X)/2),
+										COLOR_X (FIRE_1_X + (M_TORCH_1_X-FIRE_1_X)/2),
 										FIRE_2_Y_STICK);
 
 		err = wait_traj_end(TRAJ_FLAGS_NO_NEAR);
@@ -556,8 +556,8 @@ uint8_t strat_begin_alcabot_v2 (void)
 		i2c_slavedspic_wait_ready();
 
 		trajectory_goto_forward_xy_abs (&mainboard.traj, 
-										COLOR_X (FIRE_1_X+(MOBILE_TORCH_1_X-FIRE_1_X)/2),
-										MOBILE_TORCH_1_Y+(FIRE_3_Y-MOBILE_TORCH_1_Y)/2);
+										COLOR_X (FIRE_1_X+(M_TORCH_1_X-FIRE_1_X)/2),
+										M_TORCH_1_Y+(FIRE_3_Y-M_TORCH_1_Y)/2);
 
 		err = wait_traj_end(TRAJ_FLAGS_NO_NEAR);
 		if (!TRAJ_SUCCESS(err))
@@ -592,7 +592,7 @@ uint8_t strat_begin_alcabot_v2 (void)
 
 		trajectory_goto_forward_xy_abs (&mainboard.traj, 
 										COLOR_X (M_TORCH_X_PUSH),
-										MOBILE_TORCH_1_Y+(FIRE_3_Y-MOBILE_TORCH_1_Y)/2);
+										M_TORCH_1_Y+(FIRE_3_Y-M_TORCH_1_Y)/2);
 		err = wait_traj_end(TRAJ_FLAGS_NO_NEAR);
 		if (!TRAJ_SUCCESS(err))
 				ERROUT(err);
@@ -616,7 +616,7 @@ uint8_t strat_begin_alcabot_v2 (void)
 		/* avoid heart fire 2 */
 		trajectory_goto_forward_xy_abs (&mainboard.traj, 
 										COLOR_X(CENTER_X),
-		HEART_FIRE_2_Y + HEART_FIRE_2_RAD +  ROBOT_WIDTH/2 + TORCH_2_D_MARGIN);
+		HEART_2_Y + HEART_2_RAD +  ROBOT_WIDTH/2 + TORCH_2_D_MARGIN);
 		
 		err = wait_traj_end(TRAJ_FLAGS_STD);
 		if (!TRAJ_SUCCESS(err))
@@ -624,8 +624,8 @@ uint8_t strat_begin_alcabot_v2 (void)
 
 		/* goto near fire 6 */
 		trajectory_goto_forward_xy_abs (&mainboard.traj, 
-										COLOR_X(MOBILE_TORCH_2_X+(FIRE_6_X-MOBILE_TORCH_2_X)/2),
-										MOBILE_TORCH_1_Y+(FIRE_3_Y-MOBILE_TORCH_1_Y)/2);	
+										COLOR_X(M_TORCH_2_X+(FIRE_6_X-M_TORCH_2_X)/2),
+										M_TORCH_1_Y+(FIRE_3_Y-M_TORCH_1_Y)/2);	
 		err = wait_traj_end(TRAJ_FLAGS_NO_NEAR);
 		if (!TRAJ_SUCCESS(err))
 				ERROUT(err);
@@ -649,7 +649,7 @@ uint8_t strat_begin_alcabot_v2 (void)
 #define FIRE_5_D_STICK	75
 		trajectory_goto_backward_xy_abs (&mainboard.traj, 
 								COLOR_X(FIRE_5_X - FIRE_5_D_STICK),
-								MOBILE_TORCH_1_Y + (FIRE_3_Y-MOBILE_TORCH_1_Y)/2);	
+								M_TORCH_1_Y + (FIRE_3_Y-M_TORCH_1_Y)/2);	
 		err = wait_traj_end(TRAJ_FLAGS_NO_NEAR);
 		if (!TRAJ_SUCCESS(err))
 				ERROUT(err);
@@ -712,8 +712,8 @@ uint8_t strat_begin_alcabot_v2 (void)
       case 8:
 #define FIRE_3_TIMEOUT	1000
 		trajectory_goto_forward_xy_abs (&mainboard.traj, 
-								COLOR_X(MOBILE_TORCH_1_X),
-								MOBILE_TORCH_1_Y);
+								COLOR_X(M_TORCH_1_X),
+								M_TORCH_1_Y);
 
 
 		WAIT_COND_OR_TIMEOUT(!x_is_more_than(1400),
@@ -773,7 +773,7 @@ uint8_t strat_begin_alcabot_v2 (void)
  											 I2C_STICK_MODE_HIDE, 0);
 		i2c_slavedspic_wait_ready();
 
-		strat_infos.zones[ZONE_MOBILE_TORCH_1].flags |= ZONE_CHECKED;
+		strat_infos.zones[ZONE_M_TORCH_1].flags |= ZONE_CHECKED;
 		state ++;
 		break;
 		

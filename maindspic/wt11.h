@@ -23,8 +23,6 @@
 #ifndef __WT11_H__
 #define __WT11_H__
 
-#if 0
-
 /* UART used for send and receive data */
 #define BT_UART   MUX_UART
 
@@ -54,25 +52,13 @@ int16_t wt11_rdline (uint8_t *buff, uint16_t buff_size);
 
 /* open serial link in multiplexin mode */
 void __wt11_open_link(uint8_t mode, uint8_t *addr, uint8_t *link_id);
-
-inline void wt11_open_link(uint8_t *addr, uint8_t *link_id) {
-  __wt11_open_link(WT11_MODE_NORMAL, addr, link_id);
-}
-
-inline void wt11_open_link_mux(uint8_t *addr, uint8_t *link_id) {
-  __wt11_open_link(WT11_MODE_MUX, addr, link_id);
-}
+void wt11_open_link(uint8_t *addr, uint8_t *link_id);
+void wt11_open_link_mux(uint8_t *addr, uint8_t *link_id);
 
 /* close serial link */
 void __wt11_close_link(uint8_t mode, uint8_t link_id);
-
-inline void wt11_close_link(uint8_t link_id) {
-  __wt11_close_link(WT11_MODE_NORMAL, link_id);
-}
-
-inline void wt11_close_link_mux(uint8_t link_id) {
-  __wt11_close_link(WT11_MODE_MUX, link_id);
-}
+void wt11_close_link(uint8_t link_id);
+void wt11_close_link_mux(uint8_t link_id);
 
 /* enable multiplexing mode */
 void wt11_enable_mux_mode (void);
@@ -82,15 +68,9 @@ void wt11_disable_mux_mode (void);
 
 /* reset wt11 */
 void __wt11_reset (uint8_t mode);
+void wt11_reset (void);
+void wt11_reset_mux (void);
 
-inline void wt11_reset (void) {
-  __wt11_reset ((uint8_t)WT11_MODE_NORMAL);
-}
-
-inline void wt11_reset_mux (void) {
-  __wt11_reset ((uint8_t)WT11_MODE_MUX);
-}
-#endif
 
 #endif /* __WT11_H__ */
 

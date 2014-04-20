@@ -47,7 +47,6 @@
 #include <control_system_manager.h>
 #include <trajectory_manager.h>
 #include <trajectory_manager_utils.h>
-//#include <trajectory_manager_core.h>
 #include <vect_base.h>
 #include <lines.h>
 #include <polygon.h>
@@ -456,7 +455,6 @@ parse_pgm_inst_t cmd_sensor = {
 	},
 };
 
-#if 0
 
 /**********************************************************/
 /* wt11 */
@@ -471,11 +469,14 @@ struct cmd_wt11_result {
 static void cmd_wt11_parsed(void *parsed_result, void *data)
 {
 	struct cmd_wt11_result *res = parsed_result;
-  char buffer[32] = "hello world!!";
-  int16_t length, i;
+  	char buffer[32] = "hello world!!";
+  	int16_t length, i;
 	int16_t c;
 	struct vt100 vt100;
 	int8_t cmd = 0;
+
+	static uint8_t beacon_addr [] = {0x00, 0x07 ,0x80, 0x85, 0x04, 0x70};
+	static uint8_t beacon_link_id;
 	
 	if(!strcmp_P(res->arg1, "raw")) {
 #ifdef HOST_VERSION
@@ -506,6 +507,7 @@ static void cmd_wt11_parsed(void *parsed_result, void *data)
 		}
 #endif
   }
+#if 0
   else if (!strcmp_P(res->arg1, PSTR("send_mux_test"))) {
 
      for (i=0; i<3; i++)
@@ -522,23 +524,34 @@ static void cmd_wt11_parsed(void *parsed_result, void *data)
       else 
         printf ("%s\n", buffer);
   }
+#endif
   else if (!strcmp_P(res->arg1, PSTR("reset"))) {
       wt11_reset();
   }
   else if (!strcmp_P(res->arg1, PSTR("reset_mux"))) {
       wt11_reset_mux();
   }
-  else if (!strcmp_P(res->arg1, PSTR("mux_mode"))) {
+  else if (!strcmp_P(res->arg1, PSTR("mode_mux"))) {
       wt11_enable_mux_mode();
   }
-  else if (!strcmp_P(res->arg1, PSTR("normal_mode"))) {
+  else if (!strcmp_P(res->arg1, PSTR("mode_normal"))) {
       wt11_disable_mux_mode();
   }
+  else if (!strcmp_P(res->arg1, PSTR("mode_normal"))) {
+      wt11_disable_mux_mode();
+  }
+  else if (!strcmp_P(res->arg1, PSTR("beacon_open"))) {
+      wt11_open_link(beacon_addr, &beacon_link_id);
+  }
+  else if (!strcmp_P(res->arg1, PSTR("beacon_close"))) {
+      wt11_close_link(beacon_link_id);
+  }
+
 }
 
 prog_char str_wt11_arg0[] = "wt11";
 parse_pgm_token_string_t cmd_wt11_arg0 = TOKEN_STRING_INITIALIZER(struct cmd_wt11_result, arg0, str_wt11_arg0);
-prog_char str_wt11_arg1[] = "raw#reset#reset_mux#mux_mode#normal_mode#send_mux_test#recv_mux";
+prog_char str_wt11_arg1[] = "raw#reset#reset_mux#mode_mux#mode_normal#beacon_open#beacon_close";
 parse_pgm_token_string_t cmd_wt11_arg1 = TOKEN_STRING_INITIALIZER(struct cmd_wt11_result, arg1, str_wt11_arg1);
 
 prog_char help_wt11[] = "wt11 functions";
@@ -553,7 +566,6 @@ parse_pgm_inst_t cmd_wt11 = {
 	},
 };
 
-#endif
 
 /**********************************************************/
 /* Log */

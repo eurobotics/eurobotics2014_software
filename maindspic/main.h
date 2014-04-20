@@ -54,14 +54,14 @@
 /* uart 0 is for cmds and uart 1 is 
  * multiplexed between beacon and slavedspic */
 #define CMDLINE_UART 	0
-#define MUX_UART 			1
+#define MUX_UART 		1
 
 /* generic led toggle macro */
 #define LED_TOGGLE(port, bit) do {		\
-		if (port & _BV(bit))		\
-			port &= ~_BV(bit);	\
-		else				\
-			port |= _BV(bit);	\
+		if (port & _BV(bit))		    \
+			port &= ~_BV(bit);	        \
+		else				            \
+			port |= _BV(bit);	        \
 	} while(0)
 
 #ifdef HOST_VERSION
@@ -92,8 +92,8 @@
 #define LED1_OFF() 		sbi(LATA, 4)
 #define LED1_TOGGLE() 	LED_TOGGLE(LATA, 4)
 
-#define LED2_ON() 		  cbi(LATA, 8)
-#define LED2_OFF() 			sbi(LATA, 8)
+#define LED2_ON() 		cbi(LATA, 8)
+#define LED2_OFF() 		sbi(LATA, 8)
 #define LED2_TOGGLE() 	LED_TOGGLE(LATA, 8)
 
 #define LED3_ON() 		cbi(LATC, 2)
@@ -119,23 +119,19 @@
 
 /* distance between encoders weels,
  * decrease track to decrease angle */
-//#define EXT_TRACK_MM      292.74161502079 //2012
 #define EXT_TRACK_MM      293.51078578114
-
 #define VIRTUAL_TRACK_MM  EXT_TRACK_MM
 
 /* robot dimensions */
-#define ROBOT_LENGTH     281.5
-#define ROBOT_WIDTH 	   330.0
-
-#define ROBOT_CENTER_TO_FRONT 162.5
-#define ROBOT_CENTER_TO_BACK  119.0
-
+#define ROBOT_LENGTH            281.5
+#define ROBOT_WIDTH             330.0
+#define ROBOT_CENTER_TO_FRONT   162.5
+#define ROBOT_CENTER_TO_BACK    119.0
 #define ROBOT_HALF_LENGTH_FRONT ROBOT_CENTER_TO_FRONT
 #define ROBOT_HALF_LENGTH_REAR  ROBOT_CENTER_TO_BACK
 
 /* XXX obstacle clerance */
-#define OBS_CLERANCE       (232.+10.)
+#define OBS_CLERANCE            (232.+10.)
 
 
 /* Some calculus:
@@ -145,9 +141,9 @@
 
 /* increase it to go further */
 #define IMP_ENCODERS 		    3600.0
-#define WHEEL_DIAMETER_MM 	55.0
-#define WHEEL_PERIM_MM 	    (WHEEL_DIAMETER_MM * M_PI)
-#define IMP_COEF 			      10.0
+#define WHEEL_DIAMETER_MM 	    55.0
+#define WHEEL_PERIM_MM 	        (WHEEL_DIAMETER_MM * M_PI)
+#define IMP_COEF 			    10.0
 #define DIST_IMP_MM 		    (((IMP_ENCODERS*4) / WHEEL_PERIM_MM) * IMP_COEF)
 
 /* encoders handlers */
@@ -170,36 +166,36 @@
 
 /* EVENTS PRIORITIES */
 #ifdef old_version
-#define EVENT_PRIORITY_LED 			      170
+#define EVENT_PRIORITY_LED 			  170
 #define EVENT_PRIORITY_TIME           160
 #define EVENT_PRIORITY_I2C_POLL       140
 #define EVENT_PRIORITY_SENSORS        120
 #define EVENT_PRIORITY_CS             100
 #define EVENT_PRIORITY_BEACON_POLL    80
-#define EVENT_PRIORITY_STRAT         	70
+#define EVENT_PRIORITY_STRAT          70
 
 #else
 
-#define EVENT_PRIORITY_LED 			      170
+#define EVENT_PRIORITY_LED 			  170
 #define EVENT_PRIORITY_TIME           160
 #define EVENT_PRIORITY_I2C_POLL       140
 #define EVENT_PRIORITY_SENSORS        120
 #define EVENT_PRIORITY_CS             100
-#define EVENT_PRIORITY_STRAT         	30
+#define EVENT_PRIORITY_STRAT          30
 #define EVENT_PRIORITY_BEACON_POLL    20
 
 #endif
 
 /* EVENTS PERIODS */
-#define EVENT_PERIOD_LED 			    1000000L
-#define EVENT_PERIOD_STRAT			  25000L
-#define EVENT_PERIOD_BEACON_PULL	10000L
-#define EVENT_PERIOD_SENSORS		  10000L
-#define EVENT_PERIOD_I2C_POLL		  8000L
-#define EVENT_PERIOD_CS 			    5000L
+#define EVENT_PERIOD_LED 			1000000L
+#define EVENT_PERIOD_STRAT			25000L
+#define EVENT_PERIOD_BEACON_PULL    10000L
+#define EVENT_PERIOD_SENSORS		10000L
+#define EVENT_PERIOD_I2C_POLL		8000L
+#define EVENT_PERIOD_CS 			5000L
 
-#define CS_PERIOD ((EVENT_PERIOD_CS/SCHEDULER_UNIT)*SCHEDULER_UNIT) /* in microsecond */
-#define CS_HZ (1000000. / CS_PERIOD)
+#define CS_PERIOD   ((EVENT_PERIOD_CS/SCHEDULER_UNIT)*SCHEDULER_UNIT) /* in microsecond */
+#define CS_HZ       (1000000. / CS_PERIOD)
 
 
 /* dynamic logs */

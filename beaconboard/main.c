@@ -212,9 +212,20 @@ int main(void)
 	//beaconboard.log_level = 5;
 	//beaconboard.logs[0] = E_USER_BEACON;
 
+	/* program WT-11 */
+#if 0
+	time_wait_ms (1000);
+	printf ("+++\n\r");	  
+	time_wait_ms (1000);
+	printf ("SET BT NAME beacon\n\r");	
+	time_wait_ms (1000);
+	printf ("SET BT AUTH * gomaespuminos\n\r");
+	time_wait_ms (1000);
+#endif
+
 	/* hello */
 	printf_P(PSTR("\r\n"));
-	printf_P(PSTR("Siempre falta tiempo para hacer pruebas.\r\n"));
+	printf_P(PSTR("Don't turn it on, take it a part!!\r\n"));
 	
 	/* command line, never returns */
 	cmdline_interact();
