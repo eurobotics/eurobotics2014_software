@@ -30,11 +30,27 @@
 void bt_protocol (void);
 
 /************************************************************
- * BEACON COMMANDS 
+ * BEACON BINARY COMMANDS 
  ***********************************************************/
 
-/* request status (opponents possitions) */
-int8_t bt_beacon_cmd_req_status (void);
 
+/************************************************************
+ * BEACON ASCII COMMANDS 
+ ***********************************************************/
+
+/* set color */
+void bt_beacon_set_color (void);
+
+/* beacon on */
+void bt_beacon_set_on (void);
+
+/* beacon on with watchdog */
+void bt_beacon_set_on_watchdog (void);
+
+/* beacon off*/
+void bt_beacon_set_off (void);
+
+/* request opponent position */
+void bt_beacon_req_status(void);
 
 #endif

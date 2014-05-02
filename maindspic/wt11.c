@@ -153,7 +153,7 @@ int16_t wt11_recv_mux (uint8_t *link_id, uint8_t *buff, uint16_t buff_size)
 
 			/* data */
 			case 4:
-				printf ("%c", (char)c);
+				//printf ("%c", (char)c);
 
 				if (i < buff_size)
 			  		buff[i++] = c;

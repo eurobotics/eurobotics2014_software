@@ -634,32 +634,26 @@ static void cmd_beacon_parsed(void * parsed_result, void * data)
 		}
 #endif
 	}
-	else if (!strcmp_P(res->arg1, PSTR("open"))) {
+	else if (!strcmp_P(res->arg1, PSTR("open")))
 		wt11_open_link_mux(beacon_addr, &beaconboard.link_id);
-	}
-	else if (!strcmp_P(res->arg1, PSTR("close"))) {
+
+	else if (!strcmp_P(res->arg1, PSTR("close")))
 		wt11_close_link_mux(beaconboard.link_id);
-	}
+
     else if (!strcmp_P(res->arg1, "on"))
-    {
-        //beacon_cmd_beacon_on();
-    }
+		bt_beacon_set_on ();
+
     else if (!strcmp_P(res->arg1, "watchdog_on"))
-    {
-        //beacon_cmd_beacon_on();
-    }
+		bt_beacon_set_on_watchdog ();
+    
     else if (!strcmp_P(res->arg1, "off"))
-    {
-        //beacon_cmd_beacon_off();
-    }
+		bt_beacon_set_off ();
+
     else if (!strcmp_P(res->arg1, "color"))
-    {
-        //beacon_cmd_color();
-    }
+		bt_beacon_set_color ();
+
     else if (!strcmp_P(res->arg1, "status"))
-    {
-		bt_beacon_cmd_req_status ();
-    }
+		bt_beacon_req_status ();
 
     printf("Done\n\r");
 }

@@ -328,9 +328,9 @@ void bt_protocol (void)
 
 
 /************************************************************
- * BEACON COMMANDS 
+ * BEACON RAW COMMANDS 
  ***********************************************************/
-
+#if 0
 int8_t bt_beacon_cmd_req_status (void)
 {
 	struct bt_beacon_status_req buff;
@@ -345,34 +345,34 @@ int8_t bt_beacon_cmd_req_status (void)
 	err = bt_send_cmd (beaconboard.link_id, (uint8_t *)&buff, sizeof (buff));
 	return err;
 }
-
+#endif
 
 /************************************************************
  * BEACON ASCII COMMANDS 
  ***********************************************************/
-#if 0
+
 /* set color */
 void bt_beacon_set_color (void)
 {
 	if(mainboard.our_color == I2C_COLOR_YELLOW)
-    bt_send_ascii_cmd (beacon.link_id, "\ncolor yellow\n");
-  else
-    bt_send_ascii_cmd (beacon.link_id, "\ncolor red\n");  
+   	bt_send_ascii_cmd (beaconboard.link_id, "\ncolor yellow\n");
+  	else
+		bt_send_ascii_cmd (beaconboard.link_id, "\ncolor red\n");
 }
 
 
 /* beacon on */
 void bt_beacon_set_on (void) {
-  bt_send_ascii_cmd (beacon.link_id, "\nbeacon on\n");
+	bt_send_ascii_cmd (beaconboard.link_id, "\nbeacon on\n");
 }
 
 /* beacon on with watchdog */
-void beacon_cmd_beacon_on_watchdog (void) {
-  bt_send_ascii_cmd (beacon.link_id, "\nbeacon watchdog_on\n");
+void bt_beacon_set_on_watchdog (void) {
+	bt_send_ascii_cmd (beaconboard.link_id, "\nbeacon watchdog_on\n");
 }
 
 /* beacon off*/
-void beacon_cmd_beacon_off (void) 
+void bt_beacon_set_off (void) 
 {
 	uint8_t flags;
 
@@ -380,18 +380,16 @@ void beacon_cmd_beacon_off (void)
 	mainboard.flags &= ~(DO_OPP);
 	IRQ_UNLOCK(flags);
 
-  bt_send_ascii_cmd (beacon.link_id, "\nbeacon off\n");
+  	bt_send_ascii_cmd (beaconboard.link_id, "\nbeacon off\n");
 }
 
 
 /* request opponent position */
-void bt_beacon_rqst_opponent(void)
+void bt_beacon_req_status(void)
 {
-	char buff[32];
-	uint16_t size;
-	int16_t robot_x, robot_y, robot_a;
+	int16_t robot_a;
+	double robot_x, robot_y;
 	uint8_t flags;
-	uint8_t i;
 	
 	IRQ_LOCK(flags);
 	robot_x = position_get_x_s16(&mainboard.pos);
@@ -400,17 +398,12 @@ void bt_beacon_rqst_opponent(void)
 	IRQ_UNLOCK(flags);
 
 
-  rel_da_to_abs_xy(BEACON_OFFSET_D, BEACON_OFFSET_A, 
-                  &beacon_x, &beacon_y);    
+  	rel_da_to_abs_xy(BEACON_OFFSET_D, BEACON_OFFSET_A, 
+                  &robot_x, &robot_y);    
 
-  opp_x += beacon_x;
-  opp_y += beacon_y;
-
-
-  bt_send_ascii_cmd (beacon.link_id, "\nopponent %d %d %d\n",
-								      robot_x, robot_y, robot_a);
+  	bt_send_ascii_cmd (beaconboard.link_id, "\nopponent %d %d %d\n",
+						    (int16_t)robot_x, (int16_t)robot_y, robot_a);
 }
-#endif
 
 
 

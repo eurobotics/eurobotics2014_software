@@ -17,6 +17,7 @@ struct bt_cmd_hdr {
 /****/
 /* request status */
 /****/
+#if 0
 #define BT_BEACON_STATUS_REQ	0x01
 struct bt_beacon_status_req
 {
@@ -30,6 +31,7 @@ struct bt_beacon_status_req
   	uint16_t checksum;
 
 } __attribute__ ((aligned (2)));
+#endif
 
 #define BT_BEACON_STATUS_ANS	0x02
 struct bt_beacon_status_ans 
