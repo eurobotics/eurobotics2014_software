@@ -74,13 +74,14 @@
 #include "strat_base.h"
 #include "i2c_protocol.h"
 #include "actuator.h"
-#include "beacon.h"
+//#include "beacon.h"
+#include "bt_protocol.h"
 #include "robotsim.h"
 #include "strat_base.h"
 #include "strat_avoid.h"
 #include "strat_utils.h"
 
-extern int8_t beacon_connected;
+/* TODO extern int8_t beacon_connected; */
 
 struct cmd_event_result
 {
@@ -362,19 +363,20 @@ retry:
     }
     else
     {
-        beacon_cmd_wt11_call();
+        /* TODO beacon_cmd_wt11_call(); 
         WAIT_COND_OR_TIMEOUT((beacon_connected == 1), 5000);
-        if (!beacon_connected)
+        if (!beacon_connected)*/
+        if (0)
         {
             printf("Beacon connection FAIL, reseting local wt11\r\n");
-            beacon_cmd_wt11_local_reset();
+            /* TODO beacon_cmd_wt11_local_reset(); */
             goto retry;
         }
         else
         {
             printf("Beacon connection SUCCESS!\r\n");
 retry_on:
-            beacon_cmd_beacon_on_watchdog();
+            /* TODO beacon_cmd_beacon_on_watchdog(); */
 
             printf("is beacon running? (s/n)\n\r");
             c = -1;
@@ -474,6 +476,7 @@ parse_pgm_inst_t cmd_color = {
     },
 };
 
+#ifdef BEACON_OLD
 /**********************************************************/
 /* beacon */
 
@@ -565,6 +568,105 @@ static void cmd_beacon_parsed(void * parsed_result, void * data)
 prog_char str_beacon_arg0[] = "beacon";
 parse_pgm_token_string_t cmd_beacon_arg0 = TOKEN_STRING_INITIALIZER(struct cmd_beacon_result, arg0, str_beacon_arg0);
 prog_char str_beacon_arg1[] = "raw#wt11_reset#call#wt11_close#on#watchdog_on#off#color#opponent";
+parse_pgm_token_string_t cmd_beacon_arg1 = TOKEN_STRING_INITIALIZER(struct cmd_beacon_result, arg1, str_beacon_arg1);
+
+prog_char help_beacon[] = "beacon commads";
+parse_pgm_inst_t cmd_beacon = {
+    .f = cmd_beacon_parsed, /* function to call */
+    .data = NULL, /* 2nd arg of func */
+    .help_str = help_beacon,
+    .tokens =
+    { /* token list, NULL terminated */
+        (prog_void *) & cmd_beacon_arg0,
+        (prog_void *) & cmd_beacon_arg1,
+        NULL,
+    },
+};
+#endif
+
+/**********************************************************/
+/* beacon */
+
+/* this structure is filled when cmd_interact is parsed successfully */
+struct cmd_beacon_result
+{
+    fixed_string_t arg0;
+    fixed_string_t arg1;
+};
+
+static void cmd_beacon_parsed(void * parsed_result, void * data)
+{
+    int16_t c;
+    int8_t cmd = 0;
+    struct vt100 vt100;
+
+    struct cmd_beacon_result *res = parsed_result;
+
+    vt100_init(&vt100);
+	static uint8_t beacon_addr [] = {0x00, 0x07 ,0x80, 0x85, 0x04, 0x70};
+	
+	if(!strcmp_P(res->arg1, "raw")) {
+#ifdef HOST_VERSION
+	printf("not implemented\n");
+#else
+		/* init vt100 character set */
+		vt100_init(&vt100);
+		
+		wt11_flush ();
+
+		/* interact */
+		while(cmd != KEY_CTRL_C) 
+		{
+			/* link --> cmd line */
+			wt11_bypass_to_stdo (beaconboard.link_id);
+			
+			/* cmd line --> link */
+			c = cmdline_getchar();
+			if (c == -1) {
+				continue;
+			}
+
+			/* check exit cmd */
+			cmd = vt100_parser(&vt100, c);
+
+			/* send to link */
+			wt11_send_mux(beaconboard.link_id, (uint8_t *)&c, 1);
+		}
+#endif
+	}
+	else if (!strcmp_P(res->arg1, PSTR("open"))) {
+		wt11_open_link_mux(beacon_addr, &beaconboard.link_id);
+	}
+	else if (!strcmp_P(res->arg1, PSTR("close"))) {
+		wt11_close_link_mux(beaconboard.link_id);
+	}
+    else if (!strcmp_P(res->arg1, "on"))
+    {
+        //beacon_cmd_beacon_on();
+    }
+    else if (!strcmp_P(res->arg1, "watchdog_on"))
+    {
+        //beacon_cmd_beacon_on();
+    }
+    else if (!strcmp_P(res->arg1, "off"))
+    {
+        //beacon_cmd_beacon_off();
+    }
+    else if (!strcmp_P(res->arg1, "color"))
+    {
+        //beacon_cmd_color();
+    }
+    else if (!strcmp_P(res->arg1, "status"))
+    {
+		bt_beacon_cmd_req_status ();
+    }
+
+    printf("Done\n\r");
+}
+
+prog_char str_beacon_arg0[] = "beacon";
+parse_pgm_token_string_t cmd_beacon_arg0 = TOKEN_STRING_INITIALIZER(struct cmd_beacon_result, arg0, str_beacon_arg0);
+prog_char str_beacon_arg1[] = "raw#open#close#on#watchdog_on#off#color#status";
 parse_pgm_token_string_t cmd_beacon_arg1 = TOKEN_STRING_INITIALIZER(struct cmd_beacon_result, arg1, str_beacon_arg1);
 
 prog_char help_beacon[] = "beacon commads";

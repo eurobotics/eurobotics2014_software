@@ -10,34 +10,49 @@
 
 
 struct bt_cmd_hdr {
-	uint8_t cmd;
-};
+	uint16_t cmd;
+} __attribute__ ((aligned (2)));
 
 
 /****/
 /* request status */
 /****/
-#define BT_BEACON_STATUS_ANS    0x01
-struct bt_beacon_status_ans{
+#define BT_BEACON_STATUS_REQ	0x01
+struct bt_beacon_status_req
+{
 	struct bt_cmd_hdr hdr;
 
-  /* opponent pos */
-	uint8_t opponent_x[2];
-	uint8_t opponent_y[2];
-	uint8_t opponent_a[2];
-	uint8_t opponent_d[2];
+  /* robot pos */
+	int16_t x;
+	int16_t y;
+	int16_t a;
+
+  	uint16_t checksum;
+
+} __attribute__ ((aligned (2)));
+
+#define BT_BEACON_STATUS_ANS	0x02
+struct bt_beacon_status_ans 
+{
+	struct bt_cmd_hdr hdr;
+
+  /* opp pos */
+	int16_t opponent_x;
+	int16_t opponent_y;
+	int16_t opponent_a;
+	int16_t opponent_d;
 
 #ifdef TWO_OPPONENTS
-	uint8_t opponent2_x[2];
-	uint8_t opponent2_y[2];
-	uint8_t opponent2_a[2];
-	uint8_t opponent2_d[2];
+	int16_t opponent2_x;
+	int16_t opponent2_y;
+	int16_t opponent2_a;
+	int16_t opponent2_d;
 #endif
 
-  uint8_t checksum;
+  	uint16_t checksum;
+} __attribute__ ((aligned (2)));
 
-};
-
+#if 0
 #define BT_ROBOT_2ND_STATUS_ANS 0x02
 struct bt_robot_2nd_status_ans{
 	struct bt_cmd_hdr hdr;
@@ -67,7 +82,7 @@ struct bt_robot_2nd_status_ans{
 };
 
 
-#if 0
+
 /****/
 /* commands to boards (write data) */
 /****/

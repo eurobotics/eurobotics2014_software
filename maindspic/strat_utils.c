@@ -578,8 +578,8 @@ int8_t get_robot_2nd_a_abs(int16_t *a)
 #endif
 
 	IRQ_LOCK(flags);
-	x_tmp = beaconboard.robot_2nd_x;
-	*a = beaconboard.robot_2nd_a_abs;
+	x_tmp = robot_2nd.x;
+	*a = robot_2nd.a_abs;
 	IRQ_UNLOCK(flags);
 	if (x_tmp == I2C_OPPONENT_NOT_THERE)
 		return -1;

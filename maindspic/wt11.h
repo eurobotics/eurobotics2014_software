@@ -33,6 +33,8 @@
 #define WT11_MODE_NORMAL  0
 #define WT11_MODE_MUX     1
 
+#define WT11_MUX_CTRL_CMD   0xFF
+
 /* maximun size of message */
 #define WT11_MUX_LENGTH_MAX 100
 

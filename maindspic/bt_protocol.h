@@ -26,16 +26,15 @@
 /* number of bt devices, maximun 4 */
 #define BT_PROTO_NUM_DEVICES 2
 
-/* bt device structure */
-struct bt_proto_device
-{
-  uint8_t number;
-  uint8_t link_id;
-  uint8_t addr[6];
-};
+/* send and receive commands to/from bt devices, periodic dev status pulling */
+void bt_protocol (void);
 
+/************************************************************
+ * BEACON COMMANDS 
+ ***********************************************************/
 
-//void bt_robot_sec_send_ascii_cmd(const char * format, ...);
+/* request status (opponents possitions) */
+int8_t bt_beacon_cmd_req_status (void);
 
 
 #endif

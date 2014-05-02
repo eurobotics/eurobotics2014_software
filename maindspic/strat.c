@@ -337,7 +337,7 @@ void strat_exit(void)
     IRQ_LOCK(flags);
     mainboard.flags &= ~(DO_OPP);
     IRQ_UNLOCK(flags);
-    beacon_cmd_beacon_off();
+    /* TODO beacon_cmd_beacon_off(); */
 
     /* slavespic exit TODO 2014 */
     //i2c_slavedspic_mode_turbine_blow(0);
@@ -345,12 +345,12 @@ void strat_exit(void)
 
     /* turn off other devices (lasers...) */
 
-    /* stop beacon */
+    /* TODO stop beacon
     beacon_cmd_beacon_off();
     beacon_cmd_beacon_off();
     beacon_cmd_beacon_off();
     beacon_cmd_beacon_off();
-
+    */
 }
 
 /* called periodically */

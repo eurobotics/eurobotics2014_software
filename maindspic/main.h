@@ -252,6 +252,7 @@ struct mainboard
 #define DO_TIMER      32
 #define DO_POWER      64
 #define DO_OPP        128
+#define DO_BT_PROTO   DO_OPP
 
 	/* control systems */
 	struct cs_block angle;
@@ -305,6 +306,7 @@ struct beaconboard
 	/* status and color */
 	uint8_t status;
 	uint8_t color;
+	uint8_t link_id;
 	
 	/* opponent pos */
 	int16_t opponent_x;
@@ -323,7 +325,6 @@ struct beaconboard
 	int16_t robot_2nd_x;
 	int16_t robot_2nd_y;
 	int16_t robot_2nd_a;
-  int16_t robot_2nd_a_abs;
 	int16_t robot_2nd_d;
 #endif
 
@@ -331,17 +332,18 @@ struct beaconboard
 
 struct robot_2nd
 {
-  /* status */
-  uint8_t status;
+  	/* status */
+  	uint8_t status;
+	uint8_t link_id;
 
-  /* robot position */
+  	/* robot position */
 	int16_t x;
 	int16_t y;
-  int16_t a_abs;
+  	int16_t a_abs;
 	int16_t a;
 	int16_t d;
 
-  /* opponent pos */
+  	/* opponent pos */
 	int16_t opponent_x;
 	int16_t opponent_y;
 	int16_t opponent_a;

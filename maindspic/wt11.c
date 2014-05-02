@@ -38,7 +38,7 @@
 #include "robotsim.h"
 #endif
 
-#define WT11_MUX_CTRL_CMD   0xFF
+
 
 uint8_t data[WT11_MUX_LENGTH_MAX];
 

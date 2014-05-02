@@ -69,6 +69,7 @@
 #include "cs.h"
 #include "i2c_protocol.h"
 #include "beacon.h"
+#include "bt_protocol.h"
 #include "robotsim.h"
 #include "strat_base.h"
 
@@ -310,6 +311,8 @@ int main(void)
 	/* beacon commnads and polling */
 	//scheduler_add_periodical_event_priority(beacon_protocol, NULL,
 	//				EVENT_PERIOD_BEACON_PULL / SCHEDULER_UNIT, EVENT_PRIORITY_BEACON_POLL);
+	scheduler_add_periodical_event_priority(bt_protocol, NULL,
+					EVENT_PERIOD_BEACON_PULL / SCHEDULER_UNIT, EVENT_PRIORITY_BEACON_POLL);
 #endif
 
 	/* strat-related event */
@@ -319,11 +322,11 @@ int main(void)
 
 	/* log setup */
  	gen.logs[0] = E_USER_STRAT;
- 	//gen.logs[1] = E_USER_BEACON;
+ 	gen.logs[1] = E_USER_BEACON;
  	gen.logs[2] = E_USER_I2C_PROTO;
  	//gen.logs[3] = E_OA;
- 	gen.logs[1] = E_USER_WT11;
- 	gen.logs[2] = E_USER_BT_PROTO;
+ 	gen.logs[3] = E_USER_WT11;
+ 	gen.logs[4] = E_USER_BT_PROTO;
  	gen.log_level = 5;
 	
 	/* reset strat infos */
