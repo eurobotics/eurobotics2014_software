@@ -227,18 +227,8 @@ int main(void)
 	printf_P(PSTR("\r\n"));
 	printf_P(PSTR("Don't turn it on, take it a part!!\r\n"));
 	
-	/* init cmdline */
-	cmdline_init();
-
-	/* main loop */
-	while(1)
-	{
-		if (mainboard.flag & DO_BT_PROTO)
-			bt_protocol();
-		else
-			cmdline_interact_nowait();
-		}
-	}
+	/* command line, never returns */
+	cmdline_interact();
 
 	return 0;
 }
