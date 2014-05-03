@@ -599,6 +599,7 @@ static void cmd_beacon_parsed(void * parsed_result, void * data)
     int16_t c;
     int8_t cmd = 0;
     struct vt100 vt100;
+	uint8_t mainboard_flags;
 
     struct cmd_beacon_result *res = parsed_result;
 
@@ -609,6 +610,10 @@ static void cmd_beacon_parsed(void * parsed_result, void * data)
 #ifdef HOST_VERSION
 	printf("not implemented\n");
 #else
+		/* save flags and disable BT_PROTO */
+		mainboard_flags = mainboard.flags;
+		mainboard.flags &= (~DO_BT_PROTO);
+
 		/* init vt100 character set */
 		vt100_init(&vt100);
 		
@@ -632,6 +637,9 @@ static void cmd_beacon_parsed(void * parsed_result, void * data)
 			/* send to link */
 			wt11_send_mux(beaconboard.link_id, (uint8_t *)&c, 1);
 		}
+		
+		/* restore flags */
+		mainboard.flags = mainboard_flags;
 #endif
 	}
 	else if (!strcmp_P(res->arg1, PSTR("open")))

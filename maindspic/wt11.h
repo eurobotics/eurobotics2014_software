@@ -55,6 +55,9 @@ int16_t wt11_recv_mux (uint8_t *link_id, uint8_t *buff, uint16_t buff_size);
    returns data length, -1 if no data received */
 int16_t wt11_bypass_to_stdo (uint8_t link_id);
 
+/* return received char and link_id, -1 if not valid char */
+int16_t wt11_recv_mux_char (uint8_t *link_id);
+
 /* receive data in data mode, 
    returns data length, -1 if no data received */
 int16_t wt11_rdline (uint8_t *buff, uint16_t buff_size);

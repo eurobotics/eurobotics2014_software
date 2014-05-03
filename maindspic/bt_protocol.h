@@ -27,15 +27,11 @@
 #define BT_PROTO_NUM_DEVICES 2
 
 /* send and receive commands to/from bt devices, periodic dev status pulling */
-void bt_protocol (void);
-
-/************************************************************
- * BEACON BINARY COMMANDS 
- ***********************************************************/
+void bt_protocol (void * dummy);
 
 
 /************************************************************
- * BEACON ASCII COMMANDS 
+ * BEACON COMMANDS 
  ***********************************************************/
 
 /* set color */
