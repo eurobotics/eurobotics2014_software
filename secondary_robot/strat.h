@@ -341,7 +341,8 @@ void strat_start_match(uint8_t debug);
 /********************************************
  * in strat_fire.c 
  *******************************************/
- /* TODO 2014*/
+
+
 
 
 /********************************************
@@ -363,6 +364,8 @@ uint8_t strat_work_on_zone(uint8_t zone_num);
 //#define DEBUG_STRAT_SMART
 uint8_t strat_smart(void);
 
+
+uint8_t patrol_between(int16_t x1, int16_t y1,int16_t x2, int16_t y2);
 #endif /* notyet TODO 2014 */
 
 #else /* HOST_VERSION_OA_TEST */

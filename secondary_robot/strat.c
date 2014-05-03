@@ -17,7 +17,7 @@
  *
  *  Revision : $Id$
  *
- *  Javier Baliñas Santos <javier@arc-robots.org> and Silvia Santano
+ *  Javier Baliï¿½as Santos <javier@arc-robots.org> and Silvia Santano
  */
 
 #include <stdio.h>
@@ -64,6 +64,13 @@
 #include "actuator.h"
 #include "beacon.h"
 #include "cmdline.h"
+
+#else
+/* robot dimensions */
+#define ROBOT_LENGTH    281.5
+#define ROBOT_WIDTH 	   330.0
+#define ROBOT_CENTER_TO_FRONT 162.5
+#define ROBOT_CENTER_TO_BACK 119.0
 
 #endif
 
@@ -411,12 +418,14 @@ uint8_t strat_main(void)
 
 		/* shoot */
 		case 2:
-#ifndef HOST_VERSION
+		//XXX - Where is the problem
+/**********************************************************/
+		
+		#ifndef HOST_VERSION
 			pwm_servo_set(&gen.pwm_servo_oc3, SERVO_SHOOT_POS_UP);
 			pwm_servo_set(&gen.pwm_servo_oc4, SERVO_SHOOT_POS_DOWN);
-#endif
+		#endif
 			time_wait_ms(1000);
-
 			mamooth_done=1;
 			state ++;			
 			break;

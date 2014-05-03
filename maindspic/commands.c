@@ -174,7 +174,6 @@ extern parse_pgm_inst_t cmd_position;
 extern parse_pgm_inst_t cmd_position_set;
 
     /* TODO 2014 */
-#if 0 
 extern parse_pgm_inst_t cmd_strat_db;
 extern parse_pgm_inst_t cmd_strat_infos;
 extern parse_pgm_inst_t cmd_strat_conf;
@@ -182,7 +181,6 @@ extern parse_pgm_inst_t cmd_strat_conf2;
 extern parse_pgm_inst_t cmd_strat_conf3;
 extern parse_pgm_inst_t cmd_subtraj1;
 extern parse_pgm_inst_t cmd_subtraj2;
-#endif
 
 extern parse_pgm_inst_t cmd_gotozone;
 extern parse_pgm_inst_t cmd_workonzone;
