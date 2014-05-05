@@ -243,6 +243,7 @@ struct cmd_opponent_result {
 	int16_t robot_x;
 	int16_t robot_y;
 	int16_t robot_a;
+	uint16_t checksum;
 };
 
 #if 0
@@ -420,7 +421,18 @@ static void cmd_opponent_parsed(void * parsed_result, void *data)
 
 	/* reset watchdog */
 	beaconboard.watchdog = WATCHDOG_NB_TIMES;
-	
+
+	/* test checksum */
+	if (!strcmp_P(res->arg0, PSTR("opponent")))
+		res->checksum = (uint16_t) (res->robot_x + res->robot_y + res->robot_a);
+	else {
+
+		if (res->checksum != (uint16_t)(res->robot_x + res->robot_y + res->robot_a)) {
+			ERROR (E_USER_BEACON, "checksum ERROR");
+			return;
+		}
+	}
+
 	/* get robot and opponents position */
 	IRQ_LOCK(flags);
 	beacon.robot_x = (int32_t)res->robot_x;
@@ -468,6 +480,8 @@ static void cmd_opponent_parsed(void * parsed_result, void *data)
 #endif
 #endif /* RECALC */
 
+#define DEBUG_STATUS
+#ifdef DEBUG_STATUS
 	/* fill answer structure */
 	ans.hdr.cmd = BT_BEACON_STATUS_ANS;
 	ans.opponent_x = i++;
@@ -480,6 +494,7 @@ static void cmd_opponent_parsed(void * parsed_result, void *data)
 	ans.opponent2_y = i+1000;
 	ans.opponent2_a = i+2000;
 	ans.opponent2_d = i+3000;
+#endif
 #endif
 
 	ans.checksum = checksum ((uint8_t *)&ans, sizeof (ans)-sizeof(ans.checksum));
@@ -502,11 +517,12 @@ static void cmd_opponent_parsed(void * parsed_result, void *data)
 }
 
 
-prog_char str_opponent_arg0[] = "opponent";
+prog_char str_opponent_arg0[] = "status#opponent";
 parse_pgm_token_string_t cmd_opponent_arg0 = TOKEN_STRING_INITIALIZER(struct cmd_opponent_result, arg0, str_opponent_arg0);
 parse_pgm_token_num_t cmd_opponent_robot_x = TOKEN_NUM_INITIALIZER(struct cmd_opponent_result, robot_x, INT16);
 parse_pgm_token_num_t cmd_opponent_robot_y = TOKEN_NUM_INITIALIZER(struct cmd_opponent_result, robot_y, INT16);
 parse_pgm_token_num_t cmd_opponent_robot_a = TOKEN_NUM_INITIALIZER(struct cmd_opponent_result, robot_a, INT16);
+parse_pgm_token_num_t cmd_opponent_checksum = TOKEN_NUM_INITIALIZER(struct cmd_opponent_result, checksum, UINT16);
 
 prog_char help_opponent[] = "Get opponent position (x,y,angle,dist)";
 parse_pgm_inst_t cmd_opponent = {
@@ -518,6 +534,7 @@ parse_pgm_inst_t cmd_opponent = {
 		(prog_void *)&cmd_opponent_robot_x, 
 		(prog_void *)&cmd_opponent_robot_y, 
 		(prog_void *)&cmd_opponent_robot_a, 
+		(prog_void *)&cmd_opponent_checksum, 
 		NULL,
 	},
 };

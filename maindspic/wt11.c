@@ -48,7 +48,11 @@ void wt11_send (uint8_t *buff, uint16_t length)
   uint16_t i;
 
 	for(i=0; i<length; i++){
+#ifndef HOST_VERSION
 		uart_send(BT_UART, buff[i]);
+#else
+		robotsim_uart_send_BT(buff[i])
+#endif
 	}	
 }
 
@@ -299,7 +303,7 @@ int16_t wt11_bypass_to_stdo (uint8_t link_id)
 					state = 0;
 					i = 0;
 
-					ERROR (E_USER_WT11, "WT11: link ID ERROR");
+					//ERROR (E_USER_WT11, "WT11: link ID ERROR");
 					return -1;
 				}
 				break;

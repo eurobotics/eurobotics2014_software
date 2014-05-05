@@ -252,7 +252,9 @@ struct mainboard
 #define DO_TIMER      32
 #define DO_POWER      64
 #define DO_OPP        128
-#define DO_BT_PROTO   DO_OPP
+#define DO_ROBOT_2ND  256
+#define DO_OPP        128
+#define DO_BT_PROTO   (DO_OPP | DO_ROBOT_2ND)
 
 	/* control systems */
 	struct cs_block angle;
@@ -335,9 +337,21 @@ struct beaconboard
 
 struct robot_2nd
 {
-  	/* status */
-  	uint8_t status;
+  	/* bt link id */
 	uint8_t link_id;
+
+	/* running command info */
+	uint8_t cmd_id;					/* for ack test */
+	uint8_t cmd_ret; 					/* for end traj test, 
+												follows END_TRAJ flags rules, 
+												see strat_base.h */
+	/* for cmd ack test */
+	uint8_t cmd_args_checksum_send;	/* checksum of arguments sent */
+	uint8_t cmd_args_checksum_recv;	/* checksum received */
+
+	/* strat info */
+	uint8_t color;
+	uint16_t done_flags;
 
   	/* robot position */
 	int16_t x;

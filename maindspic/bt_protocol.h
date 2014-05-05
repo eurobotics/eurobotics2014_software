@@ -49,4 +49,21 @@ void bt_beacon_set_off (void);
 /* request opponent position */
 void bt_beacon_req_status(void);
 
+/************************************************************
+ * ROBOT 2ND COMMANDS 
+ ***********************************************************/
+
+/* set color */
+inline void bt_robot_2nd_set_color (void);
+
+/* goto xy_abs */
+inline void bt_robot_2nd_goto_xy_abs (int16_t x, int16_t y);
+
+/* goto xy_rel */
+inline void bt_robot_2nd_goto_xy_rel (int16_t x, int16_t y);
+
+/* request opponent position */
+void bt_robot_2nd_req_status(void);
+
+
 #endif

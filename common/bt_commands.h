@@ -13,9 +13,11 @@ struct bt_cmd_hdr {
 	uint16_t cmd;
 } __attribute__ ((aligned (2)));
 
+/************************************************************
+ * BEACON COMMANDS 
+ ***********************************************************/
 
-
-#define BT_BEACON_SYNC_HEADER	"beacon_header"
+#define BT_BEACON_SYNC_HEADER	"beacon_sync"
 #define BT_BEACON_STATUS_ANS	0x01
 struct bt_beacon_status_ans 
 {
@@ -37,35 +39,61 @@ struct bt_beacon_status_ans
   	uint16_t checksum;
 } __attribute__ ((aligned (2)));
 
-#if 0
-#define BT_ROBOT_2ND_STATUS_ANS 0x02
-struct bt_robot_2nd_status_ans{
+/************************************************************
+ * ROBOT_2ND COMMANDS 
+ ***********************************************************/
+
+#define BT_ROBOT_SYNC_HEADER		"robot_2nd_sync"
+#define BT_ROBOT_2ND_STATUS_ANS 	0x02
+struct bt_robot_2nd_status_ans 
+{
 	struct bt_cmd_hdr hdr;
 
-  /* status */
-  uint8_t status;
+	/* running command info */
+	uint8_t cmd_id;
+#define BT_SET_COLOR			1
 
-  /* END_TRAJ flags, see strat_base.h */
-	uint8_t end_traj;
+#define BT_GOTO_XY_ABS		2
+#define BT_GOTO_XY_REL		3
+#define BT_GOTO_AVOID		4
+#define BT_GOTO_AVOID_FW	5
+#define BT_GOTO_AVOID_BW	6
 
-  /* robot position */
-	int8_t x[2];
-	int8_t y[2];
-  int8_t a_abs[2];
+#define BT_DO_FRESCO_INIT	7
+#define BT_DO_MAMMUT_1		8
+#define BT_DO_MAMMUT_2		9
+#define BT_DO_NET				10
+#define BT_DO_OPP_FIRES		11
 
-  /* opponent pos */
-	uint8_t opponent_x[2];
-	uint8_t opponent_y[2];
+	uint8_t cmd_ret; 		/* END_TRAJ flags rules, see strat_base.h */
+	uint8_t cmd_args_checksum;
+
+	/* strat info */
+	uint8_t color;
+	uint16_t done_flags;
+#define BT_DONE_MAMMUT_1	1
+#define BT_DONE_MAMMUT_2	2
+#define BT_DONE_FRESCO		4
+#define BT_DONE_NET			8
+#define BT_DONE_OPP_FIRES	16
+
+	/* robot position */
+	int16_t x;
+	int16_t y;
+	int16_t a_abs;
+
+	/* opponent pos */
+	int16_t opponent_x;
+	int16_t opponent_y;
 
 #ifdef TWO_OPPONENTS
-	uint8_t opponent2_x[2];
-	uint8_t opponent2_y[2];
+	uint16_t opponent2_x;
+	uint16_t opponent2_y;
 #endif
 
-  uint8_t checksum;
+	uint16_t checksum;
 
-};
-#endif
+} __attribute__ ((aligned (2)));
 
 
 

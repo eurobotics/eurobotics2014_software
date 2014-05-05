@@ -476,7 +476,7 @@ parse_pgm_inst_t cmd_color = {
     },
 };
 
-#ifdef BEACON_OLD
+#ifdef CMD_BEACON_OLD
 /**********************************************************/
 /* beacon */
 
@@ -596,23 +596,27 @@ struct cmd_beacon_result
 
 static void cmd_beacon_parsed(void * parsed_result, void * data)
 {
-    int16_t c;
-    int8_t cmd = 0;
-    struct vt100 vt100;
-	uint8_t mainboard_flags;
-
-    struct cmd_beacon_result *res = parsed_result;
-
-    vt100_init(&vt100);
-	static uint8_t beacon_addr [] = {0x00, 0x07 ,0x80, 0x85, 0x04, 0x70};
-	
-	if(!strcmp_P(res->arg1, "raw")) {
 #ifdef HOST_VERSION
 	printf("not implemented\n");
 #else
+   int16_t c;
+   int8_t cmd = 0;
+   struct vt100 vt100;
+	uint8_t mainboard_flags;
+	uint8_t flags;
+
+   struct cmd_beacon_result *res = parsed_result;
+
+   vt100_init(&vt100);
+	static uint8_t beacon_addr [] = {0x00, 0x07 ,0x80, 0x85, 0x04, 0x70};
+	
+	if(!strcmp_P(res->arg1, "raw")) {
+
 		/* save flags and disable BT_PROTO */
+		IRQ_LOCK (flags);
 		mainboard_flags = mainboard.flags;
 		mainboard.flags &= (~DO_BT_PROTO);
+		IRQ_UNLOCK (flags);
 
 		/* init vt100 character set */
 		vt100_init(&vt100);
@@ -639,8 +643,9 @@ static void cmd_beacon_parsed(void * parsed_result, void * data)
 		}
 		
 		/* restore flags */
+		IRQ_LOCK (flags);
 		mainboard.flags = mainboard_flags;
-#endif
+		IRQ_UNLOCK (flags);
 	}
 	else if (!strcmp_P(res->arg1, PSTR("open")))
 		wt11_open_link_mux(beacon_addr, &beaconboard.link_id);
@@ -662,8 +667,7 @@ static void cmd_beacon_parsed(void * parsed_result, void * data)
 
     else if (!strcmp_P(res->arg1, "status"))
 		bt_beacon_req_status ();
-
-    printf("Done\n\r");
+#endif
 }
 
 prog_char str_beacon_arg0[] = "beacon";
@@ -680,6 +684,102 @@ parse_pgm_inst_t cmd_beacon = {
     { /* token list, NULL terminated */
         (prog_void *) & cmd_beacon_arg0,
         (prog_void *) & cmd_beacon_arg1,
+        NULL,
+    },
+};
+
+
+/**********************************************************/
+/* robot 2nd */
+
+/* this structure is filled when cmd_interact is parsed successfully */
+struct cmd_robot_2nd_result
+{
+    fixed_string_t arg0;
+    fixed_string_t arg1;
+};
+
+static void cmd_robot_2nd_parsed(void * parsed_result, void * data)
+{
+#ifdef HOST_VERSION
+	printf("not implemented\n");
+#else
+   int16_t c;
+   int8_t cmd = 0;
+   struct vt100 vt100;
+	uint8_t mainboard_flags;
+	uint8_t flags;
+
+   struct cmd_robot_2nd_result *res = parsed_result;
+
+   vt100_init(&vt100);
+	static uint8_t robot_2nd_addr [] = {0x00, 0x07 ,0x80, 0x85, 0x04, 0x70};
+	
+	if(!strcmp_P(res->arg1, "raw")) {
+
+		/* save flags and disable BT_PROTO */
+		IRQ_LOCK (flags);
+		mainboard_flags = mainboard.flags;
+		mainboard.flags &= (~DO_BT_PROTO);
+		IRQ_UNLOCK (flags);
+
+		/* init vt100 character set */
+		vt100_init(&vt100);
+		
+		wt11_flush ();
+
+		/* interact */
+		while(cmd != KEY_CTRL_C) 
+		{
+			/* link --> cmd line */
+			wt11_bypass_to_stdo (robot_2nd.link_id);
+			
+			/* cmd line --> link */
+			c = cmdline_getchar();
+			if (c == -1) {
+				continue;
+			}
+
+			/* check exit cmd */
+			cmd = vt100_parser(&vt100, c);
+
+			/* send to link */
+			wt11_send_mux(robot_2nd.link_id, (uint8_t *)&c, 1);
+		}
+		
+		/* restore flags */
+		IRQ_LOCK (flags);
+		mainboard.flags = mainboard_flags;
+		IRQ_UNLOCK (flags);
+	}
+	else if (!strcmp_P(res->arg1, PSTR("open")))
+		wt11_open_link_mux(robot_2nd_addr, &robot_2nd.link_id);
+
+	else if (!strcmp_P(res->arg1, PSTR("close")))
+		wt11_close_link_mux(robot_2nd.link_id);
+
+    else if (!strcmp_P(res->arg1, "color"))
+		bt_robot_2nd_set_color ();
+
+    else if (!strcmp_P(res->arg1, "status"))
+		bt_robot_2nd_req_status ();
+#endif
+}
+
+prog_char str_robot_2nd_arg0[] = "robot_2nd";
+parse_pgm_token_string_t cmd_robot_2nd_arg0 = TOKEN_STRING_INITIALIZER(struct cmd_robot_2nd_result, arg0, str_robot_2nd_arg0);
+prog_char str_robot_2nd_arg1[] = "raw#open#close#color#status";
+parse_pgm_token_string_t cmd_robot_2nd_arg1 = TOKEN_STRING_INITIALIZER(struct cmd_robot_2nd_result, arg1, str_robot_2nd_arg1);
+
+prog_char help_robot_2nd[] = "robot_2nd commads";
+parse_pgm_inst_t cmd_robot_2nd = {
+    .f = cmd_robot_2nd_parsed, /* function to call */
+    .data = NULL, /* 2nd arg of func */
+    .help_str = help_robot_2nd,
+    .tokens =
+    { /* token list, NULL terminated */
+        (prog_void *) & cmd_robot_2nd_arg0,
+        (prog_void *) & cmd_robot_2nd_arg1,
         NULL,
     },
 };

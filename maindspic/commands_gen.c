@@ -468,19 +468,22 @@ struct cmd_wt11_result {
 /* function called when cmd_wt11 is parsed successfully */
 static void cmd_wt11_parsed(void *parsed_result, void *data)
 {
-	struct cmd_wt11_result *res = parsed_result;
-  	//char buffer[32] = "hello world!!";
-  	int16_t c;
-	struct vt100 vt100;
-	int8_t cmd = 0;
-
-	static uint8_t beacon_addr [] = {0x00, 0x07 ,0x80, 0x85, 0x04, 0x70};
-	static uint8_t beacon_link_id;
-	
-	if(!strcmp_P(res->arg1, "raw")) {
 #ifdef HOST_VERSION
 	printf("not implemented\n");
 #else
+	struct cmd_wt11_result *res = parsed_result;
+  	int16_t c;
+	struct vt100 vt100;
+	int8_t cmd = 0;
+	static uint8_t beacon_link_id = 0;
+
+
+#ifdef debug_wt11_commands
+	static uint8_t beacon_addr [] = {0x00, 0x07 ,0x80, 0x85, 0x04, 0x70};
+#endif
+	
+	if(!strcmp_P(res->arg1, "raw")) {
+
 		/* init vt100 character set */
 		vt100_init(&vt100);
 		
@@ -508,30 +511,13 @@ static void cmd_wt11_parsed(void *parsed_result, void *data)
 			//uart_send_nowait(MUX_UART,c);	
 			wt11_send_mux(beacon_link_id, (uint8_t *)&c, 1);
 		}
-#endif
-  }
-#if 0
-  else if (!strcmp_P(res->arg1, PSTR("send_mux_test"))) {
-
-     for (i=0; i<3; i++)
-        wt11_send_mux(i, buffer, sizeof(buffer));			
-
-     wt11_send_mux(0xFF, buffer, sizeof(buffer));
 
   }
-  else if (!strcmp_P(res->arg1, PSTR("recv_mux"))) {
-
-      length = wt11_recv_mux(&i, buffer);	
-      if (length == -1)
-        printf ("received nothing\n"); 
-      else 
-        printf ("%s\n", buffer);
-  }
-#endif
   else if (!strcmp_P(res->arg1, PSTR("reset"))) {
       //wt11_reset();
       wt11_reset_mux();
   }
+#ifdef debug_wt11_commands
   else if (!strcmp_P(res->arg1, PSTR("mode_mux"))) {
       wt11_enable_mux_mode();
   }
@@ -547,12 +533,14 @@ static void cmd_wt11_parsed(void *parsed_result, void *data)
   else if (!strcmp_P(res->arg1, PSTR("close_link"))) {
       wt11_close_link_mux(beacon_link_id);
   }
-
+#endif
+#endif
 }
 
 prog_char str_wt11_arg0[] = "wt11";
 parse_pgm_token_string_t cmd_wt11_arg0 = TOKEN_STRING_INITIALIZER(struct cmd_wt11_result, arg0, str_wt11_arg0);
-prog_char str_wt11_arg1[] = "raw#reset#mode_mux#mode_normal#open_link#close_link";
+//prog_char str_wt11_arg1[] = "raw#reset#mode_mux#mode_normal#open_link#close_link";
+prog_char str_wt11_arg1[] = "raw#reset";
 parse_pgm_token_string_t cmd_wt11_arg1 = TOKEN_STRING_INITIALIZER(struct cmd_wt11_result, arg1, str_wt11_arg1);
 
 prog_char help_wt11[] = "wt11 functions";
