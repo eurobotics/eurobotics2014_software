@@ -386,7 +386,7 @@ int main(void)
 
 
    /* start */
-   strat_start_match(1);
+   //strat_start_match(1);
 
    /* process commands, never returns */
    cmdline_interact();

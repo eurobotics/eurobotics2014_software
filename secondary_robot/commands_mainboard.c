@@ -1499,7 +1499,7 @@ parse_pgm_inst_t cmd_sleep = {
 /**********************************************************/
 /* wt11 */
 
-/* this structure is filled when cmd_sleep is parsed successfully */
+/* this structure is filled when cmd_wt11 is parsed successfully */
 struct cmd_wt11_result {
 	fixed_string_t arg0;
 	fixed_string_t arg1;
@@ -1547,4 +1547,53 @@ parse_pgm_inst_t cmd_wt11 = {
 	},
 };
 #endif
+
+
+/**********************************************************/
+/* patrol_between */
+
+/* this structure is filled when patrol_between is parsed successfully */
+struct cmd_patrol_between_result {
+	fixed_string_t arg0;
+	int16_t x1;
+	int16_t y1;
+	int16_t x2;
+	int16_t y2;
+};
+
+/* function called when cmd_patrol_between is parsed successfully */
+static void cmd_patrol_between_parsed(void *parsed_result, void *data)
+{
+	struct cmd_patrol_between_result *res = parsed_result;
+
+	patrol_between(res->x1,res->y1,res->x2,res->y2); 
+
+}
+
+prog_char str_patrol_between_arg0[] = "patrol_between";
+parse_pgm_token_string_t cmd_patrol_between_arg0 = TOKEN_STRING_INITIALIZER(struct cmd_patrol_between_result, arg0, str_patrol_between_arg0);
+
+parse_pgm_token_num_t cmd_x1 = TOKEN_NUM_INITIALIZER(struct cmd_patrol_between_result, x1, UINT16);
+parse_pgm_token_num_t cmd_y1 = TOKEN_NUM_INITIALIZER(struct cmd_patrol_between_result, y1, UINT16);
+parse_pgm_token_num_t cmd_x2 = TOKEN_NUM_INITIALIZER(struct cmd_patrol_between_result, x2, UINT16);
+parse_pgm_token_num_t cmd_y2 = TOKEN_NUM_INITIALIZER(struct cmd_patrol_between_result, y2, UINT16);
+
+
+prog_char help_patrol_between[] = "patrol_between";
+parse_pgm_inst_t cmd_patrol_between = {
+	.f = cmd_patrol_between_parsed,  /* function to call */
+	.data = NULL,      /* 2nd arg of func */
+	.help_str = help_patrol_between,
+	.tokens = {        /* token list, NULL terminated */
+		(prog_void *)&cmd_patrol_between_arg0,
+		(prog_void *)&cmd_x1,
+		(prog_void *)&cmd_y1,
+		(prog_void *)&cmd_x2,
+		(prog_void *)&cmd_y2,
+		NULL,
+	},
+};
+
+
+
 

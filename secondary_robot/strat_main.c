@@ -446,5 +446,50 @@ uint8_t strat_smart(void)
 	return END_TRAJ;
 }
 
+
 #endif /* notyet TODO 2014 */
+
+uint8_t patrol_between(int16_t x1, int16_t y1,int16_t x2, int16_t y2)
+{	
+
+	
+	int8_t opp_there, r2nd_there;
+	int16_t opp_x, opp_y, x_aux;
+	uint16_t old_spdd, old_spda, temp_spdd, temp_spda;
+	uint8_t err = 0;
+	/* save speed */
+	strat_get_speed (&old_spdd, &old_spda);
+  	strat_limit_speed_disable ();
+	strat_set_speed(SPEED_DIST_SLOW, SPEED_ANGLE_VERY_SLOW);
+	/* get robot coordenates */
+	opp_there = get_opponent_xy(&opp_x, &opp_y);
+
+	if(opp_there == -1 )
+		printf_P("return 0;");
+ 	if(x1>x2) x_aux=x1;
+	else{
+		x_aux=x2;
+	}
+	if(opp_x_is_more_than(COLOR_X(x_aux+600))){
+		if(opp_y_is_more_than(y1)&&opp_y_is_more_than(y2)){
+			printf_P("More than Ys opp 1.\n");
+		}
+		else if((opp_y_is_more_than(y1)&&!opp_y_is_more_than(y2))||(!opp_y_is_more_than(y1)&&opp_y_is_more_than(y2))){
+			printf_P("Between Ys opp 1.\n");
+			trajectory_goto_xy_abs (&mainboard.traj,(x1+x2)/2,opp_y); 
+		}	
+	}else{
+	printf_P("More than X opp 1.\n");
+	}
+		printf_P("X: %d Y: %d.\n",opp_x,opp_y);
+
+	err = wait_traj_end(TRAJ_FLAGS_NO_NEAR);
+		
+	if (!TRAJ_SUCCESS(err))
+		ERROUT(err);
+end:
+	strat_set_speed(old_spdd, old_spda);	
+	strat_limit_speed_enable();
+
+}
 
