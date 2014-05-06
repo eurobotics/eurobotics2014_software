@@ -713,7 +713,7 @@ static void cmd_robot_2nd_parsed(void * parsed_result, void * data)
    struct cmd_robot_2nd_result *res = parsed_result;
 
    vt100_init(&vt100);
-	static uint8_t robot_2nd_addr [] = {0x00, 0x07 ,0x80, 0x85, 0x04, 0x70};
+	static uint8_t robot_2nd_addr [] = {0x00, 0x07 ,0x80, 0x9A, 0xB8, 0x73};
 	
 	if(!strcmp_P(res->arg1, "raw")) {
 

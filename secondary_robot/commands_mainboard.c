@@ -65,6 +65,7 @@
 #include <parse_num.h>
 
 #include "../common/i2c_commands.h"
+#include "../common/bt_commands.h"
 
 #include "main.h"
 #include "sensor.h"
@@ -415,12 +416,16 @@ struct cmd_color_result {
 static void cmd_color_parsed(void *parsed_result, void *data)
 {
 	struct cmd_color_result *res = (struct cmd_color_result *) parsed_result;
+
 	if (!strcmp_P(res->color, PSTR("yellow"))) {
 		mainboard.our_color = I2C_COLOR_YELLOW;
 	}
 	else if (!strcmp_P(res->color, PSTR("red"))) {
 		mainboard.our_color = I2C_COLOR_RED;
 	}
+
+	bt_set_cmd_id_and_checksum (BT_SET_COLOR, 0);
+
 	printf_P(PSTR("Done\r\n"));
 }
 
@@ -1547,6 +1552,164 @@ parse_pgm_inst_t cmd_wt11 = {
 	},
 };
 #endif
+
+/**********************************************************/
+/* status */
+
+/* this structure is filled when cmd_status is parsed successfully */
+struct cmd_status_result {
+	fixed_string_t arg0;
+	int16_t robot_x;
+	int16_t robot_y;
+	int16_t robot_a_abs;
+
+	int16_t opp1_x;
+	int16_t opp1_y;
+
+	int16_t opp2_x;
+	int16_t opp2_y;
+
+	uint16_t checksum;
+};
+
+
+/* send data in norma mode, any protocol is used */
+void uart_send_buffer (uint8_t *buff, uint16_t length) 
+{
+  uint16_t i;
+
+	for(i=0; i<length; i++){
+		uart_send(CMDLINE_UART, buff[i]);
+	}	
+}
+
+/* function called when cmd_opponent is parsed successfully */
+static void cmd_status_parsed(void * parsed_result, void *data)
+{
+	struct cmd_status_result *res = parsed_result;
+	uint8_t flags;
+	uint16_t checksum = 0;
+	struct bt_robot_2nd_status_ans ans;
+	double x, y, a, d;
+	static uint16_t i=0;
+
+	/* test checksum */
+	checksum = res->robot_x + res->robot_y + res->robot_a_abs;
+	checksum += res->opp1_x + res->opp1_y;
+	checksum += res->opp2_x + res->opp2_y;
+
+	if (res->checksum != (uint16_t)(checksum)) {
+		ERROR (E_USER_BT_PROTO, "checksum ERROR");
+		goto send_status;
+	}
+
+	/* get main robot possition */
+	x = (int32_t)res->robot_x;
+	y = (int32_t)res->robot_y;
+	abs_xy_to_rel_da(x, y, &d, &a);
+
+	IRQ_LOCK(flags);
+	mainrobot.x = res->robot_x;
+	mainrobot.y = res->robot_y;
+	mainrobot.a_abs = res->robot_a_abs;
+	mainrobot.a = a;
+	mainrobot.d = d;
+	IRQ_UNLOCK(flags);
+
+	/* get opponent 1 possition */
+	x = (int32_t)res->opp1_x;
+	y = (int32_t)res->opp1_y;
+	abs_xy_to_rel_da(x, y, &d, &a);
+
+	IRQ_LOCK(flags);
+	mainrobot.opponent_x = res->opp1_x;
+	mainrobot.opponent_y = res->opp1_y;
+	mainrobot.opponent_a = a;
+	mainrobot.opponent_d = d;
+	IRQ_UNLOCK(flags);
+
+	/* get opponent 2 possition */
+	x = (int32_t)res->opp2_x;
+	y = (int32_t)res->opp2_y;
+	abs_xy_to_rel_da(x, y, &d, &a);
+
+	IRQ_LOCK(flags);
+	mainrobot.opponent2_x = res->opp2_x;
+	mainrobot.opponent2_y = res->opp2_y;
+	mainrobot.opponent2_a = a;
+	mainrobot.opponent2_d = d;
+	IRQ_UNLOCK(flags);
+
+send_status:
+	/* send status info */
+	IRQ_LOCK(flags);
+
+	/* robot possition */
+	ans.x = position_get_x_s16(&mainboard.pos);
+	ans.y = position_get_y_s16(&mainboard.pos);
+	ans.a_abs = position_get_a_deg_s16(&mainboard.pos);
+
+	/* opponent 1 */
+	ans.opponent_x = beaconboard.opponent_x;
+	ans.opponent_y = beaconboard.opponent_y;
+
+	/* opponent 2 */
+	ans.opponent2_x = beaconboard.opponent2_x;
+	ans.opponent2_y = beaconboard.opponent2_y;
+
+	/* XXX cmd feedback: must be filld by cmds */
+	ans.cmd_id = mainrobot.cmd_id;
+	ans.cmd_id = mainrobot.cmd_ret;
+	ans.cmd_args_checksum = mainrobot.cmd_args_checksum;
+	IRQ_UNLOCK(flags);
+
+
+#define DEBUG_STATUS
+#ifdef DEBUG_STATUS
+	/* fill answer structure */
+	ans.x = ans.opponent_x = ans.opponent2_x = i++;
+	ans.y = ans.opponent_y = ans.opponent2_y = i + 1000;
+	ans.a_abs = i + 2000;
+#endif
+
+	ans.checksum = bt_checksum ((uint8_t *)&ans, sizeof (ans)-sizeof(ans.checksum));
+
+	/* send answer */
+	uint8_t sync_header[] = BT_ROBOT_2ND_SYNC_HEADER;
+	uart_send_buffer (sync_header, sizeof(sync_header)); 
+	uart_send_buffer ((uint8_t*) &ans, sizeof(ans)); 
+}
+
+
+prog_char str_status_arg0[] = "status";
+parse_pgm_token_string_t cmd_status_arg0 = TOKEN_STRING_INITIALIZER(struct cmd_status_result, arg0, str_status_arg0);
+parse_pgm_token_num_t cmd_status_robot_x = TOKEN_NUM_INITIALIZER(struct cmd_status_result, robot_x, INT16);
+parse_pgm_token_num_t cmd_status_robot_y = TOKEN_NUM_INITIALIZER(struct cmd_status_result, robot_y, INT16);
+parse_pgm_token_num_t cmd_status_robot_a_abs = TOKEN_NUM_INITIALIZER(struct cmd_status_result, robot_a_abs, INT16);
+parse_pgm_token_num_t cmd_status_opp1_x = TOKEN_NUM_INITIALIZER(struct cmd_status_result, opp1_x, INT16);
+parse_pgm_token_num_t cmd_status_opp1_y = TOKEN_NUM_INITIALIZER(struct cmd_status_result, opp1_y, INT16);
+parse_pgm_token_num_t cmd_status_opp2_x = TOKEN_NUM_INITIALIZER(struct cmd_status_result, opp2_x, INT16);
+parse_pgm_token_num_t cmd_status_opp2_y = TOKEN_NUM_INITIALIZER(struct cmd_status_result, opp2_y, INT16);
+parse_pgm_token_num_t cmd_status_checksum = TOKEN_NUM_INITIALIZER(struct cmd_status_result, checksum, UINT16);
+
+prog_char help_status[] = "Get robot status (x,y,a_abs,checksum)";
+parse_pgm_inst_t cmd_status = {
+	.f = cmd_status_parsed,  /* function to call */
+	.data = NULL,      /* 2nd arg of func */
+	.help_str = help_status,
+	.tokens = {        /* token list, NULL terminated */
+		(prog_void *)&cmd_status_arg0, 
+		(prog_void *)&cmd_status_robot_x, 
+		(prog_void *)&cmd_status_robot_y, 
+		(prog_void *)&cmd_status_robot_a_abs,
+		(prog_void *)&cmd_status_opp1_x, 
+		(prog_void *)&cmd_status_opp1_y, 
+		(prog_void *)&cmd_status_opp2_x, 
+		(prog_void *)&cmd_status_opp2_y, 
+		(prog_void *)&cmd_status_checksum, 
+		NULL,
+	},
+};
 
 
 /**********************************************************/

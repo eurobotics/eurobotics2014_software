@@ -288,6 +288,31 @@ uint8_t bt_robot_2nd_test_checksum (void) {
 }
 
 /* send command, and return after received ack */
+void bt_robot_2nd_cmd_no_wait_ack (uint8_t cmd_id, int16_t arg0, int16_t arg1)
+{
+	/* force new line */
+	bt_send_ascii_cmd (robot_2nd.link_id, "\n");
+
+	/* command */
+	if (cmd_id == BT_SET_COLOR) {
+		arg0 = mainboard.our_color;
+
+		if(arg0 == I2C_COLOR_YELLOW)
+			bt_send_ascii_cmd (robot_2nd.link_id, "color yellow");
+	  	else
+			bt_send_ascii_cmd (robot_2nd.link_id, "color red");
+	}
+
+	else if (cmd_id == BT_GOTO_XY_ABS)
+		bt_send_ascii_cmd (robot_2nd.link_id, "goto xy_abs %d %d", arg0, arg1);
+	else if (cmd_id == BT_GOTO_XY_REL)
+		bt_send_ascii_cmd (robot_2nd.link_id, "goto xy_rel %d %d", arg0, arg1);
+
+	/* execute command */
+	bt_send_ascii_cmd (robot_2nd.link_id, "\n");
+}
+
+/* send command, and return after received ack */
 void bt_robot_2nd_cmd (uint8_t cmd_id, int16_t arg0, int16_t arg1)
 {
 	uint8_t flags;
@@ -295,25 +320,8 @@ void bt_robot_2nd_cmd (uint8_t cmd_id, int16_t arg0, int16_t arg1)
 	int8_t ret;
 
 retry:
-	/* force new line */
-	bt_send_ascii_cmd (robot_2nd.link_id, "\n");
 
-	if (cmd_id == BT_SET_COLOR) {
-		arg0 = mainboard.our_color;
-
-		if(arg0 == I2C_COLOR_YELLOW)
-			bt_send_ascii_cmd (robot_2nd.link_id, "\ncolor yellow\n");
-	  	else
-			bt_send_ascii_cmd (robot_2nd.link_id, "\ncolor red\n");
-	}
-
-	if (cmd_id == BT_GOTO_XY_ABS)
-		bt_send_ascii_cmd (robot_2nd.link_id, "goto xy_abs %d %d", arg0, arg1);
-	else if (cmd_id == BT_GOTO_XY_REL)
-		bt_send_ascii_cmd (robot_2nd.link_id, "goto xy_rel %d %d", arg0, arg1);
-
-	/* execute command */
-	bt_send_ascii_cmd (robot_2nd.link_id, "\n");
+	bt_robot_2nd_cmd_no_wait_ack (cmd_id, arg0, arg1);
 
 	/* set feedback info */
 	IRQ_LOCK (flags);
@@ -333,7 +341,7 @@ retry:
 
 /* set color */
 inline void bt_robot_2nd_set_color (void) {
-	bt_robot_2nd_cmd (BT_SET_COLOR, 0, 0);
+	bt_robot_2nd_cmd_no_wait_ack (BT_SET_COLOR, 0, 0);
 }
 
 /* goto xy_abs */

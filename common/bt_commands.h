@@ -43,7 +43,7 @@ struct bt_beacon_status_ans
  * ROBOT_2ND COMMANDS 
  ***********************************************************/
 
-#define BT_ROBOT_SYNC_HEADER		"robot_2nd_sync"
+#define BT_ROBOT_2ND_SYNC_HEADER	"robot_2nd_sync"
 #define BT_ROBOT_2ND_STATUS_ANS 	0x02
 struct bt_robot_2nd_status_ans 
 {
@@ -98,7 +98,7 @@ struct bt_robot_2nd_status_ans
 
 
 /* return the sum of length datum */
-inline uint16_t checksum(uint8_t *data, uint16_t length) {
+inline uint16_t bt_checksum(uint8_t *data, uint16_t length) {
   uint16_t sum=0, i=0;
 
   for (i=0; i<length; i++)

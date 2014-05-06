@@ -79,6 +79,7 @@ struct genboard gen;
 struct mainboard mainboard;
 struct slavedspic slavedspic;
 struct beaconboard beaconboard;
+struct mainrobot mainrobot;
 
 /***************************************************************/
 
@@ -229,6 +230,7 @@ int main(void)
    memset(&mainboard, 0, sizeof(mainboard));
    memset(&slavedspic, 0, sizeof(slavedspic));
    memset(&beaconboard, 0, sizeof(beaconboard));
+   memset(&mainrobot, 0, sizeof(mainrobot));
 
    /* init flags */
 #ifdef HOST_VERSION
@@ -243,10 +245,6 @@ int main(void)
 
 #ifdef TWO_OPPONENTS
    beaconboard.opponent2_x = I2C_OPPONENT_NOT_THERE;
-#endif
-
-#ifdef ROBOT_2ND
-   beaconboard.robot_2nd_x = I2C_OPPONENT_NOT_THERE;
 #endif
 
 #ifndef HOST_VERSION
@@ -384,6 +382,16 @@ int main(void)
      strat_event_enable();
 #endif
 
+	/* program WT-11 */
+#if 0
+	time_wait_ms (1000);
+	printf ("+++\n\r");
+	time_wait_ms (1000);
+	printf ("SET BT NAME Seskapa\n\r");
+	time_wait_ms (1000);
+	printf ("SET BT AUTH * gomaespuminos\n\r");
+	time_wait_ms (1000);
+#endif
 
    /* start */
    //strat_start_match(1);

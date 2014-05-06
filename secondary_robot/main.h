@@ -304,20 +304,70 @@ struct beaconboard
 	int16_t opponent2_d;
 #endif
 
-#ifdef ROBOT_2ND
 	int16_t robot_2nd_x;
 	int16_t robot_2nd_y;
-	int16_t robot_2nd_a;
-  	int16_t robot_2nd_a_abs;
 	int16_t robot_2nd_d;
-#endif
+	int16_t robot_2nd_a;
+	int16_t robot_2nd_a_abs;
+};
 
+/* main robot structure parameters */
+struct mainrobot
+{
+	/* command requested */
+	uint8_t cmd_id;					/* for ack test */
+	uint8_t cmd_ret; 					/* for end traj test, 
+												follows END_TRAJ flags rules, 
+												see strat_base.h */
+	uint8_t cmd_args_checksum;		/* checksum of cmd arguments*/
+
+	/* strat info */
+	uint16_t done_flags;
+
+  	/* robot position */
+	int16_t x;
+	int16_t y;
+  	int16_t a_abs;
+	int16_t a;
+	int16_t d;
+
+  	/* opponent pos */
+	int16_t opponent_x;
+	int16_t opponent_y;
+	int16_t opponent_a;
+	int16_t opponent_d;
+
+#ifdef TWO_OPPONENTS
+	int16_t opponent2_x;
+	int16_t opponent2_y;
+	int16_t opponent2_a;
+	int16_t opponent2_d;
+#endif
 };
 
 extern struct genboard gen;
 extern struct mainboard mainboard;
 extern struct slavedspic slavedspic;
 extern struct beaconboard beaconboard;
+extern struct mainrobot mainrobot;
+
+
+/* set bt cmd id and args checksum */
+static inline void bt_set_cmd_id_and_checksum (uint8_t cmd_id, uint8_t args_sumatory) {
+	uint8_t flags;
+	IRQ_LOCK (flags);
+	mainrobot.cmd_id = cmd_id;
+	mainrobot.cmd_args_checksum = (uint8_t)(cmd_id + args_sumatory);
+	IRQ_UNLOCK (flags);
+}
+
+/* set bt cmd id and args checksum */
+static inline void bt_set_cmd_ret (uint8_t ret) {
+	uint8_t flags;
+	IRQ_LOCK (flags);
+	mainrobot.cmd_ret = ret;
+	IRQ_UNLOCK (flags);
+}
 
 ///* TODO start the bootloader */
 //void bootloader(void);
