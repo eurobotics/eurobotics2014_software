@@ -93,14 +93,14 @@ struct cmd_event_result
 /* function called when cmd_event is parsed successfully */
 static void cmd_event_parsed(void *parsed_result, void *data)
 {
-    u08 bit = 0;
+    uint16_t bit = 0;
 
     struct cmd_event_result * res = parsed_result;
 
     if (!strcmp_P(res->arg1, PSTR("all")))
     {
         bit = DO_ENCODERS | DO_CS | DO_RS | DO_POS |
-                DO_BD | DO_TIMER | DO_POWER | DO_OPP;
+                DO_BD | DO_TIMER | DO_POWER | DO_OPP | DO_ROBOT_2ND;
         if (!strcmp_P(res->arg2, PSTR("on")))
             mainboard.flags |= bit;
         else if (!strcmp_P(res->arg2, PSTR("off")))
@@ -122,6 +122,8 @@ static void cmd_event_parsed(void *parsed_result, void *data)
             printf_P(PSTR("power is %s\r\n"),
                      (DO_POWER & mainboard.flags) ? "on" : "off");
             printf_P(PSTR("opp is %s\r\n"),
+                     (DO_OPP & mainboard.flags) ? "on" : "off");
+           printf_P(PSTR("robot_2nd is %s\r\n"),
                      (DO_OPP & mainboard.flags) ? "on" : "off");
         }
         return;
@@ -149,6 +151,9 @@ static void cmd_event_parsed(void *parsed_result, void *data)
         bit = DO_POWER;
     else if (!strcmp_P(res->arg1, PSTR("opp")))
         bit = DO_OPP;
+   else if (!strcmp_P(res->arg1, PSTR("robot_2nd")))
+        bit = DO_ROBOT_2ND;
+
 
     if (!strcmp_P(res->arg2, PSTR("on")))
         mainboard.flags |= bit;
@@ -172,7 +177,7 @@ static void cmd_event_parsed(void *parsed_result, void *data)
 
 prog_char str_event_arg0[] = "event";
 parse_pgm_token_string_t cmd_event_arg0 = TOKEN_STRING_INITIALIZER(struct cmd_event_result, arg0, str_event_arg0);
-prog_char str_event_arg1[] = "all#encoders#cs#rs#pos#bd#timer#power#opp";
+prog_char str_event_arg1[] = "all#encoders#cs#rs#pos#bd#timer#power#opp#robot_2nd";
 parse_pgm_token_string_t cmd_event_arg1 = TOKEN_STRING_INITIALIZER(struct cmd_event_result, arg1, str_event_arg1);
 prog_char str_event_arg2[] = "on#off#show";
 parse_pgm_token_string_t cmd_event_arg2 = TOKEN_STRING_INITIALIZER(struct cmd_event_result, arg2, str_event_arg2);
@@ -763,12 +768,29 @@ static void cmd_robot_2nd_parsed(void * parsed_result, void * data)
 
     else if (!strcmp_P(res->arg1, "status"))
 		bt_robot_2nd_req_status ();
+    else if (!strcmp_P(res->arg1, "show")) {
+
+		printf ("cmd %d %d %d %d\n\r", robot_2nd.cmd_id, robot_2nd.cmd_ret,
+											robot_2nd.cmd_args_checksum_send, 
+											robot_2nd.cmd_args_checksum_recv);
+		printf ("color %s\n\r", robot_2nd.color == I2C_COLOR_YELLOW? "yellow":"red");
+		printf ("done_flags 0x%.4X\n\r", robot_2nd.done_flags);
+		printf ("pos abs(%d %d %d) rel(%d %d)\n\r",
+										robot_2nd.x, robot_2nd.y, robot_2nd.a_abs,
+										robot_2nd.a, robot_2nd.d);
+
+		printf ("opp1 (%d %d %d %d)\n\r", robot_2nd.opponent_x, robot_2nd.opponent_y,
+											   robot_2nd.opponent_a, robot_2nd.opponent_d); 
+		printf ("opp2 (%d %d %d %d)\n\r", robot_2nd.opponent2_x, robot_2nd.opponent2_y,
+											   robot_2nd.opponent2_a, robot_2nd.opponent2_d); 
+	}
+
 #endif
 }
 
 prog_char str_robot_2nd_arg0[] = "robot_2nd";
 parse_pgm_token_string_t cmd_robot_2nd_arg0 = TOKEN_STRING_INITIALIZER(struct cmd_robot_2nd_result, arg0, str_robot_2nd_arg0);
-prog_char str_robot_2nd_arg1[] = "raw#open#close#color#status";
+prog_char str_robot_2nd_arg1[] = "raw#open#close#color#status#show";
 parse_pgm_token_string_t cmd_robot_2nd_arg1 = TOKEN_STRING_INITIALIZER(struct cmd_robot_2nd_result, arg1, str_robot_2nd_arg1);
 
 prog_char help_robot_2nd[] = "robot_2nd commads";

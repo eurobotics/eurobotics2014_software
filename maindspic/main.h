@@ -243,7 +243,7 @@ struct genboard
 struct mainboard 
 {
 	/* events flags */
-	uint8_t flags;                
+	uint16_t flags;                
 #define DO_ENCODERS   1
 #define DO_CS         2
 #define DO_RS         4
@@ -253,7 +253,6 @@ struct mainboard
 #define DO_POWER      64
 #define DO_OPP        128
 #define DO_ROBOT_2ND  256
-#define DO_OPP        128
 #define DO_BT_PROTO   (DO_OPP | DO_ROBOT_2ND)
 
 	/* control systems */

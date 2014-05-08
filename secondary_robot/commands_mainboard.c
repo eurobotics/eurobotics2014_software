@@ -423,7 +423,12 @@ static void cmd_color_parsed(void *parsed_result, void *data)
 	else if (!strcmp_P(res->color, PSTR("red"))) {
 		mainboard.our_color = I2C_COLOR_RED;
 	}
-
+	else if (!strcmp_P(res->color, PSTR("show"))) {
+		if(mainboard.our_color == I2C_COLOR_YELLOW)
+			printf("color is YELLOW\n\r");
+		else
+			printf("color is RED\n\r");
+	}
 	bt_set_cmd_id_and_checksum (BT_SET_COLOR, 0);
 
 	printf_P(PSTR("Done\r\n"));
@@ -431,7 +436,7 @@ static void cmd_color_parsed(void *parsed_result, void *data)
 
 prog_char str_color_arg0[] = "color";
 parse_pgm_token_string_t cmd_color_arg0 = TOKEN_STRING_INITIALIZER(struct cmd_color_result, arg0, str_color_arg0);
-prog_char str_color_color[] = "yellow#red";
+prog_char str_color_color[] = "yellow#red#show";
 parse_pgm_token_string_t cmd_color_color = TOKEN_STRING_INITIALIZER(struct cmd_color_result, color, str_color_color);
 
 prog_char help_color[] = "Set our color";
@@ -1588,7 +1593,7 @@ static void cmd_status_parsed(void * parsed_result, void *data)
 {
 	struct cmd_status_result *res = parsed_result;
 	uint8_t flags;
-	uint16_t checksum = 0;
+	int16_t checksum = 0;
 	struct bt_robot_2nd_status_ans ans;
 	double x, y, a, d;
 	static uint16_t i=0;
@@ -1690,7 +1695,7 @@ parse_pgm_token_num_t cmd_status_opp1_x = TOKEN_NUM_INITIALIZER(struct cmd_statu
 parse_pgm_token_num_t cmd_status_opp1_y = TOKEN_NUM_INITIALIZER(struct cmd_status_result, opp1_y, INT16);
 parse_pgm_token_num_t cmd_status_opp2_x = TOKEN_NUM_INITIALIZER(struct cmd_status_result, opp2_x, INT16);
 parse_pgm_token_num_t cmd_status_opp2_y = TOKEN_NUM_INITIALIZER(struct cmd_status_result, opp2_y, INT16);
-parse_pgm_token_num_t cmd_status_checksum = TOKEN_NUM_INITIALIZER(struct cmd_status_result, checksum, UINT16);
+parse_pgm_token_num_t cmd_status_checksum = TOKEN_NUM_INITIALIZER(struct cmd_status_result, checksum, INT16);
 
 prog_char help_status[] = "Get robot status (x,y,a_abs,checksum)";
 parse_pgm_inst_t cmd_status = {

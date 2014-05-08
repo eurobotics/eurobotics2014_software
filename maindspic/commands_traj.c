@@ -880,7 +880,7 @@ static void cmd_goto_parsed(void * parsed_result, void * data)
     printf_P(PSTR("returned %s\r\n"), get_err(err));
 }
 
-prog_char str_goto_arg0[] = "goto#robot2_goto";
+prog_char str_goto_arg0[] = "goto";
 parse_pgm_token_string_t cmd_goto_arg0 = TOKEN_STRING_INITIALIZER(struct cmd_goto_result, arg0, str_goto_arg0);
 prog_char str_goto_arg1_a[] = "d_rel#a_rel#a_abs";
 parse_pgm_token_string_t cmd_goto_arg1_a = TOKEN_STRING_INITIALIZER(struct cmd_goto_result, arg1, str_goto_arg1_a);
