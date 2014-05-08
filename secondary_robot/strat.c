@@ -343,7 +343,6 @@ void state_debug_wait_key_pressed(void)
 /* strat main loop */
 uint8_t strat_main(void)
 {
-
 #define DEBUG_STRAT_HARVEST_FRUITS
 #ifdef DEBUG_STRAT_HARVEST_FRUITS 
 #define wait_press_key() state_debug_wait_key_pressed();
@@ -355,23 +354,19 @@ uint8_t strat_main(void)
 #define BEGIN_LINE_Y 	450
 #define BEGIN_MAMOOTH_X	750
 #define BEGIN_FRESCO_X	1295
+#define BEGIN_FRESCO_Y	600
 #define SERVO_SHOOT_POS_UP 80
 #define SERVO_SHOOT_POS_DOWN 300
 
-   uint8_t err = 0;
+    uint8_t err = 0;
 	uint16_t old_spdd, old_spda;
-
 	static uint8_t mamooth_done =0;
 	static uint8_t other_mamooth =0;
-	static uint8_t fresco_done =0;
 	static uint8_t state = 0;
- 
-	//wait_press_key();
-
-
+	
 	switch (state)
 	{
-		/* goto out of home */
+		/* go out of home */
 		case 0:
 			trajectory_goto_forward_xy_abs (&mainboard.traj, 
 										position_get_x_s16(&mainboard.pos),	BEGIN_LINE_Y);
@@ -383,19 +378,41 @@ uint8_t strat_main(void)
 			state ++;
 			break;
 
-		/* goto in front of mammut */
+
+		/* Go to patrol position */
 		case 1:
+			trajectory_goto_forward_xy_abs (&mainboard.traj, COLOR_X(BEGIN_FRESCO_X),BEGIN_FRESCO_Y);
+			err = wait_traj_end(TRAJ_FLAGS_NO_NEAR);
+			if (!TRAJ_SUCCESS(err))
+					ERROUT(err);
+					
+			state++;
+			break;
+			
+
+		/* patrol and paint fresco */
+		case 2:
+			/* WHILE (NO COMMAND FROM MASTER ROBOT) */
+			while(1)	
+				patrol_and_paint_fresco();
+			
+			//	state ++;			
+			break;
+			
+			
+		/* go in front of mamooth */
+		case 3:
 			trajectory_goto_forward_xy_abs (&mainboard.traj, 
 										COLOR_X(BEGIN_MAMOOTH_X), BEGIN_LINE_Y);
-#define SIM_END_OBSTACLE
-#ifdef SIM_END_OBSTACLE
-    while (!x_is_more_than(750/2));
-    strat_hardstop();
-    DEBUG (E_USER_STRAT, "End obstacle");
-    err = END_OBSTACLE;
-#else
-		err = wait_traj_end(TRAJ_FLAGS_NO_NEAR);
-#endif
+			#define SIM_END_OBSTACLE
+			#ifdef SIM_END_OBSTACLE
+				while (!x_is_more_than(750/2));
+				strat_hardstop();
+				DEBUG (E_USER_STRAT, "End obstacle");
+				err = END_OBSTACLE;
+			#else
+					err = wait_traj_end(TRAJ_FLAGS_NO_NEAR);
+			#endif
 
 			if(err & END_OBSTACLE)
 			{
@@ -416,97 +433,20 @@ uint8_t strat_main(void)
 			state ++;			
 			break;
 
-		/* shoot */
-		case 2:
-		//XXX - Where is the problem
-/**********************************************************/
-		
+		/* shoot to mamooth */
+		case 4:
 		#ifndef HOST_VERSION
 			pwm_servo_set(&gen.pwm_servo_oc3, SERVO_SHOOT_POS_UP);
 			pwm_servo_set(&gen.pwm_servo_oc4, SERVO_SHOOT_POS_DOWN);
 		#endif
 			time_wait_ms(1000);
 			mamooth_done=1;
+			
 			state ++;			
 			break;
-
 		
-		case 21:
-			beaconboard.opponent_x = COLOR_X(750);
-			beaconboard.opponent_y = 600;
-      beaconboard.opponent_a = 90;
-      beaconboard.opponent_d = 1000;
-
-			sensor_obstacle_disable();
-			goto_and_avoid_forward(	COLOR_X(BEGIN_FRESCO_X), BEGIN_LINE_Y,TRAJ_FLAGS_NO_NEAR,TRAJ_FLAGS_NO_NEAR);
-			sensor_obstacle_enable();
-			state=4;
-			break;
-
-
-		/* goto in front of fresco */
-		case 3:
-			trajectory_goto_forward_xy_abs (&mainboard.traj, 
-										COLOR_X(BEGIN_FRESCO_X), BEGIN_LINE_Y);
-//			err = wait_traj_end(TRAJ_FLAGS_NO_NEAR);
-			err = wait_traj_end(TRAJ_FLAGS_STD);
-			if (!TRAJ_SUCCESS(err))
-					ERROUT(err);
-
-			state ++;			
-			break;
-
-		/* turn to fresco 1*/
-		case 4:
-			trajectory_a_abs (&mainboard.traj, COLOR_A_ABS(90));
-//			err = wait_traj_end(TRAJ_FLAGS_NO_NEAR);
-			err = wait_traj_end(TRAJ_FLAGS_STD);
-			if (!TRAJ_SUCCESS(err))
-					ERROUT(err);
-
-			state ++;			
-			break;
-
-		/* turn to fresco 2*/
-		case 5:
-
-
-			trajectory_goto_backward_xy_abs (&mainboard.traj, 
-										COLOR_X(BEGIN_FRESCO_X), 430);
-			err = wait_traj_end(TRAJ_FLAGS_STD);
-			if (!TRAJ_SUCCESS(err))
-					ERROUT(err);
-
-			state ++;		
-			break;
-
-		/* paint fresco */
-		case 6:
-			sensor_obstacle_enable();
-			if (sensor_get (S_OBS_REAR_L) || sensor_get (S_OBS_REAR_R))
-				ERROUT(END_OBSTACLE);
-				
-			trajectory_goto_backward_xy_abs (&mainboard.traj, 
-										COLOR_X(BEGIN_FRESCO_X), ROBOT_CENTER_TO_BACK + 100);
-			err = wait_traj_end(TRAJ_FLAGS_SMALL_DIST);
-			if (!TRAJ_SUCCESS(err))
-					ERROUT(err);
-
-			/* save speed */
-			strat_get_speed(&old_spdd, &old_spda);
-			strat_set_speed(SPEED_DIST_VERY_SLOW, SPEED_ANGLE_FAST);
-			trajectory_d_rel(&mainboard.traj, -200);
-			err = wait_traj_end(TRAJ_FLAGS_SMALL_DIST);
-
-			strat_set_speed(old_spdd, old_spda);
-			fresco_done=1;
-
-			trajectory_goto_forward_xy_abs (&mainboard.traj, 
-										COLOR_X(BEGIN_FRESCO_X), ROBOT_CENTER_TO_BACK + 100);
-			err = wait_traj_end(TRAJ_FLAGS_SMALL_DIST);
-			if (!TRAJ_SUCCESS(err))
-					ERROUT(err);
-
+#if 0		
+		
 			if(other_mamooth==1)
 			{
 				state=31;
@@ -516,7 +456,6 @@ uint8_t strat_main(void)
 			break;
 
 		case 31:
-
 			trajectory_goto_forward_xy_abs (&mainboard.traj, 
 										COLOR_X(BEGIN_FRESCO_X), 430);
 			err = wait_traj_end(TRAJ_FLAGS_STD);
@@ -549,7 +488,7 @@ uint8_t strat_main(void)
 
 			state++;
 			break;
-
+#endif
 		default:
 			break;
 	}
@@ -561,7 +500,7 @@ end:
 	return err;	
 }
 
-/* start a match debuging or not */
+/* start a match debugging or not */
 void strat_start_match(uint8_t debug)
 {
 	uint8_t old_level = gen.log_level;

@@ -366,7 +366,7 @@ retry_on:
 	}
 #endif	
 
-	if (!strcmp_P(res->color, PSTR("yellow"))) {
+	if (!strcmp_P(res->color, PSTR("red"))) {
 		mainboard.our_color = I2C_COLOR_RED;
 		//beacon_cmd_color();
 	}

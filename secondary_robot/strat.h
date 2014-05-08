@@ -31,58 +31,58 @@
 #define AREA_X 3000
 #define AREA_Y 2000
 
-/* position of the tokens */
-#define TREE_1_X			3000
+/* position of the tokens XXX */
+#define TREE_1_X			0
 #define TREE_1_Y			1300
-#define TREE_2_X			2300
+#define TREE_2_X			700
 #define TREE_2_Y			2000
-#define TREE_3_X			700
+#define TREE_3_X			2300
 #define TREE_3_Y			2000
-#define TREE_4_X			0
+#define TREE_4_X			3000
 #define TREE_4_Y			1300
-#define HEART_FIRE_1_X		2860
+#define HEART_FIRE_1_X		140
 #define HEART_FIRE_1_Y		1860
 #define HEART_FIRE_2_X		1500
 #define HEART_FIRE_2_Y		1050
-#define HEART_FIRE_3_X		140
+#define HEART_FIRE_3_X		2860
 #define HEART_FIRE_3_Y		1860
-#define FIRE_1_X			2600
+#define FIRE_1_X			400
 #define FIRE_1_Y			1100
-#define FIRE_2_X			2100
+#define FIRE_2_X			900
 #define FIRE_2_Y			600
-#define FIRE_3_X			2100
+#define FIRE_3_X			900
 #define FIRE_3_Y			1600
-#define FIRE_4_X			900
+#define FIRE_4_X			2100
 #define FIRE_4_Y			600
-#define FIRE_5_X			900
+#define FIRE_5_X			2100
 #define FIRE_5_Y			1600
-#define FIRE_6_X			400
+#define FIRE_6_X			2600
 #define FIRE_6_Y			1100
-#define TORCH_1_X			3000
+#define TORCH_1_X			0
 #define TORCH_1_Y			800
-#define TORCH_2_X			1700
+#define TORCH_2_X			1300
 #define TORCH_2_Y			2000
-#define TORCH_3_X			1300
+#define TORCH_3_X			1700
 #define TORCH_3_Y			2000
-#define TORCH_4_X			0
+#define TORCH_4_X			3000
 #define TORCH_4_Y			800
-#define MOBILE_TORCH_1_X		2100
+#define MOBILE_TORCH_1_X		900
 #define MOBILE_TORCH_1_Y		1100
-#define MOBILE_TORCH_2_X		900
+#define MOBILE_TORCH_2_X		2100
 #define MOBILE_TORCH_2_Y		1100
-#define BASKET_1_X		2300
+#define BASKET_1_X		700
 #define BASKET_1_Y		150
-#define BASKET_2_X		700
+#define BASKET_2_X		2300
 #define BASKET_2_Y		150
-#define MAMOOTH_1_X		2300
+#define MAMOOTH_1_X		700
 #define MAMOOTH_1_Y		0
-#define MAMOOTH_2_X		700
+#define MAMOOTH_2_X		2300
 #define MAMOOTH_2_Y		0
 #define FRESCO_X			1500
 #define FRESCO_Y			0
-#define HOME_RED_X		200
+#define HOME_RED_X		2800
 #define HOME_RED_Y		300
-#define HOME_YELLOW_X		2800
+#define HOME_YELLOW_X		200
 #define HOME_YELLOW_Y		300
 
 /* convert coords according to our color */
@@ -348,6 +348,15 @@ void strat_start_match(uint8_t debug);
 /********************************************
  * in strat_main.c 
  *******************************************/
+ 
+
+uint8_t patrol_and_paint_fresco(void);
+uint8_t paint_fresco(void);
+uint8_t patrol_between(int16_t x1, int16_t y1,int16_t x2, int16_t y2);
+
+
+
+
 #if notyet /* TODO 2014 */
 uint8_t strat_main_loop(void);
 
@@ -364,8 +373,6 @@ uint8_t strat_work_on_zone(uint8_t zone_num);
 //#define DEBUG_STRAT_SMART
 uint8_t strat_smart(void);
 
-
-uint8_t patrol_between(int16_t x1, int16_t y1,int16_t x2, int16_t y2);
 #endif /* notyet TODO 2014 */
 
 #else /* HOST_VERSION_OA_TEST */

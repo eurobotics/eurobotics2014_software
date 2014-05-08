@@ -449,47 +449,172 @@ uint8_t strat_smart(void)
 
 #endif /* notyet TODO 2014 */
 
-uint8_t patrol_between(int16_t x1, int16_t y1,int16_t x2, int16_t y2)
-{	
 
+
+uint8_t patrol_and_paint_fresco(void)
+{
+	#define BEGIN_FRESCO_X	1295
+	#define REFERENCE_DISTANCE_TO_ROBOT 800
+	static uint8_t fresco_done =0;
+	int16_t d,d2;
+	int16_t a,a2;
+	int16_t opp_x, opp_y, opp2_x, opp2_y;
 	
-	int8_t opp_there, r2nd_there;
-	int16_t opp_x, opp_y, x_aux;
+	get_opponent_da(&d,&a);
+	get_opponent2_da(&d2,&a2);
+	
+	if(d2>REFERENCE_DISTANCE_TO_ROBOT && d>REFERENCE_DISTANCE_TO_ROBOT && fresco_done!=1)
+		return (fresco_done=paint_fresco());
+		
+	else
+	{
+		get_opponent_xy(&opp_x, &opp_y);
+		get_opponent2_xy(&opp2_x, &opp2_y);
+		if(opp_y<300 || opp2_y<300 && fresco_done!=1)
+			return (fresco_done=paint_fresco());
+			
+		else
+			return patrol_between(COLOR_X(BEGIN_FRESCO_X),300,COLOR_X(BEGIN_FRESCO_X),900);
+	}
+}
+
+
+uint8_t paint_fresco(void)
+{
+	static uint8_t state = 0;
 	uint16_t old_spdd, old_spda, temp_spdd, temp_spda;
 	uint8_t err = 0;
+#define BEGIN_LINE_Y 	450
+#define BEGIN_FRESCO_X	1295
+
+	switch (state)
+	{
+		/* go in front of fresco */
+		case 0:
+			printf_P("State 0\n");
+			//trajectory_goto_forward_xy_abs (&mainboard.traj, 
+			//							BEGIN_FRESCO_X, BEGIN_LINE_Y);
+			//err = wait_traj_end(TRAJ_FLAGS_STD);
+			//if (!TRAJ_SUCCESS(err))
+			//		ERROUT(err);
+
+			state ++;	
+			return 0;		
+			break;
+
+		/* turn to fresco 1*/
+		case 1:
+			printf_P("State 1\n");
+			trajectory_a_abs (&mainboard.traj, COLOR_A_ABS(90));
+			err = wait_traj_end(TRAJ_FLAGS_STD);
+			if (!TRAJ_SUCCESS(err))
+					ERROUT(err);
+
+			state ++;	
+			return 0;		
+			break;
+
+		/* paint fresco 1*/
+		case 2:
+			printf_P("State 2\n");
+			trajectory_goto_backward_xy_abs (&mainboard.traj, 
+										COLOR_X(BEGIN_FRESCO_X), 430);
+			err = wait_traj_end(TRAJ_FLAGS_STD);
+			if (!TRAJ_SUCCESS(err))
+					ERROUT(err);
+			state ++;		
+			return 0;	
+			break;
+
+		/* paint fresco 2*/
+		case 3:
+			printf_P("State 3\n");
+			sensor_obstacle_enable();
+			if (sensor_get (S_OBS_REAR_L) || sensor_get (S_OBS_REAR_R))
+				ERROUT(END_OBSTACLE);
+				
+			trajectory_goto_backward_xy_abs (&mainboard.traj, 
+										COLOR_X(BEGIN_FRESCO_X), ROBOT_CENTER_TO_BACK + 100);
+			err = wait_traj_end(TRAJ_FLAGS_SMALL_DIST);
+			if (!TRAJ_SUCCESS(err))
+					ERROUT(err);
+
+			/* save speed */
+			strat_get_speed(&old_spdd, &old_spda);
+			strat_set_speed(SPEED_DIST_VERY_SLOW, SPEED_ANGLE_FAST);
+			trajectory_d_rel(&mainboard.traj, -200);
+			err = wait_traj_end(TRAJ_FLAGS_SMALL_DIST);
+
+			strat_set_speed(old_spdd, old_spda);
+
+			trajectory_goto_forward_xy_abs (&mainboard.traj, 
+										COLOR_X(BEGIN_FRESCO_X), ROBOT_CENTER_TO_BACK + 100);
+			err = wait_traj_end(TRAJ_FLAGS_SMALL_DIST);
+			if (!TRAJ_SUCCESS(err))
+					ERROUT(err);
+					
+					
+			trajectory_goto_forward_xy_abs (&mainboard.traj, COLOR_X(BEGIN_FRESCO_X),600);
+			err = wait_traj_end(TRAJ_FLAGS_NO_NEAR);
+			if (!TRAJ_SUCCESS(err))
+					ERROUT(err);
+					
+			state++;
+			return 1;
+			break;
+			
+		default:
+			break;
+	}
+end:
+	return err;
+}
+
+
+uint8_t patrol_between(int16_t x1, int16_t y1,int16_t x2, int16_t y2)
+{	
+	#define REFERENCE_DISTANCE_TO_ROBOT 800
+	int8_t opp_there, r2nd_there;
+	int16_t opp_x, opp_y, opp2_x, opp2_y, reference_x;
+	uint16_t old_spdd, old_spda, temp_spdd, temp_spda;
+	uint8_t err = 0;
+	int16_t d,d2;
+	int16_t a,a2;
+	
 	/* save speed */
 	strat_get_speed (&old_spdd, &old_spda);
   	strat_limit_speed_disable ();
 	strat_set_speed(SPEED_DIST_SLOW, SPEED_ANGLE_VERY_SLOW);
-	/* get robot coordenates */
+	
+	/* get robot coordinates */
 	opp_there = get_opponent_xy(&opp_x, &opp_y);
-
-	if(opp_there == -1 )
-		printf_P("return 0;");
- 	if(x1>x2) x_aux=x1;
-	else{
-		x_aux=x2;
-	}
-	if(opp_x_is_more_than(COLOR_X(x_aux+600))){
-		if(opp_y_is_more_than(y1)&&opp_y_is_more_than(y2)){
-			printf_P("More than Ys opp 1.\n");
-		}
-		else if((opp_y_is_more_than(y1)&&!opp_y_is_more_than(y2))||(!opp_y_is_more_than(y1)&&opp_y_is_more_than(y2))){
-			printf_P("Between Ys opp 1.\n");
+	get_opponent2_xy(&opp2_x, &opp2_y);
+	/*if(opp_there == -1 )
+		printf_P("Opp is not there");*/
+	
+	get_opponent_da(&d,&a);
+	get_opponent2_da(&d2,&a2);
+	
+	if(d<(REFERENCE_DISTANCE_TO_ROBOT))
+	{
+		if((opp_y_is_more_than(y1)&&!opp_y_is_more_than(y2))||(!opp_y_is_more_than(y1)&&opp_y_is_more_than(y2)))
+		{
 			trajectory_goto_xy_abs (&mainboard.traj,(x1+x2)/2,opp_y); 
-		}	
-	}else{
-	printf_P("More than X opp 1.\n");
+		}
+	}else if(d2<(REFERENCE_DISTANCE_TO_ROBOT))
+	{
+		if((opp2_y_is_more_than(y1)&&!opp2_y_is_more_than(y2))||(!opp2_y_is_more_than(y1)&&opp2_y_is_more_than(y2)))
+		{
+			trajectory_goto_xy_abs (&mainboard.traj,(x1+x2)/2,opp2_y); 
+		}
 	}
-		printf_P("X: %d Y: %d.\n",opp_x,opp_y);
-
-	err = wait_traj_end(TRAJ_FLAGS_NO_NEAR);
 		
+	err = wait_traj_end(TRAJ_FLAGS_NO_NEAR);
 	if (!TRAJ_SUCCESS(err))
 		ERROUT(err);
 end:
 	strat_set_speed(old_spdd, old_spda);	
 	strat_limit_speed_enable();
-
+	return err;
 }
 

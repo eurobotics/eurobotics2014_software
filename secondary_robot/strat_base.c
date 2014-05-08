@@ -490,8 +490,8 @@ void strat_start(void)
 		while (!sensor_get(S_START));
 	}
 #else
-	printf_P(PSTR("Press a key\r\n"));
-	while (! cmdline_keypressed());
+	/*printf_P(PSTR("Press a key\r\n"));
+	while (! cmdline_keypressed());*/
 	for (i=3; i>0; i--) {
 		printf_P(PSTR("%d\r\n"), i);
 		time_wait_ms(1000);

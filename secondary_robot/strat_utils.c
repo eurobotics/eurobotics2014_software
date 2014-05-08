@@ -283,7 +283,7 @@ uint8_t opp_x_is_more_than(int16_t x)
 	
 	if(get_opponent_xy(&x_opp, &y_opp) == -1)
 		return 1;
-
+	//printf_P("x_opp:%d\nx_par:%d",x_opp,x);
 	if (mainboard.our_color == I2C_COLOR_YELLOW) {
 		if (x_opp > x)
 			return 1;
