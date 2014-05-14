@@ -429,7 +429,8 @@ static void cmd_color_parsed(void *parsed_result, void *data)
 		else
 			printf("color is RED\n\r");
 	}
-	bt_set_cmd_id_and_checksum (BT_SET_COLOR, 0);
+
+	bt_set_cmd_id_and_checksum (BT_SET_COLOR, mainboard.our_color);
 
 	printf_P(PSTR("Done\r\n"));
 }
@@ -1662,9 +1663,11 @@ send_status:
 	ans.opponent2_x = beaconboard.opponent2_x;
 	ans.opponent2_y = beaconboard.opponent2_y;
 
+	ans.color = mainboard.our_color;
+
 	/* XXX cmd feedback: must be filld by cmds */
 	ans.cmd_id = mainrobot.cmd_id;
-	ans.cmd_id = mainrobot.cmd_ret;
+	ans.cmd_ret = mainrobot.cmd_ret;
 	ans.cmd_args_checksum = mainrobot.cmd_args_checksum;
 	IRQ_UNLOCK(flags);
 

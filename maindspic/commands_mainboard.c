@@ -770,19 +770,26 @@ static void cmd_robot_2nd_parsed(void * parsed_result, void * data)
 		bt_robot_2nd_req_status ();
     else if (!strcmp_P(res->arg1, "show")) {
 
-		printf ("cmd %d %d %d %d\n\r", robot_2nd.cmd_id, robot_2nd.cmd_ret,
-											robot_2nd.cmd_args_checksum_send, 
-											robot_2nd.cmd_args_checksum_recv);
-		printf ("color %s\n\r", robot_2nd.color == I2C_COLOR_YELLOW? "yellow":"red");
-		printf ("done_flags 0x%.4X\n\r", robot_2nd.done_flags);
-		printf ("pos abs(%d %d %d) rel(%d %d)\n\r",
-										robot_2nd.x, robot_2nd.y, robot_2nd.a_abs,
-										robot_2nd.a, robot_2nd.d);
+		 do 
+		 {
+				printf ("cmd %d %d %d %d\n\r", robot_2nd.cmd_id, robot_2nd.cmd_ret,
+													robot_2nd.cmd_args_checksum_send, 
+													robot_2nd.cmd_args_checksum_recv);
+				printf ("color %s\n\r", robot_2nd.color == I2C_COLOR_YELLOW? "yellow":"red");
+				printf ("done_flags 0x%.4X\n\r", robot_2nd.done_flags);
+				printf ("pos abs(%d %d %d) rel(%d %d)\n\r",
+												robot_2nd.x, robot_2nd.y, robot_2nd.a_abs,
+												robot_2nd.a, robot_2nd.d);
 
-		printf ("opp1 (%d %d %d %d)\n\r", robot_2nd.opponent_x, robot_2nd.opponent_y,
-											   robot_2nd.opponent_a, robot_2nd.opponent_d); 
-		printf ("opp2 (%d %d %d %d)\n\r", robot_2nd.opponent2_x, robot_2nd.opponent2_y,
-											   robot_2nd.opponent2_a, robot_2nd.opponent2_d); 
+				printf ("opp1 (%d %d %d %d)\n\r", robot_2nd.opponent_x, robot_2nd.opponent_y,
+														robot_2nd.opponent_a, robot_2nd.opponent_d); 
+				printf ("opp2 (%d %d %d %d)\n\r", robot_2nd.opponent2_x, robot_2nd.opponent2_y,
+														robot_2nd.opponent2_a, robot_2nd.opponent2_d); 
+
+            wait_ms(200);
+
+        }
+        while (!cmdline_keypressed());
 	}
 
 #endif
@@ -790,7 +797,7 @@ static void cmd_robot_2nd_parsed(void * parsed_result, void * data)
 
 prog_char str_robot_2nd_arg0[] = "robot_2nd";
 parse_pgm_token_string_t cmd_robot_2nd_arg0 = TOKEN_STRING_INITIALIZER(struct cmd_robot_2nd_result, arg0, str_robot_2nd_arg0);
-prog_char str_robot_2nd_arg1[] = "raw#open#close#color#status#show";
+prog_char str_robot_2nd_arg1[] = "raw#open#close#color#status#show#opp";
 parse_pgm_token_string_t cmd_robot_2nd_arg1 = TOKEN_STRING_INITIALIZER(struct cmd_robot_2nd_result, arg1, str_robot_2nd_arg1);
 
 prog_char help_robot_2nd[] = "robot_2nd commads";

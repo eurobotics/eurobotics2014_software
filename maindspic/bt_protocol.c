@@ -33,6 +33,7 @@
 #include <clock_time.h>
 
 #include "main.h"
+#include "strat_base.h"
 #include "strat_utils.h"
 #include "wt11.h"
 #include "bt_protocol.h"
@@ -279,7 +280,7 @@ void bt_beacon_status_parser (int16_t c)
 error_checksum:
 	state = 0;
 	bt_errors_checksum ++;
-	NOTICE(E_USER_BT_PROTO, "recv CHECKSUM error (%d)", bt_errors_checksum);
+	NOTICE(E_USER_BT_PROTO, "beacon CHECKSUM error (%d)", bt_errors_checksum);
   	return;
 }
 
@@ -295,7 +296,8 @@ uint8_t bt_robot_2nd_test_checksum (void) {
 /* send command, and return after received ack */
 void bt_robot_2nd_cmd_no_wait_ack (uint8_t cmd_id, int16_t arg0, int16_t arg1)
 {
-	DEBUG (E_USER_BT_PROTO, "cmd %d %d %d", cmd_id, arg0, arg1);
+    uint8_t flags;
+	//DEBUG (E_USER_BT_PROTO, "TX cmd: id %d arg0 %d arg1 %d", cmd_id, arg0, arg1);
 
 	/* command */
 	if (cmd_id == BT_SET_COLOR) {
@@ -311,18 +313,6 @@ void bt_robot_2nd_cmd_no_wait_ack (uint8_t cmd_id, int16_t arg0, int16_t arg1)
 		bt_send_ascii_cmd (robot_2nd.link_id, "goto xy_abs %d %d", arg0, arg1);
 	else if (cmd_id == BT_GOTO_XY_REL)
 		bt_send_ascii_cmd (robot_2nd.link_id, "goto xy_rel %d %d", arg0, arg1);
-}
-
-/* send command, and return after received ack */
-void bt_robot_2nd_cmd (uint8_t cmd_id, int16_t arg0, int16_t arg1)
-{
-	uint8_t flags;
-	uint8_t nb_tries = 3;
-	int8_t ret;
-
-retry:
-
-	bt_robot_2nd_cmd_no_wait_ack (cmd_id, arg0, arg1);
 
 	/* set feedback info */
 	IRQ_LOCK (flags);
@@ -332,8 +322,20 @@ retry:
 	robot_2nd.cmd_ret = 0;
 	IRQ_UNLOCK (flags);
 
+}
+
+/* send command, and return after received ack */
+void bt_robot_2nd_cmd (uint8_t cmd_id, int16_t arg0, int16_t arg1)
+{
+	uint8_t nb_tries = 3;
+	int8_t ret;
+
+retry:
+
+	bt_robot_2nd_cmd_no_wait_ack (cmd_id, arg0, arg1);
+
 	/* wait ack */
-	ret = WAIT_COND_OR_TIMEOUT( bt_robot_2nd_test_checksum (), 150);
+	ret = BT_WAIT_COND_OR_TIMEOUT( bt_robot_2nd_test_checksum (), 150);
 	if (!ret && nb_tries--) {
 		ERROR (E_USER_BT_PROTO, "ERROR sendind robot 2nd command (%d)", nb_tries);
 		goto retry;
@@ -342,7 +344,8 @@ retry:
 
 /* set color */
 inline void bt_robot_2nd_set_color (void) {
-	bt_robot_2nd_cmd_no_wait_ack (BT_SET_COLOR, 0, 0);
+	//bt_robot_2nd_cmd_no_wait_ack (BT_SET_COLOR, 0, 0);
+	bt_robot_2nd_cmd (BT_SET_COLOR, 0, 0);
 }
 
 /* goto xy_abs */
@@ -362,8 +365,8 @@ void bt_robot_2nd_req_status(void)
 	int16_t robot_a_abs, robot_x, robot_y;
 	int16_t opp1_x, opp1_y, opp2_x, opp2_y;
 	uint8_t flags;
-//	uint8_t buff[64];
-//	uint8_t size;
+	uint8_t buff[64];
+	uint8_t size;
 	int16_t checksum = 0;
 	
 	IRQ_LOCK(flags);
@@ -381,19 +384,19 @@ void bt_robot_2nd_req_status(void)
 	checksum += opp1_x + opp1_y;
 	checksum += opp2_x + opp2_y;
 
+#if 0
   	bt_send_ascii_cmd (beaconboard.link_id, "status %d %d %d %d %d %d %d %d",
 						robot_x, robot_y, robot_a_abs, 
 						opp1_x, opp1_y, 
 						opp2_x, opp2_y,
 						checksum);
-
-#if 0
+#else
 	size = sprintf((char*)buff, "\nstatus %d %d %d %d %d %d %d %d\n",
 						robot_x, robot_y, robot_a_abs, 
 						opp1_x, opp1_y, 
 						opp2_x, opp2_y,
 						checksum);
-	wt11_send_mux (beaconboard.link_id, buff, size);
+	wt11_send_mux (robot_2nd.link_id, buff, size);
 #endif
 
 }
@@ -441,6 +444,9 @@ void bt_robot_2nd_status_parser (int16_t c)
 
 			if (ans.checksum != bt_checksum(data, sizeof(ans)-sizeof(ans.checksum)))
 				goto error_checksum;
+
+			//DEBUG (E_USER_BEACON, "RX cmd id %d, args %d, ret %d", 
+			//		ans.cmd_id, ans.cmd_args_checksum, get_err(ans.cmd_ret));
 
 			/* running command info */
 			if (ans.cmd_id == robot_2nd.cmd_id) {
@@ -517,7 +523,7 @@ void bt_robot_2nd_status_parser (int16_t c)
 error_checksum:
 	state = 0;
 	bt_errors_checksum ++;
-	NOTICE(E_USER_BT_PROTO, "recv CHECKSUM error (%d)", bt_errors_checksum);
+	NOTICE(E_USER_BT_PROTO, "robot 2nd CHECKSUM error (%d)", bt_errors_checksum);
   	return;
 }
 
@@ -531,6 +537,8 @@ void bt_protocol (void * dummy)
 	static microseconds pull_time_us = 0;
    uint8_t flags;
    uint8_t i;
+
+	static uint8_t toggle = 1;
 
 	if ((mainboard.flags & DO_BT_PROTO)==0)
 		return;
@@ -547,17 +555,17 @@ void bt_protocol (void * dummy)
 
   	while (c != -1) {
 
-		uart_send (CMDLINE_UART, c);
+		//uart_send (CMDLINE_UART, c);
 
-		if ( (link_id == beaconboard.link_id) && (mainboard.flags & DO_OPP) )
+		//if ( (link_id == beaconboard.link_id) && (mainboard.flags & DO_OPP) )
 			bt_beacon_status_parser (c);
-		else if ( (link_id == robot_2nd.link_id) && (mainboard.flags & DO_ROBOT_2ND))
+		//else if ( (link_id == robot_2nd.link_id) && (mainboard.flags & DO_ROBOT_2ND))
 			bt_robot_2nd_status_parser (c);
-	  	else if ( (link_id != beaconboard.link_id) 
-					&& (link_id != robot_2nd.link_id) ) {
-			NOTICE (E_USER_BT_PROTO, "Unexpected link id (%d)", link_id);
+	  	//else if ( (link_id != beaconboard.link_id) 
+		//			&& (link_id != robot_2nd.link_id) ) {
+		//	NOTICE (E_USER_BT_PROTO, "Unexpected link id (%d)", link_id);
 			//uart_send (CMDLINE_UART, c);
-		}
+		//}
 
 		c = wt11_recv_mux_char (&link_id);	
 	}
@@ -588,14 +596,16 @@ void bt_protocol (void * dummy)
 	}
 
   	/* pulling of status */
-	if((time_get_us2() - pull_time_us > 50000UL)) {
+	if((time_get_us2() - pull_time_us > 60000UL)) {
+
+		toggle ^= 1;
 
 #ifndef HOST_VERSION
-		if (mainboard.flags & DO_OPP)
+		if ((mainboard.flags & DO_OPP) && toggle)
 			bt_beacon_req_status ();	
 #endif
-		//if (mainboard.flags & DO_ROBOT_2ND)
-		//	bt_robot_2nd_req_status ();
+		if ((mainboard.flags & DO_ROBOT_2ND) && !toggle)
+			bt_robot_2nd_req_status ();
 
 		pull_time_us = time_get_us2();
 	}

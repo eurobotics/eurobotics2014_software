@@ -150,7 +150,7 @@ int16_t wt11_recv_mux (uint8_t *link_id, uint8_t *buff, uint16_t buff_size)
 			case 3:
 			  	__length |= ((uint16_t)c & 0x00FF);
 
-				DEBUG (E_USER_WT11, "WT11 (%d): length =  %d\n", __link_id, __length);
+				//DEBUG (E_USER_WT11, "WT11 (%d): length =  %d\n", __link_id, __length);
 			  	state ++;
 			 	i = 0;
 			  	break;
@@ -202,7 +202,7 @@ int16_t wt11_recv_mux (uint8_t *link_id, uint8_t *buff, uint16_t buff_size)
 				else {
 					state = 0;
 					i = 0;
-					ERROR (E_USER_WT11, "WT11: link ID ERROR");
+					//ERROR (E_USER_WT11, "WT11: link ID ERROR");
 					return -1;
 				}
 				break;
@@ -401,7 +401,7 @@ int16_t wt11_recv_mux_char (uint8_t *link_id)
 					state = 0;
 					i = 0;
 
-					ERROR (E_USER_WT11, "WT11: link ID ERROR");
+					//ERROR (E_USER_WT11, "WT11: link ID ERROR");
 					return -1;
 
 				}

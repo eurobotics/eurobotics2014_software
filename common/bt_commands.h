@@ -107,6 +107,20 @@ inline uint16_t bt_checksum(uint8_t *data, uint16_t length) {
   return sum;
 }
 
+#define BT_WAIT_COND_OR_TIMEOUT(cond, timeout)                   \
+({                                                            \
+        microseconds __us = time_get_us2();                   \
+        uint8_t __ret = 1;                                    \
+        while(! (cond)) {                                     \
+                if (time_get_us2() - __us > (timeout)*1000L) {\
+                        __ret = 0;                            \
+                        break;                                \
+                }                                             \
+        }                                                     \
+							      \
+        __ret;                                                \
+})
+
 
 #endif /* __BT_COMMANDS__ */
 
