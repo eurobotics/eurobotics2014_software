@@ -43,6 +43,11 @@
 #include "robotsim.h"
 #endif
 
+#define M_2PI (2*M_PI)
+
+#define DEG(x) ((x) * (180.0 / M_PI))
+#define RAD(x) ((x) * (M_PI / 180.0))
+
 
 static uint8_t cmd_data[BT_PROTO_NUM_DEVICES][WT11_MUX_LENGTH_MAX];
 static uint8_t cmd_size[BT_PROTO_NUM_DEVICES] = {0, 0};
@@ -72,24 +77,24 @@ uint8_t bt_send_cmd (uint8_t link_id, uint8_t *data, uint16_t size)
 	}
 
 	/* command size != 0 indicate 
-   * that there is a command to send */	
+   	 * that there is a command to send */	
 	IRQ_LOCK(flags);
 	cmd_size[link_id] = size;
   	IRQ_UNLOCK(flags);
 
-  return 0;
+  	return 0;
 }
 
 /* fill a link id buffer with formated data to be send */
 uint8_t bt_send_ascii_cmd (uint8_t link_id, const char * format, ...)
 {
-  char buffer[WT11_MUX_LENGTH_MAX];
-  va_list args;
-  uint16_t n;
-  uint8_t ret;
+	char buffer[WT11_MUX_LENGTH_MAX];
+	va_list args;
+	uint16_t n;
+	uint8_t ret;
 
-  va_start (args, format);
-  n = vsprintf (&buffer[1],format, args);
+	va_start (args, format);
+	n = vsprintf (&buffer[1],format, args);
 	
 	buffer[0]='\n';
 	buffer[n+1]='\n';
@@ -103,10 +108,10 @@ uint8_t bt_send_ascii_cmd (uint8_t link_id, const char * format, ...)
 		return 1;
 	}
 
-  ret = bt_send_cmd (link_id, (uint8_t *)buffer, n);
+	ret = bt_send_cmd (link_id, (uint8_t *)buffer, n);
 
-  va_end (args);
-  return ret;
+	va_end (args);
+	return ret;
 }
 
 
@@ -139,10 +144,6 @@ void bt_beacon_set_off (void)
 {
 	uint8_t flags;
 
-	IRQ_LOCK(flags);
-	mainboard.flags &= ~(DO_OPP);
-	IRQ_UNLOCK(flags);
-
   	bt_send_ascii_cmd (beaconboard.link_id, "beacon off");
 }
 
@@ -163,19 +164,21 @@ void bt_beacon_req_status(void)
 	robot_a = position_get_a_deg_s16(&mainboard.pos);
 	IRQ_UNLOCK(flags);
 
-  	rel_da_to_abs_xy(BEACON_OFFSET_D, BEACON_OFFSET_A, 
+  	rel_da_to_abs_xy(BEACON_OFFSET_D, RAD(BEACON_OFFSET_A), 
                   &robot_x, &robot_y);    
 
 	/* checksum */
 	checksum = (uint16_t)((int16_t)robot_x + (int16_t)robot_y + robot_a);
 
-  	//bt_send_ascii_cmd (beaconboard.link_id, "opponent %d %d %d %d",
-	//					    (int16_t)robot_x, (int16_t)robot_y, robot_a, checksum);
+#if 0
+  	bt_send_ascii_cmd (beaconboard.link_id, "opponent %d %d %d %d",
+						    (int16_t)robot_x, (int16_t)robot_y, robot_a, checksum);
 
-
+#else
 	size = sprintf((char*)buff, "\nstatus %d %d %d %d\n",
 						(int16_t)robot_x, (int16_t)robot_y, robot_a,
 						checksum);
+#endif
 
 	wt11_send_mux (beaconboard.link_id, buff, size);
 }
@@ -183,7 +186,7 @@ void bt_beacon_req_status(void)
 /* parse opponent position */
 void bt_beacon_status_parser (int16_t c)
 {
-#define debug_beacon_parser
+//#define debug_beacon_parser
 
 	static uint8_t state = 0;
    static uint16_t i = 0;
@@ -236,7 +239,7 @@ void bt_beacon_status_parser (int16_t c)
 			IRQ_LOCK(flags);
 			beaconboard.opponent_x = (int16_t)x;
 			beaconboard.opponent_y = (int16_t)y;
-			beaconboard.opponent_a = (int16_t)a;
+			beaconboard.opponent_a = (int16_t)DEG(a);
 			beaconboard.opponent_d = (int16_t)d;       
 			IRQ_UNLOCK(flags);
 
@@ -253,7 +256,7 @@ void bt_beacon_status_parser (int16_t c)
 			IRQ_LOCK(flags);
 			beaconboard.opponent2_x = (int16_t)x;
 			beaconboard.opponent2_y = (int16_t)y;
-			beaconboard.opponent2_a = (int16_t)a;
+			beaconboard.opponent2_a = (int16_t)DEG(a);
 			beaconboard.opponent2_d = (int16_t)d;       
 			IRQ_UNLOCK(flags);
 			#endif
@@ -404,7 +407,7 @@ void bt_robot_2nd_req_status(void)
 /* parse robot 2nd status */
 void bt_robot_2nd_status_parser (int16_t c)
 {
-#define debug_robot_2nd_parser
+//#define debug_robot_2nd_parser
 
 	static uint8_t state = 0;
    static uint16_t i = 0;
@@ -450,7 +453,6 @@ void bt_robot_2nd_status_parser (int16_t c)
 
 			/* running command info */
 			if (ans.cmd_id == robot_2nd.cmd_id) {
-				//robot_2nd.cmd_id = ans.cmd_id;
 				robot_2nd.cmd_ret = ans.cmd_ret;
 				robot_2nd.cmd_args_checksum_recv = ans.cmd_args_checksum;
 			}
@@ -472,7 +474,7 @@ void bt_robot_2nd_status_parser (int16_t c)
 			IRQ_LOCK(flags);
 			robot_2nd.x = (int16_t)x;
 			robot_2nd.y = (int16_t)y;
-			robot_2nd.a = (int16_t)a;
+			robot_2nd.a = (int16_t)DEG(a);
 			robot_2nd.a_abs = (int16_t)a_abs;
 			robot_2nd.d = (int16_t)d;       
 			IRQ_UNLOCK(flags);
@@ -489,7 +491,7 @@ void bt_robot_2nd_status_parser (int16_t c)
 			IRQ_LOCK(flags);
 			robot_2nd.opponent_x = (int16_t)x;
 			robot_2nd.opponent_y = (int16_t)y;
-			robot_2nd.opponent_a = (int16_t)a;
+			robot_2nd.opponent_a = (int16_t)DEG(a);
 			robot_2nd.opponent_d = (int16_t)d;       
 			IRQ_UNLOCK(flags);
 
@@ -506,7 +508,7 @@ void bt_robot_2nd_status_parser (int16_t c)
 			IRQ_LOCK(flags);
 			robot_2nd.opponent2_x = (int16_t)x;
 			robot_2nd.opponent2_y = (int16_t)y;
-			robot_2nd.opponent2_a = (int16_t)a;
+			robot_2nd.opponent2_a = (int16_t)DEG(a);
 			robot_2nd.opponent2_d = (int16_t)d;       
 			IRQ_UNLOCK(flags);
 #endif
@@ -537,6 +539,7 @@ void bt_protocol (void * dummy)
 	static microseconds pull_time_us = 0;
    uint8_t flags;
    uint8_t i;
+	uint8_t cmd_sent = 0;
 
 	static uint8_t toggle = 1;
 
@@ -592,7 +595,16 @@ void bt_protocol (void * dummy)
 			IRQ_LOCK(flags);
 			cmd_size[i] = 0;
 			IRQ_UNLOCK(flags);
+
+			cmd_sent = 1;
 		}
+	}
+
+	/* avoid send a command and pulling in the same cycle) */
+	if (cmd_sent) {
+		toggle = 1; /* force robot 2nd pulling next cycle */
+		pull_time_us = time_get_us2();
+		return;
 	}
 
   	/* pulling of status */

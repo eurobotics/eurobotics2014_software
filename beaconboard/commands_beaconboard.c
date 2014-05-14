@@ -480,7 +480,7 @@ static void cmd_opponent_parsed(void * parsed_result, void *data)
 #endif
 #endif /* RECALC */
 
-#define DEBUG_STATUS
+//#define DEBUG_STATUS
 #ifdef DEBUG_STATUS
 	/* fill answer structure */
 	ans.hdr.cmd = BT_BEACON_STATUS_ANS;
@@ -495,25 +495,51 @@ static void cmd_opponent_parsed(void * parsed_result, void *data)
 	ans.opponent2_a = i+2000;
 	ans.opponent2_d = i+3000;
 #endif
+
+#else
+	/* fill answer structure */
+	ans.hdr.cmd = BT_BEACON_STATUS_ANS;
+	ans.opponent_x = opponent1_x;
+	ans.opponent_y = opponent1_y;
+	ans.opponent_a = opponent1_angle;
+	ans.opponent_d = opponent1_dist;
+
+#ifdef TWO_OPPONENTS
+	ans.opponent2_x = opponent2_x;
+	ans.opponent2_y = opponent2_y;
+	ans.opponent2_a = opponent2_angle;
+	ans.opponent2_d = opponent2_dist;
 #endif
 
-	ans.checksum = checksum ((uint8_t *)&ans, sizeof (ans)-sizeof(ans.checksum));
+#ifdef ROBOT_2ND
+	ans.robot_2nd_x = robot_2nd_x;
+	ans.robot_2nd_y = robot_2nd_y;
+	ans.robot_2nd_a = robot_2nd_angle;
+	ans.robot_2nd_d = robot_2nd_dist;
+#endif
+
+#endif
+
+	ans.checksum = bt_checksum ((uint8_t *)&ans, sizeof (ans)-sizeof(ans.checksum));
 
 	/* send answer */
-	uint8_t sync_header[] = BT_BEACON_SYNC_HEADER;
-	uart_send_buffer (sync_header, sizeof(sync_header)); 
-	uart_send_buffer ((uint8_t*) &ans, sizeof(ans)); 
-#if 0
-	printf("\n\r");
-	printf("size %d \n\r", sizeof(ans));
-	printf("opp1 %d %d %d %d \n\r",
-	 			(int16_t)ans.opponent_x, (int16_t)ans.opponent_y,
-			   (int16_t)ans.opponent_a, (int16_t)ans.opponent_d);
-	printf("opp2 %d %d %d %d \n\r",
-	 			(int16_t)ans.opponent2_x, (int16_t)ans.opponent2_y,
-			   (int16_t)ans.opponent2_a, (int16_t)ans.opponent2_d);
-	printf("cksum %x \n\r", ans.checksum);
-#endif
+	if (!strcmp_P(res->arg0, PSTR("opponent"))) {
+		printf("\n\r");
+		printf("size %d \n\r", sizeof(ans));
+		printf("opp1 %d %d %d %d \n\r",
+		 			(int16_t)ans.opponent_x, (int16_t)ans.opponent_y,
+					(int16_t)ans.opponent_a, (int16_t)ans.opponent_d);
+		printf("opp2 %d %d %d %d \n\r",
+		 			(int16_t)ans.opponent2_x, (int16_t)ans.opponent2_y,
+					(int16_t)ans.opponent2_a, (int16_t)ans.opponent2_d);
+		printf("cksum %x \n\r", ans.checksum);
+	}
+	else {
+		uint8_t sync_header[] = BT_BEACON_SYNC_HEADER;
+		uart_send_buffer (sync_header, sizeof(sync_header)); 
+		uart_send_buffer ((uint8_t*) &ans, sizeof(ans)); 
+
+	}
 }
 
 

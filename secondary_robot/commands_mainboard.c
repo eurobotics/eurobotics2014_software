@@ -1672,7 +1672,7 @@ send_status:
 	IRQ_UNLOCK(flags);
 
 
-#define DEBUG_STATUS
+//#define DEBUG_STATUS
 #ifdef DEBUG_STATUS
 	/* fill answer structure */
 	ans.x = ans.opponent_x = ans.opponent2_x = i++;

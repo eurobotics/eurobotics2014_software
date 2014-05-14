@@ -22,7 +22,7 @@
 
 /* NUMBER OF ROBOTS TO TRACK */
 #define TWO_OPPONENTS
-#define ROBOT_2ND
+//#define ROBOT_2ND
 
 #define BRAKE_ON()      do { _LATC6 = 0; _LATC7	= 0; } while(0)
 #define BRAKE_OFF()     do { Nop(); } while(0)
