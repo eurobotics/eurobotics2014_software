@@ -49,3 +49,5 @@ beaconboard/beaconboard.X/build
 maindspic/maindspic.X/build
 beaconboard/beaconboard.X/dist
 maindspic/maindspic.X/dist
+secondary_robot/maindspic.X/build
+secondary_robot/maindspic.X/dist
