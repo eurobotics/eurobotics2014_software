@@ -24,10 +24,10 @@ struct bt_beacon_status_ans
 	struct bt_cmd_hdr hdr;
 
   /* opp pos */
-	int16_t opponent_x;
-	int16_t opponent_y;
-	int16_t opponent_a;
-	int16_t opponent_d;
+	int16_t opponent1_x;
+	int16_t opponent1_y;
+	int16_t opponent1_a;
+	int16_t opponent1_d;
 
 #ifdef TWO_OPPONENTS
 	int16_t opponent2_x;
@@ -83,12 +83,12 @@ struct bt_robot_2nd_status_ans
 	int16_t a_abs;
 
 	/* opponent pos */
-	int16_t opponent_x;
-	int16_t opponent_y;
+	int16_t opponent1_x;
+	int16_t opponent1_y;
 
 #ifdef TWO_OPPONENTS
-	uint16_t opponent2_x;
-	uint16_t opponent2_y;
+	int16_t opponent2_x;
+	int16_t opponent2_y;
 #endif
 
 	uint16_t checksum;

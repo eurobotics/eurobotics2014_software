@@ -207,15 +207,15 @@ static void cmd_opponent_parsed(void *parsed_result, void *data)
 
 	if(data)
 	{
-		beaconboard.opponent_d = res->arg2;
-		beaconboard.opponent_a = res->arg3;
-		beaconboard.opponent_x = 0;
+		beaconboard.opponent1_d = res->arg2;
+		beaconboard.opponent1_a = res->arg3;
+		beaconboard.opponent1_x = 0;
 	}
 	else
 		do {
 	
 	#ifdef TWO_OPPONENTS
-		opp1 = get_opponent_xyda(&x, &y, &d, &a);
+		opp1 = get_opponent1_xyda(&x, &y, &d, &a);
 		opp2 = get_opponent2_xyda(&x2, &y2, &d2, &a2);
 		r2nd = get_robot_2nd_xyda(&x_r2nd, &y_r2nd, &d_r2nd, &a_r2nd);
     get_robot_2nd_a_abs(&a_abs_r2nd);
@@ -330,6 +330,7 @@ static void cmd_start_parsed(void *parsed_result, void *data)
 		gen.log_level = 0;
 	}
 
+#if 0
 #ifndef HOST_VERSION
 retry:
 	printf_P(PSTR("Press a key when beacon ready, 'q' for skip \r\n"));
@@ -365,7 +366,8 @@ retry_on:
 			}
 		}
 	}
-#endif	
+#endif
+#endif
 
 	if (!strcmp_P(res->color, PSTR("yellow"))) {
 		mainboard.our_color = I2C_COLOR_RED;
@@ -453,8 +455,8 @@ parse_pgm_inst_t cmd_color = {
 };
 
 /**********************************************************/
-/* beacon */
-
+/* TODO beacon */
+#if 0
 /* this structure is filled when cmd_interact is parsed successfully */
 struct cmd_beacon_result {
 	fixed_string_t arg0;
@@ -546,530 +548,11 @@ parse_pgm_inst_t cmd_beacon = {
 		NULL,
 	},
 };
-
-
-#ifdef notyet /* TODO 2014*/
-
-/**********************************************************/
-/* slavedspic */
-
-/* this structure is filled when cmd_slavedspic is parsed successfully */
-struct cmd_slavedspic_result {
-	fixed_string_t arg0;
-	fixed_string_t arg1;
-};
-
-/* function called when cmd_slavedspic is parsed successfully */
-static void cmd_slavedspic_parsed(void *parsed_result, void *data)
-{
-	struct cmd_slavedspic_result *res = parsed_result;
-	static uint8_t led_flag = 0;
-	int16_t c;
-	int8_t cmd = 0;
-	struct vt100 vt100;
-	uint8_t mainboard_flags;
-	uint8_t flags;
-
-	if(!strcmp_P(res->arg1, "raw"))
-	{
-#ifdef HOST_VERSION
-	printf("not implemented\n");
-#else
-		/* disable opponent event */
-		IRQ_LOCK(flags);
-		mainboard_flags = mainboard.flags;
-		mainboard.flags &= ~(DO_OPP);
-		IRQ_UNLOCK(flags);
-
-		/* flush rx buffer */
-		while(uart_recv_nowait(MUX_UART) != -1);
-
-		/* remap UART */
-		set_uart_mux(SLAVEDSPIC_CHANNEL);
-		
-		/* init vt100 character set */
-		vt100_init(&vt100);
-		
-		/* interact */
-		while(cmd != KEY_CTRL_C) 
-		{
-			/* received from slave */
-			if((c = uart_recv_nowait(MUX_UART))!= -1)
-				/* echo */
-				uart_send_nowait(CMDLINE_UART,c);
-			
-			/* send to slavedspic */
-			c = cmdline_getchar();
-			if (c == -1) {
-				continue;
-			}
-
-			/* check exit cmd */
-			cmd = vt100_parser(&vt100, c);
-
-			/* send to slave */
-			uart_send_nowait(MUX_UART,c);	
-		}
-
-		/* remap UART */
-		set_uart_mux(BEACON_CHANNEL);
-
-		/* restore opponent event */
-		IRQ_LOCK(flags);
-		mainboard.flags = mainboard_flags;
-		IRQ_UNLOCK(flags);
 #endif
-	}	
-	else if (!strcmp(res->arg1, "init")){
-		i2c_slavedspic_mode_init();
-	}
-	else if (!strcmp(res->arg1, "info"))
-	{
-		/* actuators blocking flags */
-		printf("fingers_floor_blocked = %d\r\n", slavedspic.fingers_floor_blocked);
-		printf("fingers_totem_blocked = %d\r\n", slavedspic.fingers_totem_blocked);
-		printf("arm_right_blocked = %d\r\n", slavedspic.arm_right_blocked);
-		printf("arm_left_blocked = %d\r\n", slavedspic.arm_left_blocked);
-		printf("lift_blocked = %d\r\n", slavedspic.lift_blocked);
 
-		/* sensors */
-		printf("turbine_sensors = %d\r\n", slavedspic.turbine_sensors);
 
-		/* infos */
-		printf("status = %s\r\n", slavedspic.status == I2C_SLAVEDSPIC_STATUS_BUSY? "BUSY":"READY");
-		printf("harvest_mode = %d\r\n", slavedspic.harvest_mode);
-		printf("store_mode = %d\r\n", slavedspic.store_mode);
-		printf("dump_mode = %d\r\n", slavedspic.dump_mode);
 
-		printf("nb_goldbars_in_boot = %d\r\n", slavedspic.nb_goldbars_in_boot);
-		printf("nb_goldbars_in_mouth = %d\r\n", slavedspic.nb_goldbars_in_mouth);
-		printf("nb_coins_in_boot = %d\r\n", slavedspic.nb_coins_in_boot);
-		printf("nb_coins_in_mouth = %d\r\n", slavedspic.nb_coins_in_mouth);
-	}
-	else if(!strcmp(res->arg1, "led")){
-		i2c_led_control(I2C_SLAVEDSPIC_ADDR, 1, led_flag);
-		led_flag ^= 1;
-	}
-	else if(!strcmp(res->arg1, "poweroff")){
-		i2c_slavedspic_mode_power_off();
-	}
-
-
-	printf("done \r\n");
-	return;	
-}
-
-prog_char str_slavedspic_arg0[] = "slavedspic";
-parse_pgm_token_string_t cmd_slavedspic_arg0 = TOKEN_STRING_INITIALIZER(struct cmd_slavedspic_result, arg0, str_slavedspic_arg0);
-prog_char str_slavedspic_arg1[] = "raw#init#info#led#poweroff";
-parse_pgm_token_string_t cmd_slavedspic_arg1 = TOKEN_STRING_INITIALIZER(struct cmd_slavedspic_result, arg1, str_slavedspic_arg1);
-
-prog_char help_slavedspic[] = "control slavedspic";
-parse_pgm_inst_t cmd_slavedspic = {
-	.f = cmd_slavedspic_parsed,  /* function to call */
-	.data = NULL,      /* 2nd arg of func */
-	.help_str = help_slavedspic,
-	.tokens = {        /* token list, NULL terminated */
-		(prog_void *)&cmd_slavedspic_arg0, 
-		(prog_void *)&cmd_slavedspic_arg1, 
-		NULL,
-	},
-};
-
-/**********************************************************/
-/* harvest */
-
-/* this structure is filled when cmd_harvest is parsed successfully */
-struct cmd_slavedspic_harvest_result {
-	fixed_string_t arg0;
-	fixed_string_t arg1;
-};
-
-/* function called when cmd_harvest is parsed successfully */
-static void cmd_slavedspic_harvest_parsed(void *parsed_result,
-			      __attribute__((unused)) void *data)
-{
-	struct cmd_slavedspic_harvest_result *res = parsed_result;
-
-	if (!strcmp(res->arg1, "prep_totem"))
-		i2c_slavedspic_mode_harvest(I2C_HARVEST_MODE_PREPARE_TOTEM);
-	else if (!strcmp(res->arg1, "prep_goldbar_totem"))
-		i2c_slavedspic_mode_harvest(I2C_HARVEST_MODE_PREPARE_GOLDBAR_TOTEM);
-	else if (!strcmp(res->arg1, "prep_goldbar_floor"))
-		i2c_slavedspic_mode_harvest(I2C_HARVEST_MODE_PREPARE_GOLDBAR_FLOOR);
-	else if (!strcmp(res->arg1, "prep_coins_totem"))
-		i2c_slavedspic_mode_harvest(I2C_HARVEST_MODE_PREPARE_COINS_TOTEM);
-	else if (!strcmp(res->arg1, "prep_coins_floor"))
-		i2c_slavedspic_mode_harvest(I2C_HARVEST_MODE_PREPARE_COINS_FLOOR);
-	else if (!strcmp(res->arg1, "coins_isle"))
-		i2c_slavedspic_mode_harvest(I2C_HARVEST_MODE_COINS_ISLE);
-	else if (!strcmp(res->arg1, "coins_floor"))
-		i2c_slavedspic_mode_harvest(I2C_HARVEST_MODE_COINS_FLOOR);
-	else if (!strcmp(res->arg1, "coins_totem"))
-		i2c_slavedspic_mode_harvest(I2C_HARVEST_MODE_COINS_TOTEM);
-	else if (!strcmp(res->arg1, "goldbar_totem"))
-		i2c_slavedspic_mode_harvest(I2C_HARVEST_MODE_GOLDBAR_TOTEM);
-	else if (!strcmp(res->arg1, "goldbar_floor"))
-		i2c_slavedspic_mode_harvest(I2C_HARVEST_MODE_GOLDBAR_FLOOR);
-
-}
-
-prog_char str_slavedspic_harvest_arg0[] = "slavedspic_harvest";
-parse_pgm_token_string_t cmd_slavedspic_harvest_arg0 = TOKEN_STRING_INITIALIZER(struct cmd_slavedspic_harvest_result, arg0, str_slavedspic_harvest_arg0);
-prog_char str_slavedspic_harvest_arg1[] = "prep_totem#prep_goldbar_totem#prep_goldbar_floor#prep_coins_totem#prep_coins_floor#"
-										"coins_isle#coins_floor#coins_totem#goldbar_totem#goldbar_floor";
-parse_pgm_token_string_t cmd_slavedspic_harvest_arg1 = TOKEN_STRING_INITIALIZER(struct cmd_slavedspic_harvest_result, arg1, str_slavedspic_harvest_arg1);
-
-
-prog_char help_slavedspic_harvest[] = "prepare for/or harvest something";
-parse_pgm_inst_t cmd_slavedspic_harvest = {
-	.f = cmd_slavedspic_harvest_parsed,  /* function to call */
-	.data = NULL,      /* 2nd arg of func */
-	.help_str = help_slavedspic_harvest,
-	.tokens = {        /* token list, NULL terminated */
-		(prog_void *)&cmd_slavedspic_harvest_arg0, 
-		(prog_void *)&cmd_slavedspic_harvest_arg1, 
-		NULL,
-	},
-};
-
-/**********************************************************/
-/* store */
-
-/* this structure is filled when cmd_store is parsed successfully */
-struct cmd_slavedspic_store_result {
-	fixed_string_t arg0;
-	fixed_string_t arg1;
-	uint8_t arg2;
-};
-
-/* function called when cmd_store is parsed successfully */
-static void cmd_slavedspic_store_parsed(void *parsed_result,
-			      __attribute__((unused)) void *data)
-{
-	struct cmd_slavedspic_store_result *res = parsed_result;
-
-	if (!strcmp(res->arg1, "goldbar_mouth"))
-		i2c_slavedspic_mode_store(res->arg2,I2C_STORE_MODE_GOLDBAR_IN_MOUTH);
-	else if (!strcmp(res->arg1, "goldbar_boot"))
-		i2c_slavedspic_mode_store(res->arg2,I2C_STORE_MODE_GOLDBAR_IN_BOOT);
-	else if (!strcmp(res->arg1, "mouth_in_boot"))
-		i2c_slavedspic_mode_store(res->arg2,I2C_STORE_MODE_MOUTH_IN_BOOT);
-}
-
-prog_char str_slavedspic_store_arg0[] = "slavedspic_store";
-parse_pgm_token_string_t cmd_slavedspic_store_arg0 = TOKEN_STRING_INITIALIZER(struct cmd_slavedspic_store_result, arg0, str_slavedspic_store_arg0);
-prog_char str_slavedspic_store_arg1[] = "goldbar_mouth#goldbar_boot#mouth_in_boot";
-parse_pgm_token_string_t cmd_slavedspic_store_arg1 = TOKEN_STRING_INITIALIZER(struct cmd_slavedspic_store_result, arg1, str_slavedspic_store_arg1);
-parse_pgm_token_num_t cmd_slavedspic_store_arg2 = TOKEN_NUM_INITIALIZER(struct cmd_slavedspic_store_result, arg2, UINT8);
-
-
-prog_char help_slavedspic_store[] = "store something in somewhere (n times)";
-parse_pgm_inst_t cmd_slavedspic_store = {
-	.f = cmd_slavedspic_store_parsed,  /* function to call */
-	.data = NULL,      /* 2nd arg of func */
-	.help_str = help_slavedspic_store,
-	.tokens = {        /* token list, NULL terminated */
-		(prog_void *)&cmd_slavedspic_store_arg0, 
-		(prog_void *)&cmd_slavedspic_store_arg1, 
-		(prog_void *)&cmd_slavedspic_store_arg2, 
-		NULL,
-	},
-};
-
-
-/**********************************************************/
-/* dump */
-
-/* this structure is filled when cmd_dump is parsed successfully */
-struct cmd_slavedspic_dump_result {
-	fixed_string_t arg0;
-	fixed_string_t arg1;
-};
-
-/* function called when cmd_dump is parsed successfully */
-static void cmd_slavedspic_dump_parsed(void *parsed_result,
-			      __attribute__((unused)) void *data)
-{
-	struct cmd_slavedspic_dump_result *res = parsed_result;
-
-	if (!strcmp(res->arg1, "prep_hold"))
-		i2c_slavedspic_mode_dump(I2C_DUMP_MODE_PREPARE_HOLD);
-	else if (!strcmp(res->arg1, "prep_mouth"))
-		i2c_slavedspic_mode_dump(I2C_DUMP_MODE_PREPARE_MOUTH);
-	else if (!strcmp(res->arg1, "prep_boot"))
-		i2c_slavedspic_mode_dump(I2C_DUMP_MODE_PREPARE_BOOT);
-	else if (!strcmp(res->arg1, "boot"))
-		i2c_slavedspic_mode_dump(I2C_DUMP_MODE_BOOT);
-	else if (!strcmp(res->arg1, "boot_blowing"))
-		i2c_slavedspic_mode_dump(I2C_DUMP_MODE_BOOT_BLOWING);
-	else if (!strcmp(res->arg1, "mouth_blowing"))
-		i2c_slavedspic_mode_dump(I2C_DUMP_MODE_MOUTH_BLOWING);
-	else if (!strcmp(res->arg1, "end_boot"))
-		i2c_slavedspic_mode_dump(I2C_DUMP_MODE_END_BOOT);
-	else if (!strcmp(res->arg1, "end_mouth"))
-		i2c_slavedspic_mode_dump(I2C_DUMP_MODE_END_MOUTH);
-}
-
-prog_char str_slavedspic_dump_arg0[] = "slavedspic_dump";
-parse_pgm_token_string_t cmd_slavedspic_dump_arg0 = TOKEN_STRING_INITIALIZER(struct cmd_slavedspic_dump_result, arg0, str_slavedspic_dump_arg0);
-prog_char str_slavedspic_dump_arg1[] = "prep_hold#prep_mouth#prep_boot#boot#boot_blowing#mouth_blowing#end_boot#end_mouth";
-parse_pgm_token_string_t cmd_slavedspic_dump_arg1 = TOKEN_STRING_INITIALIZER(struct cmd_slavedspic_dump_result, arg1, str_slavedspic_dump_arg1);
-
-
-prog_char help_slavedspic_dump[] = "dump something to somewhere";
-parse_pgm_inst_t cmd_slavedspic_dump = {
-	.f = cmd_slavedspic_dump_parsed,  /* function to call */
-	.data = NULL,      /* 2nd arg of func */
-	.help_str = help_slavedspic_dump,
-	.tokens = {        /* token list, NULL terminated */
-		(prog_void *)&cmd_slavedspic_dump_arg0, 
-		(prog_void *)&cmd_slavedspic_dump_arg1, 
-		NULL,
-	},
-};
-
-
-
-/**********************************************************/
-/* fingers */
-
-/* this structure is filled when cmd_fingers is parsed successfully */
-struct cmd_fingers_result {
-	fixed_string_t arg0;
-	fixed_string_t arg1;
-	fixed_string_t arg2;
-	int16_t arg3;
-};
-
-/* function called when cmd_fingers is parsed successfully */
-static void cmd_fingers_parsed(__attribute__((unused)) void *parsed_result,
-			    __attribute__((unused)) void *data)
-{
-	struct cmd_fingers_result *res = (struct cmd_fingers_result *) parsed_result;
-	uint8_t type=-1, mode=-1;
-
-	if (!strcmp_P(res->arg1, PSTR("totem"))) 
-		type=I2C_FINGERS_TYPE_TOTEM;
-	else if (!strcmp_P(res->arg1, PSTR("floor")))
-		type=I2C_FINGERS_TYPE_FLOOR;
-	else if (!strcmp_P(res->arg1, PSTR("left_totem")))
-		type=I2C_FINGERS_TYPE_TOTEM_LEFT;
-	else if (!strcmp_P(res->arg1, PSTR("right_totem")))
-		type=I2C_FINGERS_TYPE_TOTEM_RIGHT;
-	else if (!strcmp_P(res->arg1, PSTR("left_floor")))
-		type=I2C_FINGERS_TYPE_FLOOR_LEFT;
-	else if (!strcmp_P(res->arg1, PSTR("right_floor")))
-		type=I2C_FINGERS_TYPE_FLOOR_RIGHT;
-
-	if (!strcmp_P(res->arg2, PSTR("hug")))
-		mode=I2C_FINGERS_MODE_HUG;
-	else if (!strcmp_P(res->arg2, PSTR("open")))
-		mode=I2C_FINGERS_MODE_OPEN;
-	else if (!strcmp_P(res->arg2, PSTR("close")))
-		mode=I2C_FINGERS_MODE_CLOSE;
-	else if (!strcmp_P(res->arg2, PSTR("hold")))
-		mode=I2C_FINGERS_MODE_HOLD;
-	else if (!strcmp_P(res->arg2, PSTR("pushin")))
-		mode=I2C_FINGERS_MODE_PUSHIN;
-
-	i2c_slavedspic_mode_fingers(type,mode,res->arg3);
-	i2c_slavedspic_wait_ready();
-}
-
-prog_char str_fingers_arg0[] = "fingers";
-parse_pgm_token_string_t cmd_fingers_arg0 = TOKEN_STRING_INITIALIZER(struct cmd_fingers_result, arg0, str_fingers_arg0);
-prog_char str_fingers_arg1[] = "totem#floor#left_totem#right_totem#left_floor#right_floor";
-parse_pgm_token_string_t cmd_fingers_arg1 = TOKEN_STRING_INITIALIZER(struct cmd_fingers_result, arg1, str_fingers_arg1);
-prog_char str_fingers_arg2[] = "hug#open#hold#close#pushin";
-parse_pgm_token_string_t cmd_fingers_arg2 = TOKEN_STRING_INITIALIZER(struct cmd_fingers_result, arg2, str_fingers_arg2);
-parse_pgm_token_num_t cmd_fingers_arg3 = TOKEN_NUM_INITIALIZER(struct cmd_fingers_result, arg3, INT16);
-
-
-prog_char help_fingers[] = "set fingers mode";
-parse_pgm_inst_t cmd_fingers = {
-	.f = cmd_fingers_parsed,  /* function to call */
-	.data = NULL,      /* 2nd arg of func */
-	.help_str = help_fingers,
-	.tokens = {        /* token list, NULL terminated */
-		(prog_void *)&cmd_fingers_arg0, 
-		(prog_void *)&cmd_fingers_arg1,
-		(prog_void *)&cmd_fingers_arg2,
-		(prog_void *)&cmd_fingers_arg3,
-		NULL,
-	},
-};
-
-/**********************************************************/
-/* treasure */
-
-/* this structure is filled when cmd_dump is parsed successfully */
-struct cmd_treasure_result {
-	fixed_string_t arg0;
-	fixed_string_t arg1;
-	int16_t arg2;
-	int16_t arg3;
-	int16_t arg4;
-};
-
-/* function called when cmd_dump is parsed successfully */
-static void cmd_treasure_parsed(void *parsed_result,
-			      __attribute__((unused)) void *data)
-{
-   #include "../common/i2c_commands.h"
-
-	struct cmd_treasure_result *res = parsed_result;
-
-	if (!strcmp(res->arg1, "empty_totem")){
-		strat_empty_totem_side(res->arg2,res->arg3,0,res->arg4);
-
-      if(res->arg4 != 0 && res->arg4 != 3) {
-         i2c_slavedspic_mode_turbine_angle(0,200);
-         i2c_slavedspic_wait_ready();
-         i2c_slavedspic_mode_lift_height(30);
-         i2c_slavedspic_mode_fingers(I2C_FINGERS_TYPE_TOTEM,I2C_FINGERS_MODE_HOLD,0);
-         i2c_slavedspic_mode_fingers(I2C_FINGERS_TYPE_FLOOR,I2C_FINGERS_MODE_CLOSE,0);
-         i2c_slavedspic_wait_ready();
-      }
-   }  
-	else if (!strcmp(res->arg1, "coin_floor"))
-		strat_pickup_coins_floor(res->arg2,res->arg3,0);
-	else if (!strcmp(res->arg1, "coin_floor_group"))
-		strat_pickup_coins_floor(res->arg2,res->arg3,1);
-	else if (!strcmp(res->arg1, "goldbar_floor"))
-		strat_pickup_goldbar_floor(res->arg2,res->arg3,0);
-	else if (!strcmp(res->arg1, "send_message"))
-		strat_send_message_bottle(res->arg2,res->arg3);
-	else if (!strcmp(res->arg1, "save_generic"))
-		strat_save_treasure_generic(res->arg2,res->arg3);
-	else if (!strcmp(res->arg1, "save_deck_back"))
-		strat_save_treasure_in_deck_back(res->arg2,res->arg3);
-	else if (!strcmp(res->arg1, "save_hold"))
-		strat_save_treasure_in_hold_back(res->arg2,res->arg3);
-}
-
-prog_char str_treasure_arg0[] = "treasure";
-parse_pgm_token_string_t cmd_treasure_arg0 = TOKEN_STRING_INITIALIZER(struct cmd_treasure_result, arg0, str_treasure_arg0);
-prog_char str_treasure_arg1[] = "empty_totem#coin_floor#coin_floor_group#goldbar_floor#send_message#save_generic#save_deck_back#save_hold#";
-parse_pgm_token_string_t cmd_treasure_arg1 = TOKEN_STRING_INITIALIZER(struct cmd_treasure_result, arg1, str_treasure_arg1);
-parse_pgm_token_num_t cmd_treasure_arg2 = TOKEN_NUM_INITIALIZER(struct cmd_treasure_result, arg2, INT32);
-parse_pgm_token_num_t cmd_treasure_arg3 = TOKEN_NUM_INITIALIZER(struct cmd_treasure_result, arg3, INT32);
-parse_pgm_token_num_t cmd_treasure_arg4 = TOKEN_NUM_INITIALIZER(struct cmd_treasure_result, arg4, INT32);
-
-
-prog_char help_treasure[] = "treasure functions";
-parse_pgm_inst_t cmd_treasure = {
-	.f = cmd_treasure_parsed,  /* function to call */
-	.data = NULL,      /* 2nd arg of func */
-	.help_str = help_treasure,
-	.tokens = {        /* token list, NULL terminated */
-		(prog_void *)&cmd_treasure_arg0, 
-		(prog_void *)&cmd_treasure_arg1, 
-		(prog_void *)&cmd_treasure_arg2, 
-		(prog_void *)&cmd_treasure_arg3, 
-		(prog_void *)&cmd_treasure_arg4, 
-		NULL,
-	},
-};
-
-
-
-/**********************************************************/
-/* Robot sensors test */
-
-/* this structure is filled when cmd_sensor is parsed successfully */
-struct cmd_sensor_robot_result {
-	fixed_string_t arg0;
-	fixed_string_t arg1;
-};
-
-
-#define _BV64(i) ((uint64_t)1 << i)
-
-/* function called when cmd_sensor is parsed successfully */
-static void cmd_sensor_robot_parsed(void *parsed_result, void *data)
-{
-	struct cmd_sensor_robot_result *res = parsed_result;
-	volatile int64_t sensor_prev = 0;
-	uint8_t sensor_event = 0;
-	uint8_t i;
-	char sensor_string[15];
-
-	if (!strcmp(res->arg1, "robot"))
-	{	
-		do {
-			for (i=0; i<SENSOR_MAX; i++) {
-
-				if(sensor_get(i) && ((sensor_prev & _BV64(i))==0) ){
-					sensor_event = 1;
-					sensor_prev |= _BV64(i);
-				}
-				else if (!sensor_get(i) && ((sensor_prev & _BV64(i))!=0)){
-					sensor_event = 1;
-					sensor_prev &= (~_BV64(i));
-				}
-			
-				if(sensor_event){
-
-					sensor_event = 0;
-
-					switch(i){
-						case S_START_SWITCH: strcpy(sensor_string, "START"); break;
-
-						case S_TOKEN_FRONT_R: 			strcpy(sensor_string, "T_FRONT_R"); break;
-						case S_TOKEN_FRONT_L: 			strcpy(sensor_string, "T_FRONT_L"); break;
-						case S_TOKEN_FRONT_45R: 		strcpy(sensor_string, "T_FRONT_45R"); break;
-						case S_TOKEN_FRONT_45L: 		strcpy(sensor_string, "T_FRONT_45L"); break;
-						case S_TOKEN_FRONT_TOWER2H: 	strcpy(sensor_string, "S_TOKEN_FRONT_TOWER2H"); break;
-						case S_TOKEN_FRONT_TOWER1H: 	strcpy(sensor_string, "S_TOKEN_FRONT_TOWER1H"); break;
-						case S_TOKEN_FRONT_FIGURE: 	strcpy(sensor_string, "S_TOKEN_FRONT_FIGURE"); break;
-
-						case S_TOKEN_REAR_R: 			strcpy(sensor_string, "T_REAR_R"); break;
-						case S_TOKEN_REAR_L: 			strcpy(sensor_string, "T_REAR_L"); break;
-						case S_TOKEN_REAR_45R: 			strcpy(sensor_string, "T_REAR_45R"); break;
-						case S_TOKEN_REAR_45L: 			strcpy(sensor_string, "T_REAR_45L"); break;
-						case S_TOKEN_REAR_TOWER2H: 	strcpy(sensor_string, "S_TOKEN_REAR_TOWER2H"); break;
-						case S_TOKEN_REAR_TOWER1H: 	strcpy(sensor_string, "S_TOKEN_REAR_TOWER1H"); break;
-						case S_TOKEN_REAR_FIGURE: 		strcpy(sensor_string, "S_TOKEN_REAR_FIGURE"); break;
-
-						case S_OPPONENT_FRONT_R: 		strcpy(sensor_string, "OP_FRONT_R"); break;
-						case S_OPPONENT_FRONT_L: 		strcpy(sensor_string, "OP_FRONT_L"); break;
-						case S_OPPONENT_REAR_R: 		strcpy(sensor_string, "OP_REAR_R"); break;
-						case S_OPPONENT_REAR_L: 		strcpy(sensor_string, "OP_REAR_L"); break;
-						case S_OPPONENT_RIGHT: 			strcpy(sensor_string, "OP_RIGHT"); break;
-						case S_OPPONENT_LEFT: 			strcpy(sensor_string, "OP_LEFT"); break;
-
-						default: strcpy(sensor_string, "S_UNKNOW"); continue;
-					}
-
-					printf("%s %s!\n\r", sensor_string, (sensor_prev & _BV64(i))? "on":"off" ); 
-
-				}
-			}
-
-			wait_ms(100);
-		} while (!cmdline_keypressed());
-	}
-}
-
-prog_char str_sensor_robot_arg0[] = "sensor";
-parse_pgm_token_string_t cmd_sensor_robot_arg0 = TOKEN_STRING_INITIALIZER(struct cmd_sensor_robot_result, arg0, str_sensor_robot_arg0);
-prog_char str_sensor_robot_arg1[] = "robot";
-parse_pgm_token_string_t cmd_sensor_robot_arg1 = TOKEN_STRING_INITIALIZER(struct cmd_sensor_robot_result, arg1, str_sensor_robot_arg1);
-
-prog_char help_sensor_robot[] = "Show robot sensors";
-parse_pgm_inst_t cmd_sensor_robot = {
-	.f = cmd_sensor_robot_parsed,  /* function to call */
-	.data = NULL,      /* 2nd arg of func */
-	.help_str = help_sensor_robot,
-	.tokens = {        /* token list, NULL terminated */
-		(prog_void *)&cmd_sensor_robot_arg0, 
-		(prog_void *)&cmd_sensor_robot_arg1, 
-		NULL,
-	},
-};
-
-#endif /* notyet TODO 2014*/
+#ifdef COMPILE_COMMANDS_MAINBOARD_OPTIONALS /*--------------------------------*/
 
 /**********************************************************/
 /* Interact */
@@ -1435,6 +918,39 @@ parse_pgm_inst_t cmd_time_monitor = {
 	},
 };
 
+/**********************************************************/
+/* Sleep */
+
+/* this structure is filled when cmd_sleep is parsed successfully */
+struct cmd_sleep_result {
+	fixed_string_t arg0;
+	uint32_t ms;
+};
+
+/* function called when cmd_sleep is parsed successfully */
+static void cmd_sleep_parsed(void *parsed_result, void *data)
+{
+	struct cmd_sleep_result *res = parsed_result;
+	time_wait_ms(res->ms);
+}
+
+prog_char str_sleep_arg0[] = "sleep";
+parse_pgm_token_string_t cmd_sleep_arg0 = TOKEN_STRING_INITIALIZER(struct cmd_sleep_result, arg0, str_sleep_arg0);
+parse_pgm_token_num_t cmd_sleep_ms = TOKEN_NUM_INITIALIZER(struct cmd_sleep_result, ms, UINT32);
+
+prog_char help_sleep[] = "Sleep during some miliseconds";
+parse_pgm_inst_t cmd_sleep = {
+	.f = cmd_sleep_parsed,  /* function to call */
+	.data = NULL,      /* 2nd arg of func */
+	.help_str = help_sleep,
+	.tokens = {        /* token list, NULL terminated */
+		(prog_void *)&cmd_sleep_arg0,
+		(prog_void *)&cmd_sleep_ms,
+		NULL,
+	},
+};
+#endif /* COMPILE_COMMANDS_MAINBOARD_OPTIONALS -------------------------------*/
+
 
 /**********************************************************/
 /* Strat_Event */
@@ -1473,91 +989,7 @@ parse_pgm_inst_t cmd_strat_event = {
 	},
 };
 
-/**********************************************************/
-/* Sleep */
 
-/* this structure is filled when cmd_sleep is parsed successfully */
-struct cmd_sleep_result {
-	fixed_string_t arg0;
-	uint32_t ms;
-};
-
-/* function called when cmd_sleep is parsed successfully */
-static void cmd_sleep_parsed(void *parsed_result, void *data)
-{
-	struct cmd_sleep_result *res = parsed_result;
-	time_wait_ms(res->ms);
-}
-
-prog_char str_sleep_arg0[] = "sleep";
-parse_pgm_token_string_t cmd_sleep_arg0 = TOKEN_STRING_INITIALIZER(struct cmd_sleep_result, arg0, str_sleep_arg0);
-parse_pgm_token_num_t cmd_sleep_ms = TOKEN_NUM_INITIALIZER(struct cmd_sleep_result, ms, UINT32);
-
-prog_char help_sleep[] = "Sleep during some miliseconds";
-parse_pgm_inst_t cmd_sleep = {
-	.f = cmd_sleep_parsed,  /* function to call */
-	.data = NULL,      /* 2nd arg of func */
-	.help_str = help_sleep,
-	.tokens = {        /* token list, NULL terminated */
-		(prog_void *)&cmd_sleep_arg0,
-		(prog_void *)&cmd_sleep_ms,
-		NULL,
-	},
-};
-
-#ifdef notyet
-
-/**********************************************************/
-/* wt11 */
-
-/* this structure is filled when cmd_wt11 is parsed successfully */
-struct cmd_wt11_result {
-	fixed_string_t arg0;
-	fixed_string_t arg1;
-};
-
-/* function called when cmd_wt11 is parsed successfully */
-static void cmd_wt11_parsed(void *parsed_result, void *data)
-{
-	struct cmd_wt11_result *res = parsed_result;
-  char buffer[32] = "hello world!!";
-  int16_t length, i;
-	
-  if (!strcmp_P(res->arg1, PSTR("mux_send"))) {
-
-     for (i=0; i<3; i++)
-        bt_wt11_mux_send(i, buffer, sizeof(buffer));			
-
-     bt_wt11_mux_send(0xFF, buffer, sizeof(buffer));
-
-  }
-  else if (!strcmp_P(res->arg1, PSTR("mux_recv"))) {
-
-      length = bt_wt11_mux_recv(&i, buffer);	
-      if (length == -1)
-        printf ("received nothing\n"); 
-      else 
-        printf ("%s\n", buffer);
-  }
-}
-
-prog_char str_wt11_arg0[] = "wt11";
-parse_pgm_token_string_t cmd_wt11_arg0 = TOKEN_STRING_INITIALIZER(struct cmd_wt11_result, arg0, str_wt11_arg0);
-prog_char str_wt11_arg1[] = "mux_send#mux_recv";
-parse_pgm_token_string_t cmd_wt11_arg1 = TOKEN_STRING_INITIALIZER(struct cmd_wt11_result, arg1, str_wt11_arg1);
-
-prog_char help_wt11[] = "wt11 test functions";
-parse_pgm_inst_t cmd_wt11 = {
-	.f = cmd_wt11_parsed,  /* function to call */
-	.data = NULL,      /* 2nd arg of func */
-	.help_str = help_wt11,
-	.tokens = {        /* token list, NULL terminated */
-		(prog_void *)&cmd_wt11_arg0,
-		(prog_void *)&cmd_wt11_arg1,
-		NULL,
-	},
-};
-#endif
 
 /**********************************************************/
 /* status */
@@ -1615,11 +1047,11 @@ static void cmd_status_parsed(void * parsed_result, void *data)
 	abs_xy_to_rel_da(x, y, &d, &a);
 
 	IRQ_LOCK(flags);
-	mainrobot.x = res->robot_x;
-	mainrobot.y = res->robot_y;
-	mainrobot.a_abs = res->robot_a_abs;
-	mainrobot.a = a;
-	mainrobot.d = d;
+	robot_2nd.x = res->robot_x;
+	robot_2nd.y = res->robot_y;
+	robot_2nd.a_abs = res->robot_a_abs;
+	robot_2nd.a = a;
+	robot_2nd.d = d;
 	IRQ_UNLOCK(flags);
 
 	/* get opponent 1 possition */
@@ -1628,10 +1060,10 @@ static void cmd_status_parsed(void * parsed_result, void *data)
 	abs_xy_to_rel_da(x, y, &d, &a);
 
 	IRQ_LOCK(flags);
-	mainrobot.opponent_x = res->opp1_x;
-	mainrobot.opponent_y = res->opp1_y;
-	mainrobot.opponent_a = a;
-	mainrobot.opponent_d = d;
+	robot_2nd.opponent1_x = res->opp1_x;
+	robot_2nd.opponent1_y = res->opp1_y;
+	robot_2nd.opponent1_a = a;
+	robot_2nd.opponent1_d = d;
 	IRQ_UNLOCK(flags);
 
 	/* get opponent 2 possition */
@@ -1640,10 +1072,10 @@ static void cmd_status_parsed(void * parsed_result, void *data)
 	abs_xy_to_rel_da(x, y, &d, &a);
 
 	IRQ_LOCK(flags);
-	mainrobot.opponent2_x = res->opp2_x;
-	mainrobot.opponent2_y = res->opp2_y;
-	mainrobot.opponent2_a = a;
-	mainrobot.opponent2_d = d;
+	robot_2nd.opponent2_x = res->opp2_x;
+	robot_2nd.opponent2_y = res->opp2_y;
+	robot_2nd.opponent2_a = a;
+	robot_2nd.opponent2_d = d;
 	IRQ_UNLOCK(flags);
 
 send_status:
@@ -1656,8 +1088,8 @@ send_status:
 	ans.a_abs = position_get_a_deg_s16(&mainboard.pos);
 
 	/* opponent 1 */
-	ans.opponent_x = beaconboard.opponent_x;
-	ans.opponent_y = beaconboard.opponent_y;
+	ans.opponent1_x = beaconboard.opponent1_x;
+	ans.opponent1_y = beaconboard.opponent1_y;
 
 	/* opponent 2 */
 	ans.opponent2_x = beaconboard.opponent2_x;
@@ -1666,9 +1098,9 @@ send_status:
 	ans.color = mainboard.our_color;
 
 	/* XXX cmd feedback: must be filld by cmds */
-	ans.cmd_id = mainrobot.cmd_id;
-	ans.cmd_ret = mainrobot.cmd_ret;
-	ans.cmd_args_checksum = mainrobot.cmd_args_checksum;
+	ans.cmd_id = robot_2nd.cmd_id;
+	ans.cmd_ret = robot_2nd.cmd_ret;
+	ans.cmd_args_checksum = robot_2nd.cmd_args_checksum;
 	IRQ_UNLOCK(flags);
 
 
@@ -1719,51 +1151,106 @@ parse_pgm_inst_t cmd_status = {
 	},
 };
 
+/* TODO 2014 */
+#if 0
+
 
 /**********************************************************/
-/* patrol_between */
+/* Robot sensors test */
 
-/* this structure is filled when patrol_between is parsed successfully */
-struct cmd_patrol_between_result {
+/* this structure is filled when cmd_sensor is parsed successfully */
+struct cmd_sensor_robot_result {
 	fixed_string_t arg0;
-	int16_t x1;
-	int16_t y1;
-	int16_t x2;
-	int16_t y2;
+	fixed_string_t arg1;
 };
 
-/* function called when cmd_patrol_between is parsed successfully */
-static void cmd_patrol_between_parsed(void *parsed_result, void *data)
+
+#define _BV64(i) ((uint64_t)1 << i)
+
+/* function called when cmd_sensor is parsed successfully */
+static void cmd_sensor_robot_parsed(void *parsed_result, void *data)
 {
-	struct cmd_patrol_between_result *res = parsed_result;
+	struct cmd_sensor_robot_result *res = parsed_result;
+	volatile int64_t sensor_prev = 0;
+	uint8_t sensor_event = 0;
+	uint8_t i;
+	char sensor_string[15];
 
-	patrol_between(res->x1,res->y1,res->x2,res->y2); 
+	if (!strcmp(res->arg1, "robot"))
+	{	
+		do {
+			for (i=0; i<SENSOR_MAX; i++) {
 
+				if(sensor_get(i) && ((sensor_prev & _BV64(i))==0) ){
+					sensor_event = 1;
+					sensor_prev |= _BV64(i);
+				}
+				else if (!sensor_get(i) && ((sensor_prev & _BV64(i))!=0)){
+					sensor_event = 1;
+					sensor_prev &= (~_BV64(i));
+				}
+			
+				if(sensor_event){
+
+					sensor_event = 0;
+
+					switch(i){
+						case S_START_SWITCH: strcpy(sensor_string, "START"); break;
+
+						case S_TOKEN_FRONT_R: 			strcpy(sensor_string, "T_FRONT_R"); break;
+						case S_TOKEN_FRONT_L: 			strcpy(sensor_string, "T_FRONT_L"); break;
+						case S_TOKEN_FRONT_45R: 		strcpy(sensor_string, "T_FRONT_45R"); break;
+						case S_TOKEN_FRONT_45L: 		strcpy(sensor_string, "T_FRONT_45L"); break;
+						case S_TOKEN_FRONT_TOWER2H: 	strcpy(sensor_string, "S_TOKEN_FRONT_TOWER2H"); break;
+						case S_TOKEN_FRONT_TOWER1H: 	strcpy(sensor_string, "S_TOKEN_FRONT_TOWER1H"); break;
+						case S_TOKEN_FRONT_FIGURE: 	strcpy(sensor_string, "S_TOKEN_FRONT_FIGURE"); break;
+
+						case S_TOKEN_REAR_R: 			strcpy(sensor_string, "T_REAR_R"); break;
+						case S_TOKEN_REAR_L: 			strcpy(sensor_string, "T_REAR_L"); break;
+						case S_TOKEN_REAR_45R: 			strcpy(sensor_string, "T_REAR_45R"); break;
+						case S_TOKEN_REAR_45L: 			strcpy(sensor_string, "T_REAR_45L"); break;
+						case S_TOKEN_REAR_TOWER2H: 	strcpy(sensor_string, "S_TOKEN_REAR_TOWER2H"); break;
+						case S_TOKEN_REAR_TOWER1H: 	strcpy(sensor_string, "S_TOKEN_REAR_TOWER1H"); break;
+						case S_TOKEN_REAR_FIGURE: 		strcpy(sensor_string, "S_TOKEN_REAR_FIGURE"); break;
+
+						case S_OPPONENT_FRONT_R: 		strcpy(sensor_string, "OP_FRONT_R"); break;
+						case S_OPPONENT_FRONT_L: 		strcpy(sensor_string, "OP_FRONT_L"); break;
+						case S_OPPONENT_REAR_R: 		strcpy(sensor_string, "OP_REAR_R"); break;
+						case S_OPPONENT_REAR_L: 		strcpy(sensor_string, "OP_REAR_L"); break;
+						case S_OPPONENT_RIGHT: 			strcpy(sensor_string, "OP_RIGHT"); break;
+						case S_OPPONENT_LEFT: 			strcpy(sensor_string, "OP_LEFT"); break;
+
+						default: strcpy(sensor_string, "S_UNKNOW"); continue;
+					}
+
+					printf("%s %s!\n\r", sensor_string, (sensor_prev & _BV64(i))? "on":"off" ); 
+
+				}
+			}
+
+			wait_ms(100);
+		} while (!cmdline_keypressed());
+	}
 }
 
-prog_char str_patrol_between_arg0[] = "patrol_between";
-parse_pgm_token_string_t cmd_patrol_between_arg0 = TOKEN_STRING_INITIALIZER(struct cmd_patrol_between_result, arg0, str_patrol_between_arg0);
+prog_char str_sensor_robot_arg0[] = "sensor";
+parse_pgm_token_string_t cmd_sensor_robot_arg0 = TOKEN_STRING_INITIALIZER(struct cmd_sensor_robot_result, arg0, str_sensor_robot_arg0);
+prog_char str_sensor_robot_arg1[] = "robot";
+parse_pgm_token_string_t cmd_sensor_robot_arg1 = TOKEN_STRING_INITIALIZER(struct cmd_sensor_robot_result, arg1, str_sensor_robot_arg1);
 
-parse_pgm_token_num_t cmd_x1 = TOKEN_NUM_INITIALIZER(struct cmd_patrol_between_result, x1, UINT16);
-parse_pgm_token_num_t cmd_y1 = TOKEN_NUM_INITIALIZER(struct cmd_patrol_between_result, y1, UINT16);
-parse_pgm_token_num_t cmd_x2 = TOKEN_NUM_INITIALIZER(struct cmd_patrol_between_result, x2, UINT16);
-parse_pgm_token_num_t cmd_y2 = TOKEN_NUM_INITIALIZER(struct cmd_patrol_between_result, y2, UINT16);
-
-
-prog_char help_patrol_between[] = "patrol_between";
-parse_pgm_inst_t cmd_patrol_between = {
-	.f = cmd_patrol_between_parsed,  /* function to call */
+prog_char help_sensor_robot[] = "Show robot sensors";
+parse_pgm_inst_t cmd_sensor_robot = {
+	.f = cmd_sensor_robot_parsed,  /* function to call */
 	.data = NULL,      /* 2nd arg of func */
-	.help_str = help_patrol_between,
+	.help_str = help_sensor_robot,
 	.tokens = {        /* token list, NULL terminated */
-		(prog_void *)&cmd_patrol_between_arg0,
-		(prog_void *)&cmd_x1,
-		(prog_void *)&cmd_y1,
-		(prog_void *)&cmd_x2,
-		(prog_void *)&cmd_y2,
+		(prog_void *)&cmd_sensor_robot_arg0, 
+		(prog_void *)&cmd_sensor_robot_arg1, 
 		NULL,
 	},
 };
+
+#endif /* TODO 2014*/
 
 
 

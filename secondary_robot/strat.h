@@ -348,6 +348,10 @@ void strat_start_match(uint8_t debug);
 /********************************************
  * in strat_main.c 
  *******************************************/
+
+/* patrol between 2 points depending on nearest opponent */
+uint8_t patrol_between(int16_t x1, int16_t y1,int16_t x2, int16_t y2);
+
 #if notyet /* TODO 2014 */
 uint8_t strat_main_loop(void);
 

@@ -979,12 +979,13 @@ static void auto_position(void)
     strat_reset_pos(DO_NOT_SET_POS, COLOR_Y(ROBOT_DIS2_WALL), 90);
 
     /* goto start position */
+#if 0
     trajectory_d_rel(&mainboard.traj, 200 - 25);
     err = wait_traj_end(END_INTR | END_TRAJ);
     if (err == END_INTR)
         goto intr;
     wait_ms(100);
-
+#endif
     /* restore speeds */
     strat_set_speed(old_spdd, old_spda);
     return;
@@ -1232,6 +1233,7 @@ static void cmd_strat_conf3_parsed(void *parsed_result, void *data)
     if (!strcmp_P(res->arg1, PSTR("something")))
     {
         /* set value of a strat parameter */
+			printf ("not implemented");
     }
 
     strat_infos.dump_enabled = 1;

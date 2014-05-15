@@ -100,7 +100,7 @@ static void cmd_event_parsed(void *parsed_result, void *data)
     if (!strcmp_P(res->arg1, PSTR("all")))
     {
         bit = DO_ENCODERS | DO_CS | DO_RS | DO_POS |
-                DO_BD | DO_TIMER | DO_POWER | DO_OPP | DO_ROBOT_2ND;
+                DO_BD | DO_TIMER | DO_POWER | DO_BEACON | DO_ROBOT_2ND;
         if (!strcmp_P(res->arg2, PSTR("on")))
             mainboard.flags |= bit;
         else if (!strcmp_P(res->arg2, PSTR("off")))
@@ -121,10 +121,10 @@ static void cmd_event_parsed(void *parsed_result, void *data)
                      (DO_TIMER & mainboard.flags) ? "on" : "off");
             printf_P(PSTR("power is %s\r\n"),
                      (DO_POWER & mainboard.flags) ? "on" : "off");
-            printf_P(PSTR("opp is %s\r\n"),
-                     (DO_OPP & mainboard.flags) ? "on" : "off");
+            printf_P(PSTR("beacon is %s\r\n"),
+                     (DO_BEACON & mainboard.flags) ? "on" : "off");
            printf_P(PSTR("robot_2nd is %s\r\n"),
-                     (DO_OPP & mainboard.flags) ? "on" : "off");
+                     (DO_ROBOT_2ND & mainboard.flags) ? "on" : "off");
         }
         return;
     }
@@ -149,8 +149,8 @@ static void cmd_event_parsed(void *parsed_result, void *data)
     }
     else if (!strcmp_P(res->arg1, PSTR("power")))
         bit = DO_POWER;
-    else if (!strcmp_P(res->arg1, PSTR("opp")))
-        bit = DO_OPP;
+    else if (!strcmp_P(res->arg1, PSTR("beacon")))
+        bit = DO_BEACON;
    else if (!strcmp_P(res->arg1, PSTR("robot_2nd")))
         bit = DO_ROBOT_2ND;
 
@@ -177,7 +177,7 @@ static void cmd_event_parsed(void *parsed_result, void *data)
 
 prog_char str_event_arg0[] = "event";
 parse_pgm_token_string_t cmd_event_arg0 = TOKEN_STRING_INITIALIZER(struct cmd_event_result, arg0, str_event_arg0);
-prog_char str_event_arg1[] = "all#encoders#cs#rs#pos#bd#timer#power#opp#robot_2nd";
+prog_char str_event_arg1[] = "all#encoders#cs#rs#pos#bd#timer#power#beacon#robot_2nd";
 parse_pgm_token_string_t cmd_event_arg1 = TOKEN_STRING_INITIALIZER(struct cmd_event_result, arg1, str_event_arg1);
 prog_char str_event_arg2[] = "on#off#show";
 parse_pgm_token_string_t cmd_event_arg2 = TOKEN_STRING_INITIALIZER(struct cmd_event_result, arg2, str_event_arg2);
@@ -222,16 +222,16 @@ static void cmd_opponent_parsed(void *parsed_result, void *data)
 
     if (data)
     {
-        beaconboard.opponent_d = res->arg2;
-        beaconboard.opponent_a = res->arg3;
-        beaconboard.opponent_x = 0;
+        beaconboard.opponent1_d = res->arg2;
+        beaconboard.opponent1_a = res->arg3;
+        beaconboard.opponent1_x = 0;
     }
     else
         do
         {
 
 #ifdef TWO_OPPONENTS
-            opp1 = get_opponent_xyda(&x, &y, &d, &a);
+            opp1 = get_opponent1_xyda(&x, &y, &d, &a);
             opp2 = get_opponent2_xyda(&x2, &y2, &d2, &a2);
             r2nd = get_robot_2nd_xyda(&x_r2nd, &y_r2nd, &d_r2nd, &a_r2nd);
             get_robot_2nd_a_abs(&a_abs_r2nd);
@@ -357,13 +357,11 @@ static void cmd_start_parsed(void *parsed_result, void *data)
 retry:
     printf_P(PSTR("Press a key when beacon ready, 'q' for skip \r\n"));
     c = -1;
-    while (c == -1)
-    {
+    while (c == -1) {
         c = cmdline_getchar();
     }
 
-    if (c == 'q')
-    {
+    if (c == 'q') {
         printf("Play without beacon\r\n");
     }
     else
@@ -781,8 +779,8 @@ static void cmd_robot_2nd_parsed(void * parsed_result, void * data)
 												robot_2nd.x, robot_2nd.y, robot_2nd.a_abs,
 												robot_2nd.a, robot_2nd.d);
 
-				printf ("opp1 (%d %d %d %d)\n\r", robot_2nd.opponent_x, robot_2nd.opponent_y,
-														robot_2nd.opponent_a, robot_2nd.opponent_d); 
+				printf ("opp1 (%d %d %d %d)\n\r", robot_2nd.opponent1_x, robot_2nd.opponent1_y,
+														robot_2nd.opponent1_a, robot_2nd.opponent1_d);
 				printf ("opp2 (%d %d %d %d)\n\r", robot_2nd.opponent2_x, robot_2nd.opponent2_y,
 														robot_2nd.opponent2_a, robot_2nd.opponent2_d); 
 
@@ -843,7 +841,7 @@ static void cmd_slavedspic_parsed(void *parsed_result, void *data)
         /* disable opponent event */
         IRQ_LOCK(flags);
         mainboard_flags = mainboard.flags;
-        mainboard.flags &= ~(DO_OPP);
+        mainboard.flags &= ~(DO_BT_PROTO);
         IRQ_UNLOCK(flags);
 
         /* flush rx buffer */

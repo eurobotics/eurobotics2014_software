@@ -499,10 +499,10 @@ static void cmd_opponent_parsed(void * parsed_result, void *data)
 #else
 	/* fill answer structure */
 	ans.hdr.cmd = BT_BEACON_STATUS_ANS;
-	ans.opponent_x = opponent1_x;
-	ans.opponent_y = opponent1_y;
-	ans.opponent_a = opponent1_angle;
-	ans.opponent_d = opponent1_dist;
+	ans.opponent1_x = opponent1_x;
+	ans.opponent1_y = opponent1_y;
+	ans.opponent1_a = opponent1_angle;
+	ans.opponent1_d = opponent1_dist;
 
 #ifdef TWO_OPPONENTS
 	ans.opponent2_x = opponent2_x;
@@ -527,8 +527,8 @@ static void cmd_opponent_parsed(void * parsed_result, void *data)
 		printf("\n\r");
 		printf("size %d \n\r", sizeof(ans));
 		printf("opp1 %d %d %d %d \n\r",
-		 			(int16_t)ans.opponent_x, (int16_t)ans.opponent_y,
-					(int16_t)ans.opponent_a, (int16_t)ans.opponent_d);
+		 			(int16_t)ans.opponent1_x, (int16_t)ans.opponent1_y,
+					(int16_t)ans.opponent1_a, (int16_t)ans.opponent1_d);
 		printf("opp2 %d %d %d %d \n\r",
 		 			(int16_t)ans.opponent2_x, (int16_t)ans.opponent2_y,
 					(int16_t)ans.opponent2_a, (int16_t)ans.opponent2_d);

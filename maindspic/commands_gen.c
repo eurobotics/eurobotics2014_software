@@ -343,6 +343,8 @@ parse_pgm_inst_t cmd_dac_mc = {
 	},
 };
 
+#ifdef COMPILE_COMMANDS_MAINBOARD_OPTIONALS /*--------------------------------*/
+
 /**********************************************************/
 /* Adcs tests */
 
@@ -374,6 +376,9 @@ static void cmd_adc_parsed(void *parsed_result, void *data)
 	} while (loop && !cmdline_keypressed());
 #endif
 }
+
+#endif /* COMPILE_COMMANDS_MAINBOARD_OPTIONALS --------------------------------*/
+
 
 prog_char str_adc_arg0[] = "adc";
 parse_pgm_token_string_t cmd_adc_arg0 = TOKEN_STRING_INITIALIZER(struct cmd_adc_result, arg0, str_adc_arg0);
@@ -578,6 +583,7 @@ static const prog_char i2cproto_log[] = "i2cproto";
 static const prog_char sensor_log[] = "sensor";
 static const prog_char block_log[] = "bd";
 static const prog_char cs_log[] = "cs";
+static const prog_char btproto_log[] = "btproto";
 
 struct log_name_and_num {
 	const prog_char * name;
@@ -595,6 +601,7 @@ static const struct log_name_and_num log_name_and_num[] = {
 	{ sensor_log, E_USER_SENSOR },
 	{ block_log, E_BLOCKING_DETECTION_MANAGER },
 	{ cs_log, E_USER_CS },
+	{ btproto_log, E_USER_BT_PROTO },
 };
 
 static uint8_t
@@ -744,8 +751,7 @@ static void cmd_log_type_parsed(void * parsed_result, void * data)
 prog_char str_log_arg1_type[] = "type";
 parse_pgm_token_string_t cmd_log_arg1_type = TOKEN_STRING_INITIALIZER(struct cmd_log_type_result, arg1, str_log_arg1_type);
 /* keep it sync with log_name_and_num above */
-//prog_char str_log_arg2_type[] = "uart#rs#servo#traj#i2c#oa#strat#i2cproto#ext#sensor#bd#cs";
-prog_char str_log_arg2_type[] = "uart#rs#traj#oa#ext#sensor#cs#bd";
+prog_char str_log_arg2_type[] = "uart#rs#traj#oa#ext#sensor#cs#bd#btproto";
 parse_pgm_token_string_t cmd_log_arg2_type = TOKEN_STRING_INITIALIZER(struct cmd_log_type_result, arg2, str_log_arg2_type);
 prog_char str_log_arg3[] = "on#off";
 parse_pgm_token_string_t cmd_log_arg3 = TOKEN_STRING_INITIALIZER(struct cmd_log_type_result, arg3, str_log_arg3);

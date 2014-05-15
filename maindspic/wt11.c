@@ -71,7 +71,7 @@ void wt11_send_mux (uint8_t link_id, uint8_t *buff, uint16_t length)
 
   /* check length */
   if (length > WT11_MUX_LENGTH_MAX) {
-    ERROR(E_USER_BT_PROTO, "BT_PROTO: ERROR, length > max");
+    ERROR(E_USER_WT11, "WT11: ERROR, length > max");
     return;
   }
 
@@ -171,22 +171,7 @@ int16_t wt11_recv_mux (uint8_t *link_id, uint8_t *buff, uint16_t buff_size)
 
 				if (i == __length)
 					state ++;
-#if 0
-					i++;
-			  
-				if (i == __length) {
 
-					if (i < buff_size)
-						state ++;
-					else {
-						state = 0;
-						i = 0;
-						ERROR (E_USER_WT11, "WT11: ERROR buffer overflow");
-						wt11_flush();
-						return -1;
-					}
-				}
-#endif
 				break;
 
 			/* nLINK */    
@@ -564,6 +549,7 @@ void __wt11_open_link(uint8_t mode, uint8_t *addr, uint8_t *link_id)
 		i++;
 	}
 
+	*link_id = 0xFF;
 	ERROR(E_USER_WT11, "WT11: link KO");
 }
 

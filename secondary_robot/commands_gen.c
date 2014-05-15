@@ -350,6 +350,7 @@ parse_pgm_inst_t cmd_pwm = {
 };
 
 
+#ifdef COMPILE_COMMANDS_MAINBOARD_OPTIONALS /*--------------------------------*/
 
 /**********************************************************/
 /* Adcs tests */
@@ -399,6 +400,8 @@ parse_pgm_inst_t cmd_adc = {
 		NULL,
 	},
 };
+
+#endif /* COMPILE_COMMANDS_MAINBOARD_OPTIONALS --------------------------------*/
 
 
 /**********************************************************/

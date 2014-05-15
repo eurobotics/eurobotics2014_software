@@ -227,17 +227,22 @@ int main(void)
 	memset(&beaconboard, 0, sizeof(beaconboard));
 
 	/* init flags */
-  mainboard.flags = DO_ENCODERS | DO_CS | DO_RS |
+  	mainboard.flags = DO_ENCODERS | DO_CS | DO_RS |
 		DO_POS | DO_POWER | DO_BD;
 	
-	beaconboard.opponent_x = I2C_OPPONENT_NOT_THERE;
+	/* bt protocol */
+	beaconboard.link_id = 0xFF;
+	robot_2nd.link_id = 0xFF;
+
+	/* opponents and robot 2nd positions */
+	beaconboard.opponent1_x = I2C_OPPONENT_NOT_THERE;
 
 #ifdef TWO_OPPONENTS
-   beaconboard.opponent2_x = I2C_OPPONENT_NOT_THERE;
+    beaconboard.opponent2_x = I2C_OPPONENT_NOT_THERE;
 #endif
 
 #ifdef ROBOT_2ND
-	beaconboard.robot_2nd_x = I2C_OPPONENT_NOT_THERE;
+	robot_2nd.x = I2C_OPPONENT_NOT_THERE;
 #endif
 
 #ifndef HOST_VERSION
@@ -322,11 +327,11 @@ int main(void)
 
 	/* log setup */
  	gen.logs[0] = E_USER_STRAT;
- 	gen.logs[1] = E_USER_BEACON;
- 	gen.logs[2] = E_USER_I2C_PROTO;
+ 	//gen.logs[1] = E_USER_BEACON;
+ 	gen.logs[1] = E_USER_I2C_PROTO;
  	//gen.logs[3] = E_OA;
- 	gen.logs[3] = E_USER_WT11;
- 	gen.logs[4] = E_USER_BT_PROTO;
+ 	gen.logs[2] = E_USER_WT11;
+ 	//gen.logs[4] = E_USER_BT_PROTO;
  	gen.log_level = 5;
 	
 	/* reset strat infos */

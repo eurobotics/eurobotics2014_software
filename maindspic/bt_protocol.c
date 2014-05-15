@@ -140,10 +140,7 @@ void bt_beacon_set_on_watchdog (void) {
 }
 
 /* beacon off*/
-void bt_beacon_set_off (void) 
-{
-	uint8_t flags;
-
+void bt_beacon_set_off (void) {
   	bt_send_ascii_cmd (beaconboard.link_id, "beacon off");
 }
 
@@ -156,7 +153,7 @@ void bt_beacon_req_status(void)
 	uint8_t flags;
 	uint8_t buff[32];
 	uint8_t size;
-    uint16_t checksum;
+   uint16_t checksum;
 	
 	IRQ_LOCK(flags);
 	robot_x = position_get_x_s16(&mainboard.pos);
@@ -228,19 +225,19 @@ void bt_beacon_status_parser (int16_t c)
 				goto error_checksum;
 
 			/* beacon correction */
-			x = ans.opponent_x;
-			y = ans.opponent_y;
+			x = ans.opponent1_x;
+			y = ans.opponent1_y;
 #ifdef debug_beacon_parser
-			a = ans.opponent_a;
-			d = ans.opponent_d;
+			a = ans.opponent1_a;
+			d = ans.opponent1_d;
 #else
 			abs_xy_to_rel_da(x, y, &d, &a);
 #endif
 			IRQ_LOCK(flags);
-			beaconboard.opponent_x = (int16_t)x;
-			beaconboard.opponent_y = (int16_t)y;
-			beaconboard.opponent_a = (int16_t)DEG(a);
-			beaconboard.opponent_d = (int16_t)d;       
+			beaconboard.opponent1_x = (int16_t)x;
+			beaconboard.opponent1_y = (int16_t)y;
+			beaconboard.opponent1_a = (int16_t)DEG(a);
+			beaconboard.opponent1_d = (int16_t)d;       
 			IRQ_UNLOCK(flags);
 
 
@@ -376,8 +373,8 @@ void bt_robot_2nd_req_status(void)
 	robot_x = position_get_x_s16(&mainboard.pos);
 	robot_y = position_get_y_s16(&mainboard.pos);
 	robot_a_abs = position_get_a_deg_s16(&mainboard.pos);
-	opp1_x = beaconboard.opponent_x;
-	opp1_y = beaconboard.opponent_y;
+	opp1_x = beaconboard.opponent1_x;
+	opp1_y = beaconboard.opponent1_y;
 	opp2_x = beaconboard.opponent2_x;
 	opp2_y = beaconboard.opponent2_y;
 	IRQ_UNLOCK(flags);
@@ -480,19 +477,19 @@ void bt_robot_2nd_status_parser (int16_t c)
 			IRQ_UNLOCK(flags);
 
 			/* opponents pos with beacon correction */
-			x = ans.opponent_x;
-			y = ans.opponent_y;
+			x = ans.opponent1_x;
+			y = ans.opponent1_y;
 #ifdef debug_robot_2nd_parser
-			a = ans.opponent_x;
-			d = ans.opponent_y;
+			a = ans.opponent1_x;
+			d = ans.opponent1_y;
 #else
 			abs_xy_to_rel_da(x, y, &d, &a);
 #endif
 			IRQ_LOCK(flags);
-			robot_2nd.opponent_x = (int16_t)x;
-			robot_2nd.opponent_y = (int16_t)y;
-			robot_2nd.opponent_a = (int16_t)DEG(a);
-			robot_2nd.opponent_d = (int16_t)d;       
+			robot_2nd.opponent1_x = (int16_t)x;
+			robot_2nd.opponent1_y = (int16_t)y;
+			robot_2nd.opponent1_a = (int16_t)DEG(a);
+			robot_2nd.opponent1_d = (int16_t)d;       
 			IRQ_UNLOCK(flags);
 
 
@@ -560,7 +557,7 @@ void bt_protocol (void * dummy)
 
 		//uart_send (CMDLINE_UART, c);
 
-		//if ( (link_id == beaconboard.link_id) && (mainboard.flags & DO_OPP) )
+		//if ( (link_id == beaconboard.link_id) && (mainboard.flags & DO_BEACON) )
 			bt_beacon_status_parser (c);
 		//else if ( (link_id == robot_2nd.link_id) && (mainboard.flags & DO_ROBOT_2ND))
 			bt_robot_2nd_status_parser (c);
@@ -613,7 +610,7 @@ void bt_protocol (void * dummy)
 		toggle ^= 1;
 
 #ifndef HOST_VERSION
-		if ((mainboard.flags & DO_OPP) && toggle)
+		if ((mainboard.flags & DO_BEACON) && toggle)
 			bt_beacon_req_status ();	
 #endif
 		if ((mainboard.flags & DO_ROBOT_2ND) && !toggle)

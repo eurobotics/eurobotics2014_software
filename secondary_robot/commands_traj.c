@@ -199,6 +199,8 @@ parse_pgm_inst_t cmd_traj_acc_show = {
 	},
 };
 
+#ifdef COMPILE_COMMANDS_TRAJ_OPTIONALS /*-------------------------------------*/
+
 /**********************************************************/
 /* circle coef configuration */
 
@@ -668,7 +670,7 @@ parse_pgm_inst_t cmd_pt_list_show = {
 	},
 };
 
-//#endif /* COMPILE_CODE ---------------------------------------------------------------------------------------------*/
+#endif /* COMPILE_COMMANDS_TRAJ_OPTIONALS ------------------------------------*/
 
 
 /**********************************************************/
@@ -927,8 +929,113 @@ parse_pgm_inst_t cmd_position_set = {
 	},
 };
 
+/**********************************************************/
+/* Subtraj 1 */
 
-#ifdef notyet /* TODO 2014*/
+/* this structure is filled when cmd_subtraj1 is parsed successfully */
+struct cmd_subtraj1_result {
+	fixed_string_t arg0;
+	fixed_string_t arg1;
+ 	//int32_t arg2;
+ 	//int32_t arg3;
+};
+
+/* function called when cmd_subtraj1 is parsed successfully */
+static void cmd_subtraj1_parsed(void *parsed_result, void *data)
+{
+	struct cmd_subtraj1_result *res = parsed_result;
+	uint8_t err = 0;
+
+
+	if (strcmp_P(res->arg1, PSTR("mamut1")) == 0) {
+		printf ("not implemented");
+	}
+	else if (strcmp_P(res->arg1, PSTR("mamut2")) == 0) {
+		printf ("not implemented");
+	}
+	else if (strcmp_P(res->arg1, PSTR("fresco")) == 0) {
+		printf ("not implemented");
+	}
+
+	printf_P(PSTR("substrat returned %s\r\n"), get_err(err));
+	trajectory_hardstop(&mainboard.traj);
+}
+
+prog_char str_subtraj1_arg0[] = "subtraj";
+parse_pgm_token_string_t cmd_subtraj1_arg0 = TOKEN_STRING_INITIALIZER(struct cmd_subtraj1_result, arg0, str_subtraj1_arg0);
+prog_char str_subtraj1_arg1[] = "mamut1#mamut2#fresco";
+parse_pgm_token_string_t cmd_subtraj1_arg1 = TOKEN_STRING_INITIALIZER(struct cmd_subtraj1_result, arg1, str_subtraj1_arg1);
+//parse_pgm_token_num_t cmd_subtraj1_arg2 = TOKEN_NUM_INITIALIZER(struct cmd_subtraj1_result, arg2, INT32);
+//parse_pgm_token_num_t cmd_subtraj1_arg3 = TOKEN_NUM_INITIALIZER(struct cmd_subtraj1_result, arg3, INT32);
+prog_char help_subtraj1[] = "Test sub-trajectories";
+parse_pgm_inst_t cmd_subtraj1 = {
+	.f = cmd_subtraj1_parsed,  /* function to call */
+	.data = NULL,      /* 2nd arg of func */
+	.help_str = help_subtraj1,
+	.tokens = {        /* token list, NULL terminated */
+		(prog_void *)&cmd_subtraj1_arg0, 
+		(prog_void *)&cmd_subtraj1_arg1,
+ 		//(prog_void *)&cmd_subtraj1_arg2, 
+ 		//(prog_void *)&cmd_subtraj1_arg3,  
+		NULL,
+	},
+};
+
+
+/**********************************************************/
+/* Subtraj 2 */
+
+/* this structure is filled when cmd_subtraj2 is parsed successfully */
+struct cmd_subtraj2_result {
+	fixed_string_t arg0;
+	fixed_string_t arg1;
+	int16_t arg2;
+	int16_t arg3;
+	int16_t arg4;
+	int16_t arg5;
+};
+
+/* function called when cmd_subtraj2 is parsed successfully */
+static void cmd_subtraj2_parsed(void *parsed_result, void *data)
+{
+	struct cmd_subtraj2_result *res = parsed_result;
+	uint8_t err = 0;
+
+	if (strcmp_P(res->arg1, PSTR("patrol_between")) == 0) {
+		err = patrol_between(res->arg2,res->arg3,res->arg4,res->arg5); 
+	}
+
+	printf_P(PSTR("substrat returned %s\r\n"), get_err(err));
+	trajectory_hardstop(&mainboard.traj);
+}
+
+prog_char str_subtraj2_arg0[] = "subtraj";
+parse_pgm_token_string_t cmd_subtraj2_arg0 = TOKEN_STRING_INITIALIZER(struct cmd_subtraj2_result, arg0, str_subtraj2_arg0);
+prog_char str_subtraj2_arg1[] = "patrol_between";
+parse_pgm_token_string_t cmd_subtraj2_arg1 = TOKEN_STRING_INITIALIZER(struct cmd_subtraj2_result, arg1, str_subtraj2_arg1);
+parse_pgm_token_num_t cmd_subtraj2_arg2 = TOKEN_NUM_INITIALIZER(struct cmd_subtraj2_result, arg2, INT16);
+parse_pgm_token_num_t cmd_subtraj2_arg3 = TOKEN_NUM_INITIALIZER(struct cmd_subtraj2_result, arg3, INT16);
+parse_pgm_token_num_t cmd_subtraj2_arg4 = TOKEN_NUM_INITIALIZER(struct cmd_subtraj2_result, arg4, INT16);
+parse_pgm_token_num_t cmd_subtraj2_arg5 = TOKEN_NUM_INITIALIZER(struct cmd_subtraj2_result, arg5, INT16);
+
+prog_char help_subtraj2[] = "Test sub-trajectories (a,b,c,d: specific params)";
+parse_pgm_inst_t cmd_subtraj2 = {
+	.f = cmd_subtraj2_parsed,  /* function to call */
+	.data = NULL,      /* 2nd arg of func */
+	.help_str = help_subtraj2,
+	.tokens = {        /* token list, NULL terminated */
+		(prog_void *)&cmd_subtraj2_arg0, 
+		(prog_void *)&cmd_subtraj2_arg1, 
+		(prog_void *)&cmd_subtraj2_arg2, 
+		(prog_void *)&cmd_subtraj2_arg3, 
+		(prog_void *)&cmd_subtraj2_arg4, 
+		(prog_void *)&cmd_subtraj2_arg5, 
+		NULL,
+	},
+};
+
+/* TODO 2014*/
+#if 0
 
 /**********************************************************/
 /* strat configuration */
@@ -1120,157 +1227,9 @@ parse_pgm_inst_t cmd_strat_conf3 = {
 };
 
 
-/**********************************************************/
-/* Subtraj 1 */
-
-/* this structure is filled when cmd_subtraj1 is parsed successfully */
-struct cmd_subtraj1_result {
-	fixed_string_t arg0;
-	fixed_string_t arg1;
- 	//int32_t arg2;
- 	//int32_t arg3;
-};
-
-/* function called when cmd_subtraj1 is parsed successfully */
-static void cmd_subtraj1_parsed(void *parsed_result, void *data)
-{
-	struct cmd_subtraj1_result *res = parsed_result;
-	uint8_t err = 0;
 
 
-	if (strcmp_P(res->arg1, PSTR("begin")) == 0) {
-		err = strat_begin();
-		printf_P(PSTR("substrat returned %s\r\n"), get_err(err));
-		trajectory_hardstop(&mainboard.traj);
-	}
-	else if (strcmp_P(res->arg1, PSTR("strat_smart")) == 0) {
-		strat_smart();
-	}
-}
-
-prog_char str_subtraj1_arg0[] = "subtraj";
-parse_pgm_token_string_t cmd_subtraj1_arg0 = TOKEN_STRING_INITIALIZER(struct cmd_subtraj1_result, arg0, str_subtraj1_arg0);
-prog_char str_subtraj1_arg1[] = "begin#strat_smart";
-parse_pgm_token_string_t cmd_subtraj1_arg1 = TOKEN_STRING_INITIALIZER(struct cmd_subtraj1_result, arg1, str_subtraj1_arg1);
-//parse_pgm_token_num_t cmd_subtraj1_arg2 = TOKEN_NUM_INITIALIZER(struct cmd_subtraj1_result, arg2, INT32);
-//parse_pgm_token_num_t cmd_subtraj1_arg3 = TOKEN_NUM_INITIALIZER(struct cmd_subtraj1_result, arg3, INT32);
-prog_char help_subtraj1[] = "Test sub-trajectories (a,b,c: specific params)";
-parse_pgm_inst_t cmd_subtraj1 = {
-	.f = cmd_subtraj1_parsed,  /* function to call */
-	.data = NULL,      /* 2nd arg of func */
-	.help_str = help_subtraj1,
-	.tokens = {        /* token list, NULL terminated */
-		(prog_void *)&cmd_subtraj1_arg0, 
-		(prog_void *)&cmd_subtraj1_arg1,
- 		//(prog_void *)&cmd_subtraj1_arg2, 
- 		//(prog_void *)&cmd_subtraj1_arg3,  
-		NULL,
-	},
-};
+#endif /* TODO 2014*/
 
 
-/**********************************************************/
-/* Subtraj 2 */
 
-/* this structure is filled when cmd_subtraj2 is parsed successfully */
-struct cmd_subtraj2_result {
-	fixed_string_t arg0;
-	fixed_string_t arg1;
-//	int32_t arg2;
-//	int32_t arg3;
-//	int32_t arg4;
-//	int32_t arg5;
-};
-
-/* function called when cmd_subtraj2 is parsed successfully */
-static void cmd_subtraj2_parsed(void *parsed_result, void *data)
-{
-	struct cmd_subtraj2_result *res = parsed_result;
-	uint8_t err = 0;
-	int8_t cmd = 0;
-	struct vt100 vt100;
-	int16_t c;
-	int8_t i, j, i_place, j_place;
-
-
-	if (strcmp_P(res->arg1, PSTR("line1")) == 0) {
-		err = strat_harvest_line1();
-	}
-	else if (strcmp_P(res->arg1, PSTR("line2")) == 0) {
-		err = strat_harvest_line2();
-	}
-		
-	else if (strcmp_P(res->arg1, PSTR("green")) == 0) {
-		err = strat_harvest_green_area();
-	}
-	else if (strcmp_P(res->arg1, PSTR("beginning")) == 0) {
-		err = strat_beginning();
-	}
-//	else if (strcmp_P(res->arg1, PSTR("bonus_wall")) == 0) {
-//		//err = strat_bonus_point();
-//		//err = strat_work_on_zone(&strat_infos.zones[ZONE_WALL_BONUS]);
-//		strat_pickup_bonus_near_wall();
-//	}
-	else if (strcmp_P(res->arg1, PSTR("pickup_near")) == 0) {
-		err = strat_pickup_or_push_near_slots(MODE_ALL);
-	}
-	else if (strcmp_P(res->arg1, PSTR("play")) == 0) {
-
-		while(cmd != KEY_CTRL_C) 
-		{
-			/* play */
-			err = strat_play_with_opp();
-
-			/* read cmdline */
-			c = cmdline_getchar();
-			if (c == -1) {
-				continue;
-			}
-
-			/* check exit cmd */
-			cmd = vt100_parser(&vt100, c);	
-		}
-	}
-	else if (strcmp_P(res->arg1, PSTR("final")) == 0) {
-		err = strat_big_final();
-
-		do {
-			err = strat_big_final();	
-		} while(TRAJ_SUCCESS(err));
-	}
-	else if (strcmp_P(res->arg1, PSTR("get_tower")) == 0) {
-		if(strat_get_best_tower_ij(&i, &j)) {
-			strat_get_slot_to_place(i, j, &i_place, &j_place);
-		}	
-	}
-
-	printf_P(PSTR("substrat returned %s\r\n"), get_err(err));
-	trajectory_hardstop(&mainboard.traj);
-}
-
-prog_char str_subtraj2_arg0[] = "subtraj";
-parse_pgm_token_string_t cmd_subtraj2_arg0 = TOKEN_STRING_INITIALIZER(struct cmd_subtraj2_result, arg0, str_subtraj2_arg0);
-prog_char str_subtraj2_arg1[] = "line1#line2#green#beginning#pickup_near#bonus_wall#play#final#get_tower";
-parse_pgm_token_string_t cmd_subtraj2_arg1 = TOKEN_STRING_INITIALIZER(struct cmd_subtraj2_result, arg1, str_subtraj2_arg1);
-//parse_pgm_token_num_t cmd_subtraj2_arg2 = TOKEN_NUM_INITIALIZER(struct cmd_subtraj2_result, arg2, INT32);
-//parse_pgm_token_num_t cmd_subtraj2_arg3 = TOKEN_NUM_INITIALIZER(struct cmd_subtraj2_result, arg3, INT32);
-//parse_pgm_token_num_t cmd_subtraj2_arg4 = TOKEN_NUM_INITIALIZER(struct cmd_subtraj2_result, arg4, INT32);
-//parse_pgm_token_num_t cmd_subtraj2_arg5 = TOKEN_NUM_INITIALIZER(struct cmd_subtraj2_result, arg5, INT32);
-//
-prog_char help_subtraj2[] = "Test sub-trajectories (a,b,c,d: specific params)";
-parse_pgm_inst_t cmd_subtraj2 = {
-	.f = cmd_subtraj2_parsed,  /* function to call */
-	.data = NULL,      /* 2nd arg of func */
-	.help_str = help_subtraj2,
-	.tokens = {        /* token list, NULL terminated */
-		(prog_void *)&cmd_subtraj2_arg0, 
-		(prog_void *)&cmd_subtraj2_arg1, 
-//		(prog_void *)&cmd_subtraj2_arg2, 
-//		(prog_void *)&cmd_subtraj2_arg3, 
-//		(prog_void *)&cmd_subtraj2_arg4, 
-//		(prog_void *)&cmd_subtraj2_arg5, 
-		NULL,
-	},
-};
-
-#endif /* notyet  TODO 2014*/

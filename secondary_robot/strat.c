@@ -283,7 +283,7 @@ void strat_exit(void)
 	IRQ_LOCK(flags);
 	mainboard.flags &= ~(DO_OPP);
 	IRQ_UNLOCK(flags);
-	beacon_cmd_beacon_off();
+	//beacon_cmd_beacon_off();
 
 	/* slavespic exit TODO 2014 */
   //i2c_slavedspic_mode_turbine_blow(0);
@@ -292,11 +292,12 @@ void strat_exit(void)
 	/* turn off other devices (lasers...) */
 
 	/* stop beacon */
+    /*
 	beacon_cmd_beacon_off();
 	beacon_cmd_beacon_off();
 	beacon_cmd_beacon_off();
 	beacon_cmd_beacon_off();
-
+*/
 }
 
 /* called periodically */
@@ -432,10 +433,10 @@ uint8_t strat_main(void)
 
 		
 		case 21:
-			beaconboard.opponent_x = COLOR_X(750);
-			beaconboard.opponent_y = 600;
-      beaconboard.opponent_a = 90;
-      beaconboard.opponent_d = 1000;
+			beaconboard.opponent1_x = COLOR_X(750);
+			beaconboard.opponent1_y = 600;
+      beaconboard.opponent1_a = 90;
+      beaconboard.opponent1_d = 1000;
 
 			sensor_obstacle_disable();
 			goto_and_avoid_forward(	COLOR_X(BEGIN_FRESCO_X), BEGIN_LINE_Y,TRAJ_FLAGS_NO_NEAR,TRAJ_FLAGS_NO_NEAR);

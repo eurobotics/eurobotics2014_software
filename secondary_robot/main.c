@@ -77,9 +77,8 @@
 
 struct genboard gen;
 struct mainboard mainboard;
-struct slavedspic slavedspic;
 struct beaconboard beaconboard;
-struct mainrobot mainrobot;
+struct robot_2nd robot_2nd;
 
 /***************************************************************/
 
@@ -228,9 +227,8 @@ int main(void)
    /* reset data structures */
    memset(&gen, 0, sizeof(gen));
    memset(&mainboard, 0, sizeof(mainboard));
-   memset(&slavedspic, 0, sizeof(slavedspic));
    memset(&beaconboard, 0, sizeof(beaconboard));
-   memset(&mainrobot, 0, sizeof(mainrobot));
+   memset(&robot_2nd, 0, sizeof(robot_2nd));
 
    /* init flags */
 #ifdef HOST_VERSION
@@ -241,7 +239,7 @@ int main(void)
       DO_POS | DO_POWER | DO_BD; // | DO_CS ;
 #endif
 
-   beaconboard.opponent_x = I2C_OPPONENT_NOT_THERE;
+   beaconboard.opponent1_x = I2C_OPPONENT_NOT_THERE;
 
 #ifdef TWO_OPPONENTS
    beaconboard.opponent2_x = I2C_OPPONENT_NOT_THERE;

@@ -251,9 +251,9 @@ struct mainboard
 #define DO_BD         16
 #define DO_TIMER      32
 #define DO_POWER      64
-#define DO_OPP        128
+#define DO_BEACON     128
 #define DO_ROBOT_2ND  256
-#define DO_BT_PROTO   (DO_OPP | DO_ROBOT_2ND)
+#define DO_BT_PROTO	(DO_BEACON | DO_ROBOT_2ND)
 
 	/* control systems */
 	struct cs_block angle;
@@ -313,23 +313,16 @@ struct beaconboard
 	uint8_t link_id;
 	
 	/* opponent pos */
-	int16_t opponent_x;
-	int16_t opponent_y;
-	int16_t opponent_a;
-	int16_t opponent_d;
+	int16_t opponent1_x;
+	int16_t opponent1_y;
+	int16_t opponent1_a;
+	int16_t opponent1_d;
 
 #ifdef TWO_OPPONENTS
 	int16_t opponent2_x;
 	int16_t opponent2_y;
 	int16_t opponent2_a;
 	int16_t opponent2_d;
-#endif
-
-#ifdef ROBOT_2ND
-	int16_t robot_2nd_x;
-	int16_t robot_2nd_y;
-	int16_t robot_2nd_a;
-	int16_t robot_2nd_d;
 #endif
 
 };
@@ -360,10 +353,10 @@ struct robot_2nd
 	int16_t d;
 
   	/* opponent pos */
-	int16_t opponent_x;
-	int16_t opponent_y;
-	int16_t opponent_a;
-	int16_t opponent_d;
+	int16_t opponent1_x;
+	int16_t opponent1_y;
+	int16_t opponent1_a;
+	int16_t opponent1_d;
 
 #ifdef TWO_OPPONENTS
 	int16_t opponent2_x;

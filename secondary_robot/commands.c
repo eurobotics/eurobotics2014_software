@@ -33,18 +33,25 @@
 #include <parse.h>
 
 #define COMPILE_COMMANDS_GEN
-#define COMPILE_COMMANDS_CS
+//#define COMPILE_COMMANDS_GEN_OPTIONALS
+//#define COMPILE_COMMANDS_CS
 #define COMPILE_COMMANDS_MAINBOARD
+//#define COMPILE_COMMANDS_MAINBOARD_OPTIONALS
 #define COMPILE_COMMANDS_TRAJ
+//#define COMPILE_COMMANDS_TRAJ_OPTIONALS
+
+#define COMPILE_COMMANDS_AX12
+
 #define COMPILE_CODE
+#ifdef COMPILE_CODE /*---------------------------------------------------------------------------------------------*/
+#endif /* COMPILE_CODE --------------------------------------------------------------------------------------------*/
+
 
 #ifndef HOST_VERSION
 #define COMPILE_COMMANDS_AX12
 #endif
 
 
-#ifdef COMPILE_CODE /*---------------------------------------------------------------------------------------------*/
-#endif /* COMPILE_CODE --------------------------------------------------------------------------------------------*/
 
 /* commands_gen.c */
 #ifdef COMPILE_COMMANDS_GEN
@@ -59,7 +66,11 @@ extern parse_pgm_inst_t cmd_encoders;
 extern parse_pgm_inst_t cmd_pwm_servo;
 extern parse_pgm_inst_t cmd_pwm_servo_show_range;
 extern parse_pgm_inst_t cmd_pwm;
+
+#ifdef COMPILE_COMMANDS_MAINBOARD_OPTIONALS /*--------------------------------*/
 extern parse_pgm_inst_t cmd_adc;
+#endif /* COMPILE_COMMANDS_MAINBOARD_OPTIONALS --------------------------------*/
+
 extern parse_pgm_inst_t cmd_sensor;
 extern parse_pgm_inst_t cmd_log;
 extern parse_pgm_inst_t cmd_log_show;
@@ -119,25 +130,24 @@ extern parse_pgm_inst_t cmd_opponent;
 extern parse_pgm_inst_t cmd_opponent_set;
 extern parse_pgm_inst_t cmd_start;
 extern parse_pgm_inst_t cmd_color;
-extern parse_pgm_inst_t cmd_beacon;
+//extern parse_pgm_inst_t cmd_beacon;
+
+#ifdef COMPILE_COMMANDS_MAINBOARD_OPTIONALS /*--------------------------------*/
 extern parse_pgm_inst_t cmd_interact;
 extern parse_pgm_inst_t cmd_rs;
 extern parse_pgm_inst_t cmd_clitoid;
 extern parse_pgm_inst_t cmd_time_monitor;
-extern parse_pgm_inst_t cmd_strat_event;
 extern parse_pgm_inst_t cmd_sleep;
-extern parse_pgm_inst_t cmd_patrol_between;
-//extern parse_pgm_inst_t cmd_wt11;
+#endif /* COMPILE_COMMANDS_MAINBOARD_OPTIONALS -------------------------------*/
+
+extern parse_pgm_inst_t cmd_strat_event;
 extern parse_pgm_inst_t cmd_status;
 
-
-#ifdef notyet /* TODO 2014*/
-extern parse_pgm_inst_t cmd_slavedspic;
-extern parse_pgm_inst_t cmd_slavedspic_harvest;
-extern parse_pgm_inst_t cmd_slavedspic_store;
-extern parse_pgm_inst_t cmd_slavedspic_dump;	
-extern parse_pgm_inst_t cmd_fingers;
-extern parse_pgm_inst_t cmd_treasure;
+/* TODO 2014*/
+#if 0
+extern parse_pgm_inst_t cmd_balls;
+extern parse_pgm_inst_t cmd_net;
+extern parse_pgm_inst_t cmd_tray;
 extern parse_pgm_inst_t cmd_sensor_robot;
 #endif
 
@@ -156,11 +166,10 @@ extern parse_pgm_inst_t cmd_traj_speed;
 extern parse_pgm_inst_t cmd_traj_speed_show;
 extern parse_pgm_inst_t cmd_traj_acc;
 extern parse_pgm_inst_t cmd_traj_acc_show;
+
+#ifdef COMPILE_COMMANDS_TRAJ_OPTIONALS /*-------------------------------------*/
 extern parse_pgm_inst_t cmd_circle_coef;
 extern parse_pgm_inst_t cmd_circle_coef_show;
-
-#ifdef COMPILE_CODE /*---------------------------------------------------------------------------------------------*/
-#endif /* COMPILE_CODE --------------------------------------------------------------------------------------------*/
 extern parse_pgm_inst_t cmd_trajectory;
 extern parse_pgm_inst_t cmd_trajectory_show;
 extern parse_pgm_inst_t cmd_rs_gains;
@@ -173,8 +182,7 @@ extern parse_pgm_inst_t cmd_pt_list;
 extern parse_pgm_inst_t cmd_pt_list_append;
 extern parse_pgm_inst_t cmd_pt_list_del;
 extern parse_pgm_inst_t cmd_pt_list_show;
-
-//#endif /* COMPILE_CODE --------------------------------------------------------------------------------------------*/
+#endif /* COMPILE_COMMANDS_TRAJ_OPTIONALS ------------------------------------*/
 
 extern parse_pgm_inst_t cmd_goto1;
 extern parse_pgm_inst_t cmd_goto2;
@@ -182,14 +190,16 @@ extern parse_pgm_inst_t cmd_goto3;
 extern parse_pgm_inst_t cmd_position;
 extern parse_pgm_inst_t cmd_position_set;
 
-#ifdef notyet /* TODO 2014 */
+extern parse_pgm_inst_t cmd_subtraj1;
+extern parse_pgm_inst_t cmd_subtraj2;
+
+/* TODO 2014 */
+#if 0 
 extern parse_pgm_inst_t cmd_strat_db;
 extern parse_pgm_inst_t cmd_strat_infos;
 extern parse_pgm_inst_t cmd_strat_conf;
 extern parse_pgm_inst_t cmd_strat_conf2;
 extern parse_pgm_inst_t cmd_strat_conf3;
-extern parse_pgm_inst_t cmd_subtraj1;
-extern parse_pgm_inst_t cmd_subtraj2;
 #endif /* notyet TODO 2014 */
 
 #endif /* COMPILE_COMMANDS_TRAJ*/
@@ -205,7 +215,11 @@ parse_pgm_ctx_t main_ctx[] = {
 	(parse_pgm_inst_t *)&cmd_pwm_servo,
 	(parse_pgm_inst_t *)&cmd_pwm_servo_show_range,
 	(parse_pgm_inst_t *)&cmd_pwm,
+
+#ifdef COMPILE_COMMANDS_MAINBOARD_OPTIONALS /*--------------------------------*/
 	(parse_pgm_inst_t *)&cmd_adc,
+#endif /* COMPILE_COMMANDS_MAINBOARD_OPTIONALS --------------------------------*/
+
 	(parse_pgm_inst_t *)&cmd_sensor,
 	(parse_pgm_inst_t *)&cmd_log,
 	(parse_pgm_inst_t *)&cmd_log_show,
@@ -254,24 +268,25 @@ parse_pgm_ctx_t main_ctx[] = {
 	(parse_pgm_inst_t *)&cmd_opponent_set,
 	(parse_pgm_inst_t *)&cmd_start,
 	(parse_pgm_inst_t *)&cmd_color,
-	(parse_pgm_inst_t *)&cmd_beacon,
+//	(parse_pgm_inst_t *)&cmd_beacon,
+
+#ifdef COMPILE_COMMANDS_MAINBOARD_OPTIONALS /*--------------------------------*/
+
 	(parse_pgm_inst_t *)&cmd_interact,
 	(parse_pgm_inst_t *)&cmd_rs,
 	(parse_pgm_inst_t *)&cmd_clitoid,
 	(parse_pgm_inst_t *)&cmd_time_monitor,
-	(parse_pgm_inst_t *)&cmd_strat_event,
 	(parse_pgm_inst_t *)&cmd_sleep,
-	(parse_pgm_inst_t *)&cmd_patrol_between,
-//	(parse_pgm_inst_t *)&cmd_wt11,
+#endif /* COMPILE_COMMANDS_MAINBOARD_OPTIONALS -------------------------------*/
+
+	(parse_pgm_inst_t *)&cmd_strat_event,
 	(parse_pgm_inst_t *)&cmd_status,
 
-#ifdef notyet /* TODO 2014*/
-	(parse_pgm_inst_t *)&cmd_slavedspic,
-	(parse_pgm_inst_t *)&cmd_slavedspic_harvest,
-	(parse_pgm_inst_t *)&cmd_slavedspic_store,
-	(parse_pgm_inst_t *)&cmd_slavedspic_dump,
-	(parse_pgm_inst_t *)&cmd_fingers,
-	(parse_pgm_inst_t *)&cmd_treasure,
+/* TODO 2014*/
+#if 0 
+	(parse_pgm_inst_t *)&cmd_balls,
+	(parse_pgm_inst_t *)&cmd_net
+	(parse_pgm_inst_t *)&cmd_tray,
 	(parse_pgm_inst_t *)&cmd_sensor_robot,
 #endif
 
@@ -284,11 +299,10 @@ parse_pgm_ctx_t main_ctx[] = {
 	(parse_pgm_inst_t *)&cmd_traj_speed_show,
 	(parse_pgm_inst_t *)&cmd_traj_acc,
 	(parse_pgm_inst_t *)&cmd_traj_acc_show,
+
+#ifdef COMPILE_COMMANDS_TRAJ_OPTIONALS /*-------------------------------------*/
 	(parse_pgm_inst_t *)&cmd_circle_coef,
 	(parse_pgm_inst_t *)&cmd_circle_coef_show,
-
-#ifdef COMPILE_CODE /*---------------------------------------------------------------------------------------------*/
-#endif /* COMPILE_CODE ---------------------------------------------------------------------------------------------*/
 	(parse_pgm_inst_t *)&cmd_trajectory,
 	(parse_pgm_inst_t *)&cmd_trajectory_show,
 	(parse_pgm_inst_t *)&cmd_rs_gains,
@@ -301,21 +315,22 @@ parse_pgm_ctx_t main_ctx[] = {
 	(parse_pgm_inst_t *)&cmd_pt_list_append,
 	(parse_pgm_inst_t *)&cmd_pt_list_del,
 	(parse_pgm_inst_t *)&cmd_pt_list_show,
-//#endif /* COMPILE_CODE ---------------------------------------------------------------------------------------------*/
+#endif /* COMPILE_COMMANDS_TRAJ_OPTIONALS ------------------------------------*/
 
 	(parse_pgm_inst_t *)&cmd_goto1,
 	(parse_pgm_inst_t *)&cmd_goto2,
 	(parse_pgm_inst_t *)&cmd_position,
 	(parse_pgm_inst_t *)&cmd_position_set,
+	(parse_pgm_inst_t *)&cmd_subtraj1,
+	(parse_pgm_inst_t *)&cmd_subtraj2,
 
-
-#ifdef notyet /* TODO 2014 */
+/* TODO 2014 */
+#if 0 
 	(parse_pgm_inst_t *)&cmd_strat_infos,
 	(parse_pgm_inst_t *)&cmd_strat_conf,
 	(parse_pgm_inst_t *)&cmd_strat_conf2,
 	(parse_pgm_inst_t *)&cmd_strat_conf3,
-	(parse_pgm_inst_t *)&cmd_subtraj1,
-	(parse_pgm_inst_t *)&cmd_subtraj2,
+
 #endif /* notyet TODO 2014 */
 
 #endif /* COMPILE_COMMANDS_TRAJ */

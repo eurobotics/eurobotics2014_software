@@ -258,32 +258,6 @@ struct mainboard
 };
 
 
-/* state of slavedspic, synchronized through i2c */
-struct slavedspic 
-{
-	/* actuators blocking */
-	uint8_t fingers_floor_blocked;
-	uint8_t fingers_totem_blocked;
-	uint8_t arm_right_blocked;
-	uint8_t arm_left_blocked;
-	uint8_t lift_blocked;
-
-	/* sensors */
-	uint8_t turbine_sensors;
-
-	/* infos */
-	uint8_t status;
-
-	uint8_t harvest_mode;
-	uint8_t store_mode;
-	uint8_t dump_mode;
-
-	int8_t nb_goldbars_in_boot;
-	int8_t nb_goldbars_in_mouth;
-	int8_t nb_coins_in_boot;
-	int8_t nb_coins_in_mouth;
-};
-
 /* state of beaconboard, synchronized through i2c */
 struct beaconboard 
 {
@@ -292,10 +266,10 @@ struct beaconboard
 	uint8_t color;
 	
 	/* opponent pos */
-	int16_t opponent_x;
-	int16_t opponent_y;
-	int16_t opponent_a;
-	int16_t opponent_d;
+	int16_t opponent1_x;
+	int16_t opponent1_y;
+	int16_t opponent1_a;
+	int16_t opponent1_d;
 
 #ifdef TWO_OPPONENTS
 	int16_t opponent2_x;
@@ -303,16 +277,10 @@ struct beaconboard
 	int16_t opponent2_a;
 	int16_t opponent2_d;
 #endif
-
-	int16_t robot_2nd_x;
-	int16_t robot_2nd_y;
-	int16_t robot_2nd_d;
-	int16_t robot_2nd_a;
-	int16_t robot_2nd_a_abs;
 };
 
 /* main robot structure parameters */
-struct mainrobot
+struct robot_2nd
 {
 	/* command requested */
 	uint8_t cmd_id;					/* for ack test */
@@ -332,10 +300,10 @@ struct mainrobot
 	int16_t d;
 
   	/* opponent pos */
-	int16_t opponent_x;
-	int16_t opponent_y;
-	int16_t opponent_a;
-	int16_t opponent_d;
+	int16_t opponent1_x;
+	int16_t opponent1_y;
+	int16_t opponent1_a;
+	int16_t opponent1_d;
 
 #ifdef TWO_OPPONENTS
 	int16_t opponent2_x;
@@ -347,17 +315,16 @@ struct mainrobot
 
 extern struct genboard gen;
 extern struct mainboard mainboard;
-extern struct slavedspic slavedspic;
 extern struct beaconboard beaconboard;
-extern struct mainrobot mainrobot;
+extern struct robot_2nd robot_2nd;
 
 
 /* set bt cmd id and args checksum */
 static inline void bt_set_cmd_id_and_checksum (uint8_t cmd_id, uint8_t args_sumatory) {
 	uint8_t flags;
 	IRQ_LOCK (flags);
-	mainrobot.cmd_id = cmd_id;
-	mainrobot.cmd_args_checksum = (uint8_t)(cmd_id + args_sumatory);
+	robot_2nd.cmd_id = cmd_id;
+	robot_2nd.cmd_args_checksum = (uint8_t)(cmd_id + args_sumatory);
 	IRQ_UNLOCK (flags);
 }
 
@@ -365,7 +332,7 @@ static inline void bt_set_cmd_id_and_checksum (uint8_t cmd_id, uint8_t args_suma
 static inline void bt_set_cmd_ret (uint8_t ret) {
 	uint8_t flags;
 	IRQ_LOCK (flags);
-	mainrobot.cmd_ret = ret;
+	robot_2nd.cmd_ret = ret;
 	IRQ_UNLOCK (flags);
 }
 
