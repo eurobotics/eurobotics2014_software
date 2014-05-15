@@ -1029,7 +1029,7 @@ static void cmd_status_parsed(void * parsed_result, void *data)
 	int16_t checksum = 0;
 	struct bt_robot_2nd_status_ans ans;
 	double x, y, a, d;
-	static uint16_t i=0;
+	//static uint16_t i=0;
 
 	/* test checksum */
 	checksum = res->robot_x + res->robot_y + res->robot_a_abs;

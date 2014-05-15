@@ -193,7 +193,7 @@ void i2c_poll_slaves(void *dummy)
 {
 	uint8_t flags;
 	int8_t err;
-	static uint8_t a = 0;
+	//static uint8_t a = 0;
 	static uint8_t watchdog_cnt = 0;
 
 	/* goto error implementation */

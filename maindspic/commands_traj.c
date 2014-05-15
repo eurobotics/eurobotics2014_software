@@ -955,7 +955,7 @@ static void auto_position(void)
     wait_ms(100);
 
     /* set x and angle */
-    strat_reset_pos(COLOR_X(ROBOT_DIS2_WALL), 0, COLOR_A_ABS(0));
+    strat_reset_pos(COLOR_X(ROBOT_CENTER_TO_BACK), 0, COLOR_A_ABS(0));
 
     /* prepare to y axis */
     trajectory_d_rel(&mainboard.traj, 90);
@@ -976,16 +976,8 @@ static void auto_position(void)
     wait_ms(100);
 
     /* set y */
-    strat_reset_pos(DO_NOT_SET_POS, COLOR_Y(ROBOT_DIS2_WALL), 90);
+    strat_reset_pos(DO_NOT_SET_POS, COLOR_Y(ROBOT_CENTER_TO_BACK), 90);
 
-    /* goto start position */
-#if 0
-    trajectory_d_rel(&mainboard.traj, 200 - 25);
-    err = wait_traj_end(END_INTR | END_TRAJ);
-    if (err == END_INTR)
-        goto intr;
-    wait_ms(100);
-#endif
     /* restore speeds */
     strat_set_speed(old_spdd, old_spda);
     return;

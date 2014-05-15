@@ -201,6 +201,26 @@ void strat_reset_pos(int16_t x, int16_t y, int16_t a)
 	if (a == DO_NOT_SET_POS)
 		a = posa;
 
+	/* some issues with blocking on simulator */
+#ifdef HOST_VERSION
+	if (x == ROBOT_HALF_LENGTH_REAR)
+		x = ROBOT_HALF_LENGTH_REAR + 10;
+	if (x == AREA_X - ROBOT_HALF_LENGTH_REAR)
+		x = AREA_X - ROBOT_HALF_LENGTH_REAR - 10;
+	if (y == ROBOT_HALF_LENGTH_REAR)
+		y = ROBOT_HALF_LENGTH_REAR + 10;
+	if (y == AREA_Y - ROBOT_HALF_LENGTH_REAR)
+		y = AREA_Y - ROBOT_HALF_LENGTH_REAR - 10;
+	if (x == ROBOT_HALF_LENGTH_FRONT)
+		x = ROBOT_HALF_LENGTH_FRONT + 10;
+	if (x == AREA_X - ROBOT_HALF_LENGTH_FRONT)
+		x = AREA_X - ROBOT_HALF_LENGTH_FRONT - 10;
+	if (y == ROBOT_HALF_LENGTH_FRONT)
+		y = ROBOT_HALF_LENGTH_FRONT + 10;
+	if (y == AREA_Y - ROBOT_HALF_LENGTH_FRONT)
+		y = AREA_Y - ROBOT_HALF_LENGTH_FRONT - 10;
+#endif
+
 	DEBUG(E_USER_STRAT, "reset pos (%s%s%s)",
 	      x == DO_NOT_SET_POS ? "" : "x",
 	      y == DO_NOT_SET_POS ? "" : "y",

@@ -455,14 +455,49 @@ uint8_t get_opponent_color(void)
 		return I2C_COLOR_RED;
 }
 
+
+#ifdef IM_SECONDARY_ROBOT
+int8_t get_best_opponent1_xyda (int16_t *x, int16_t *y, int16_t *d, int16_t *a)
+{
+	uint8_t flags;
+	IRQ_LOCK(flags);
+	*x = robot_2nd.opponent1_x;
+	*y = robot_2nd.opponent1_y;
+	*d = robot_2nd.opponent1_d;
+	*a = robot_2nd.opponent1_a;
+	IRQ_UNLOCK(flags);	
+
+	return 0;
+}
+
+int8_t get_best_opponent2_xyda (int16_t *x, int16_t *y, int16_t *d, int16_t *a)
+{
+	uint8_t flags;
+	IRQ_LOCK(flags);
+	*x = robot_2nd.opponent2_x;
+	*y = robot_2nd.opponent2_y;
+	*d = robot_2nd.opponent2_d;
+	*a = robot_2nd.opponent2_a;
+	IRQ_UNLOCK(flags);	
+
+	return 0;
+}
+
+#endif
+
 /* get the xy pos of a robot */
 int8_t get_opponent1_xy(int16_t *x, int16_t *y)
 {
+#ifndef IM_SECONDARY_ROBOT
 	uint8_t flags;
 	IRQ_LOCK(flags);
 	*x = beaconboard.opponent1_x;
 	*y = beaconboard.opponent1_y;
 	IRQ_UNLOCK(flags);
+#else
+	get_best_opponent1_xyda (x, y, NULL, NULL);
+#endif
+
 	if (*x == I2C_OPPONENT_NOT_THERE)
 		return -1;
 	return 0;
@@ -470,11 +505,17 @@ int8_t get_opponent1_xy(int16_t *x, int16_t *y)
 int8_t get_opponent2_xy(int16_t *x, int16_t *y)
 {
 #ifdef TWO_OPPONENTS
+
+#ifndef IM_SECONDARY_ROBOT
 	uint8_t flags;
 	IRQ_LOCK(flags);
 	*x = beaconboard.opponent2_x;
 	*y = beaconboard.opponent2_y;
-	IRQ_UNLOCK(flags);
+    IRQ_UNLOCK(flags);
+#else
+	get_best_opponent2_xyda (x, y, NULL, NULL);
+#endif
+
 	if (*x == I2C_OPPONENT_NOT_THERE)
 		return -1;
 #endif
@@ -498,14 +539,19 @@ int8_t get_robot_2nd_xy(int16_t *x, int16_t *y)
 /* get the da pos of a robot */
 int8_t get_opponent1_da(int16_t *d, int16_t *a)
 {
-	uint8_t flags;
 	int16_t x_tmp;
 
+#ifndef IM_SECONDARY_ROBOT
+	uint8_t flags;
 	IRQ_LOCK(flags);
 	x_tmp = beaconboard.opponent1_x;
 	*d = beaconboard.opponent1_d;
 	*a = beaconboard.opponent1_a;
 	IRQ_UNLOCK(flags);
+#else
+	get_best_opponent1_xyda (&x_tmp, NULL, d, a);
+#endif
+
 	if (x_tmp == I2C_OPPONENT_NOT_THERE)
 		return -1;
 	return 0;
@@ -513,14 +559,19 @@ int8_t get_opponent1_da(int16_t *d, int16_t *a)
 int8_t get_opponent2_da(int16_t *d, int16_t *a)
 {
 #ifdef TWO_OPPONENTS
-	uint8_t flags;
 	int16_t x_tmp;
 
+#ifndef IM_SECONDARY_ROBOT
+	uint8_t flags;
 	IRQ_LOCK(flags);
 	x_tmp = beaconboard.opponent2_x;
 	*d = beaconboard.opponent2_d;
 	*a = beaconboard.opponent2_a;
-	IRQ_UNLOCK(flags);
+    IRQ_UNLOCK(flags);
+#else
+	get_best_opponent1_xyda (&x_tmp, NULL, d, a);
+#endif
+
 	if (x_tmp == I2C_OPPONENT_NOT_THERE)
 		return -1;
 #endif
@@ -563,6 +614,7 @@ int8_t get_robot_2nd_a_abs(int16_t *a)
 /* get the xyda pos of a robot */
 int8_t get_opponent1_xyda(int16_t *x, int16_t *y, int16_t *d, int16_t *a)
 {
+#ifndef IM_SECONDARY_ROBOT
 	uint8_t flags;
 	IRQ_LOCK(flags);
 	*x = beaconboard.opponent1_x;
@@ -570,6 +622,9 @@ int8_t get_opponent1_xyda(int16_t *x, int16_t *y, int16_t *d, int16_t *a)
 	*d = beaconboard.opponent1_d;
 	*a = beaconboard.opponent1_a;
 	IRQ_UNLOCK(flags);
+#else
+	get_best_opponent1_xyda (x, y, d, a);
+#endif
 
 	if (*x == I2C_OPPONENT_NOT_THERE)
 		return -1;
@@ -578,6 +633,7 @@ int8_t get_opponent1_xyda(int16_t *x, int16_t *y, int16_t *d, int16_t *a)
 int8_t get_opponent2_xyda(int16_t *x, int16_t *y, int16_t *d, int16_t *a)
 {
 #ifdef TWO_OPPONENTS
+#ifndef IM_SECONDARY_ROBOT
 	uint8_t flags;
 	IRQ_LOCK(flags);
 	*x = beaconboard.opponent2_x;
@@ -585,6 +641,9 @@ int8_t get_opponent2_xyda(int16_t *x, int16_t *y, int16_t *d, int16_t *a)
 	*d = beaconboard.opponent2_d;
 	*a = beaconboard.opponent2_a;
 	IRQ_UNLOCK(flags);
+#else
+	get_best_opponent1_xyda (x, y, d, a);
+#endif
 
 	if (*x == I2C_OPPONENT_NOT_THERE)
 		return -1;

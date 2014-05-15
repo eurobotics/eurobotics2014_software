@@ -804,7 +804,7 @@ struct cmd_position_result {
 };
 
 #define AUTOPOS_SPEED_FAST 	500
-#define ROBOT_DIS2_WALL 		(int16_t)(119)
+#define BASKET_WIDTH				300
 static void auto_position(void)
 {
 	uint8_t err;
@@ -815,39 +815,40 @@ static void auto_position(void)
 	strat_get_speed(&old_spdd, &old_spda);
 	strat_set_speed(AUTOPOS_SPEED_FAST, AUTOPOS_SPEED_FAST);
 
-	/* goto blocking to x axis */
-	trajectory_d_rel(&mainboard.traj, -300);
-	err = wait_traj_end(END_INTR|END_TRAJ|END_BLOCKING);
-	if (err == END_INTR)
-		goto intr;
-	wait_ms(100);
-	
-	/* set x and angle */
-	strat_reset_pos(COLOR_X(ROBOT_DIS2_WALL), 0, COLOR_A_ABS(0));
-	
-	/* prepare to y axis */
-	trajectory_d_rel(&mainboard.traj, 250-ROBOT_CENTER_TO_BACK); /* TODO */
-	err = wait_traj_end(END_INTR|END_TRAJ);
-	if (err == END_INTR)
-		goto intr;
-
-	trajectory_a_rel(&mainboard.traj, COLOR_A_REL(90));
-	err = wait_traj_end(END_INTR|END_TRAJ);
-	if (err == END_INTR)
-		goto intr;
-
 	/* goto blocking to y axis */
-	trajectory_d_rel(&mainboard.traj, -800);
+	trajectory_d_rel(&mainboard.traj, -200);
 	err = wait_traj_end(END_INTR|END_TRAJ|END_BLOCKING);
 	if (err == END_INTR)
 		goto intr;
 	wait_ms(100);
 
 	/* set y */
-	strat_reset_pos(DO_NOT_SET_POS, COLOR_Y(ROBOT_DIS2_WALL), 90);
+	strat_reset_pos(0, BASKET_WIDTH + ROBOT_CENTER_TO_BACK, 90);
 
+	/* prepare to x axis */
+	trajectory_d_rel(&mainboard.traj, 40);
+	err = wait_traj_end(END_INTR|END_TRAJ);
+	if (err == END_INTR)
+		goto intr;
+
+	trajectory_a_rel(&mainboard.traj, COLOR_A_REL(-90));
+	err = wait_traj_end(END_INTR|END_TRAJ);
+	if (err == END_INTR)
+		goto intr;
+
+
+	/* goto blocking to x axis */
+	trajectory_d_rel(&mainboard.traj, -700);
+	err = wait_traj_end(END_INTR|END_TRAJ|END_BLOCKING);
+	if (err == END_INTR)
+		goto intr;
+	wait_ms(100);
+	
+	/* set x and angle */
+	strat_reset_pos(COLOR_X(ROBOT_CENTER_TO_BACK), DO_NOT_SET_POS, COLOR_A_ABS(0));
+	
 	/* goto start position */
-	trajectory_d_rel(&mainboard.traj, 500-(ROBOT_LENGTH)); /* TODO */
+	trajectory_d_rel(&mainboard.traj, 175);
 	err = wait_traj_end(END_INTR|END_TRAJ);
 	if (err == END_INTR)
 		goto intr;

@@ -377,9 +377,6 @@ static void cmd_adc_parsed(void *parsed_result, void *data)
 #endif
 }
 
-#endif /* COMPILE_COMMANDS_MAINBOARD_OPTIONALS --------------------------------*/
-
-
 prog_char str_adc_arg0[] = "adc";
 parse_pgm_token_string_t cmd_adc_arg0 = TOKEN_STRING_INITIALIZER(struct cmd_adc_result, arg0, str_adc_arg0);
 prog_char str_adc_arg1[] = "show#loop_show";
@@ -396,6 +393,8 @@ parse_pgm_inst_t cmd_adc = {
 		NULL,
 	},
 };
+
+#endif /* COMPILE_COMMANDS_MAINBOARD_OPTIONALS --------------------------------*/
 
 
 /**********************************************************/
