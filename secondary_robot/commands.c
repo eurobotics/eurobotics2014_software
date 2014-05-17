@@ -40,7 +40,9 @@
 #define COMPILE_COMMANDS_TRAJ
 //#define COMPILE_COMMANDS_TRAJ_OPTIONALS
 
+#ifndef HOST_VERSION
 #define COMPILE_COMMANDS_AX12
+#endif
 
 #define COMPILE_CODE
 #ifdef COMPILE_CODE /*---------------------------------------------------------------------------------------------*/

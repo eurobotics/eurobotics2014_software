@@ -349,8 +349,25 @@ void strat_start_match(uint8_t debug);
  * in strat_main.c 
  *******************************************/
 
+
+/* schedule a single strat event */
+void strat_schedule_single_event(void (*f)(void *), void * data);
+
+/* schedule a periodical strat event */
+void strat_schedule_periodical_event(void (*f)(void *), void * data);
+
+
+/* wait for traj end and  */
+void strat_wait_traj_end_event (void *why);
+
+/* auto possition depending on color */
+void strat_auto_position (void);
+void strat_auto_position_event (void *data);
+
+
 /* patrol between 2 points depending on nearest opponent */
-uint8_t patrol_between(int16_t x1, int16_t y1,int16_t x2, int16_t y2);
+uint8_t strat_patrol_between(int16_t x1, int16_t y1,int16_t x2, int16_t y2);
+
 
 #if notyet /* TODO 2014 */
 uint8_t strat_main_loop(void);

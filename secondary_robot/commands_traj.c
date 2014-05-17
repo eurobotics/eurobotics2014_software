@@ -69,6 +69,7 @@
 #include "../maindspic/strat_avoid.h"
 #include "strat.h"
 #include "../common/i2c_commands.h"
+#include "../common/bt_commands.h"
 
 
 /**********************************************************/
@@ -803,65 +804,6 @@ struct cmd_position_result {
 	int32_t arg4;
 };
 
-#define AUTOPOS_SPEED_FAST 	500
-#define BASKET_WIDTH				300
-static void auto_position(void)
-{
-	uint8_t err;
-	uint16_t old_spdd, old_spda;
-
-	/* save & set speeds */
-	interrupt_traj_reset();
-	strat_get_speed(&old_spdd, &old_spda);
-	strat_set_speed(AUTOPOS_SPEED_FAST, AUTOPOS_SPEED_FAST);
-
-	/* goto blocking to y axis */
-	trajectory_d_rel(&mainboard.traj, -200);
-	err = wait_traj_end(END_INTR|END_TRAJ|END_BLOCKING);
-	if (err == END_INTR)
-		goto intr;
-	wait_ms(100);
-
-	/* set y */
-	strat_reset_pos(0, BASKET_WIDTH + ROBOT_CENTER_TO_BACK, 90);
-
-	/* prepare to x axis */
-	trajectory_d_rel(&mainboard.traj, 40);
-	err = wait_traj_end(END_INTR|END_TRAJ);
-	if (err == END_INTR)
-		goto intr;
-
-	trajectory_a_rel(&mainboard.traj, COLOR_A_REL(-90));
-	err = wait_traj_end(END_INTR|END_TRAJ);
-	if (err == END_INTR)
-		goto intr;
-
-
-	/* goto blocking to x axis */
-	trajectory_d_rel(&mainboard.traj, -700);
-	err = wait_traj_end(END_INTR|END_TRAJ|END_BLOCKING);
-	if (err == END_INTR)
-		goto intr;
-	wait_ms(100);
-	
-	/* set x and angle */
-	strat_reset_pos(COLOR_X(ROBOT_CENTER_TO_BACK), DO_NOT_SET_POS, COLOR_A_ABS(0));
-	
-	/* goto start position */
-	trajectory_d_rel(&mainboard.traj, 175);
-	err = wait_traj_end(END_INTR|END_TRAJ);
-	if (err == END_INTR)
-		goto intr;
-	wait_ms(100);
-	
-	/* restore speeds */	
-	strat_set_speed(old_spdd, old_spda);
-	return;
-
-intr:
-	strat_hardstop();
-	strat_set_speed(old_spdd, old_spda);
-}
 
 /* function called when cmd_position is parsed successfully */
 static void cmd_position_parsed(void * parsed_result, void * data)
@@ -877,23 +819,28 @@ static void cmd_position_parsed(void * parsed_result, void * data)
 	}
 	else if (!strcmp_P(res->arg1, PSTR("autoset_yellow"))) {
 		mainboard.our_color = I2C_COLOR_YELLOW;
-		auto_position();
+		strat_auto_position ();
 	}
 	else if (!strcmp_P(res->arg1, PSTR("autoset_red"))) {
 		mainboard.our_color = I2C_COLOR_RED;
-		auto_position();
+		strat_auto_position ();
 	}
-
-	/* else it's just a "show" */
-	printf_P(PSTR("x=%.2f y=%.2f a=%.2f\r\n"), 
-		 position_get_x_double(&mainboard.pos),
-		 position_get_y_double(&mainboard.pos),
-		 DEG(position_get_a_rad_double(&mainboard.pos)));
+	else if (!strcmp_P(res->arg1, PSTR("autoset"))) {
+		strat_schedule_single_event (strat_auto_position_event, NULL);
+		bt_set_cmd_id_and_checksum (BT_AUTOPOS, 0);
+	}
+	else {
+		/* else it's just a "show" */
+		printf_P(PSTR("x=%.2f y=%.2f a=%.2f\r\n"), 
+			 position_get_x_double(&mainboard.pos),
+			 position_get_y_double(&mainboard.pos),
+			 DEG(position_get_a_rad_double(&mainboard.pos)));
+	}
 }
 
 prog_char str_position_arg0[] = "position";
 parse_pgm_token_string_t cmd_position_arg0 = TOKEN_STRING_INITIALIZER(struct cmd_position_result, arg0, str_position_arg0);
-prog_char str_position_arg1[] = "show#reset#autoset_yellow#autoset_red";
+prog_char str_position_arg1[] = "show#reset#autoset_yellow#autoset_red#autoset";
 parse_pgm_token_string_t cmd_position_arg1 = TOKEN_STRING_INITIALIZER(struct cmd_position_result, arg1, str_position_arg1);
 
 prog_char help_position[] = "Show/reset (x,y,a) position";
@@ -1003,7 +950,7 @@ static void cmd_subtraj2_parsed(void *parsed_result, void *data)
 	uint8_t err = 0;
 
 	if (strcmp_P(res->arg1, PSTR("patrol_between")) == 0) {
-		err = patrol_between(res->arg2,res->arg3,res->arg4,res->arg5); 
+		err = strat_patrol_between(res->arg2,res->arg3,res->arg4,res->arg5);
 	}
 
 	printf_P(PSTR("substrat returned %s\r\n"), get_err(err));

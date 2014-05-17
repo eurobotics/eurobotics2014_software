@@ -146,17 +146,6 @@
 #define E_USER_BT_PROTO     200
 
 /* EVENTS PRIORITIES */
-#ifdef old_version
-#define EVENT_PRIORITY_LED 			  	170
-#define EVENT_PRIORITY_TIME           	160
-#define EVENT_PRIORITY_I2C_POLL       	140
-#define EVENT_PRIORITY_SENSORS        	120
-#define EVENT_PRIORITY_CS             	100
-#define EVENT_PRIORITY_BEACON_POLL    	80
-#define EVENT_PRIORITY_STRAT       		70
-
-#else
-
 #define EVENT_PRIORITY_LED 			170
 #define EVENT_PRIORITY_TIME         160
 #define EVENT_PRIORITY_I2C_POLL     140
@@ -164,12 +153,13 @@
 #define EVENT_PRIORITY_CS           100
 #define EVENT_PRIORITY_STRAT        30
 #define EVENT_PRIORITY_BEACON_POLL  20
+#define EVENT_PRIORITY_STRAT_EVENT	10
 
-#endif
 
 /* EVENTS PERIODS */
 #define EVENT_PERIOD_LED 	        1000000L
 #define EVENT_PERIOD_STRAT		  	25000L
+#define EVENT_PERIOD_STRAT_EVENT  	25000L
 #define EVENT_PERIOD_BEACON_PULL	10000L
 #define EVENT_PERIOD_SENSORS	  	10000L
 #define EVENT_PERIOD_I2C_POLL	  	8000L
@@ -245,7 +235,7 @@ struct mainboard
 	/* x,y positionning and traj*/
 	struct robot_system rs;
 	struct robot_position pos;
-   struct trajectory traj;
+   	struct trajectory traj;
 
 	/* robot status */
 	uint8_t our_color;
@@ -255,6 +245,10 @@ struct mainboard
 
 	int32_t pwm_l;  /* current left dac */
 	int32_t pwm_r;  /* current right dac */
+
+	/* strat events */
+	int8_t  strat_event;
+	int16_t strat_event_data[3];
 };
 
 

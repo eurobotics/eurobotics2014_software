@@ -48,6 +48,7 @@
 #include <blocking_detection_manager.h>
 #include <robot_system.h>
 #include <position_manager.h>
+#include <scheduler.h>
 
 
 #include <rdline.h>
@@ -71,11 +72,139 @@
 		goto end;		 \
 	} while(0)
 
-
 /* Add here the main strategic, the inteligence of robot */
 
+/**
+ * STRAT EVENTS 
+ */
+
+/* schedule a single strat tevent */
+void strat_schedule_single_event(void (*f)(void *), void * data)
+{
+	uint8_t flags;
+	int8_t ret;
+
+	/* delete current event */
+	scheduler_del_event(mainboard.strat_event);
+
+	/* add event */
+	IRQ_LOCK(flags);
+	ret  = scheduler_add_single_event_priority(f, data, 
+											   EVENT_PERIOD_STRAT/SCHEDULER_UNIT, EVENT_PRIORITY_STRAT_EVENT);
+	mainboard.strat_event = ret;
+	IRQ_UNLOCK(flags);
+}
+
+/* schedule a periodical strat tevent */
+void strat_schedule_periodical_event(void (*f)(void *), void * data)
+{
+	uint8_t flags;
+	int8_t ret;
+
+	/* delete current event */
+	scheduler_del_event(mainboard.strat_event);
+
+	/* add event */
+	IRQ_LOCK(flags);
+	ret  = scheduler_add_periodical_event_priority(f, data,
+			EVENT_PERIOD_STRAT/SCHEDULER_UNIT, EVENT_PRIORITY_STRAT_EVENT);
+	mainboard.strat_event = ret;
+	IRQ_UNLOCK(flags);
+}
+
+
+/* wait for traj end event */
+void strat_wait_traj_end_event (void *data)
+{
+	uint16_t *__data = data;
+
+	uint8_t ret = wait_traj_end ((uint8_t)__data[0]);
+
+	/* return thru bt protocol */	
+	bt_set_cmd_ret (ret);
+}
+
+/* auto possition depending on color */
+void strat_auto_position (void)
+{
+#define AUTOPOS_SPEED_FAST 	1000
+#define BASKET_WIDTH		300
+
+	uint8_t err;
+	uint16_t old_spdd, old_spda;
+
+	/* save & set speeds */
+	interrupt_traj_reset();
+	strat_get_speed(&old_spdd, &old_spda);
+	strat_set_speed(AUTOPOS_SPEED_FAST, AUTOPOS_SPEED_FAST);
+
+	/* goto blocking to y axis */
+	trajectory_d_rel(&mainboard.traj, -200);
+	err = wait_traj_end(END_INTR|END_TRAJ|END_BLOCKING);
+	if (err == END_INTR)
+		goto intr;
+	wait_ms(100);
+
+	/* set y */
+	strat_reset_pos(DO_NOT_SET_POS, BASKET_WIDTH + ROBOT_CENTER_TO_BACK, 90);
+
+	/* prepare to x axis */
+	trajectory_d_rel(&mainboard.traj, 45);
+	err = wait_traj_end(END_INTR|END_TRAJ);
+	if (err == END_INTR)
+		goto intr;
+
+	trajectory_a_rel(&mainboard.traj, COLOR_A_REL(-90));
+	err = wait_traj_end(END_INTR|END_TRAJ);
+	if (err == END_INTR)
+		goto intr;
+
+
+	/* goto blocking to x axis */
+	trajectory_d_rel(&mainboard.traj, -700);
+	err = wait_traj_end(END_INTR|END_TRAJ|END_BLOCKING);
+	if (err == END_INTR)
+		goto intr;
+	wait_ms(100);
+	
+	/* set x and angle */
+	strat_reset_pos(COLOR_X(ROBOT_CENTER_TO_BACK), DO_NOT_SET_POS, COLOR_A_ABS(0));
+	
+	/* goto start position */
+	trajectory_d_rel(&mainboard.traj, 175);
+	err = wait_traj_end(END_INTR|END_TRAJ);
+	if (err == END_INTR)
+		goto intr;
+	wait_ms(100);
+	
+	/* restore speeds */	
+	strat_set_speed(old_spdd, old_spda);
+	return;
+
+intr:
+	strat_hardstop();
+	strat_set_speed(old_spdd, old_spda);
+}
+
+
+/* auto position event */
+void strat_auto_position_event (void *data)
+{
+	strat_auto_position ();
+
+	/* return thru bt protocol */	
+	bt_set_cmd_ret (END_TRAJ);
+
+	/* print end pos */
+	printf_P(PSTR("x=%.2f y=%.2f a=%.2f\r\n"), 
+		 position_get_x_double(&mainboard.pos),
+		 position_get_y_double(&mainboard.pos),
+		 DEG(position_get_a_rad_double(&mainboard.pos)));
+}
+
+
 /* patrol between 2 points depending on nearest opponent */
-uint8_t patrol_between(int16_t x1, int16_t y1,int16_t x2, int16_t y2)
+uint8_t strat_patrol_between(int16_t x1, int16_t y1,int16_t x2, int16_t y2)
 {
 
 

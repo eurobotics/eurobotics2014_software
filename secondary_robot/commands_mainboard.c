@@ -219,10 +219,7 @@ static void cmd_opponent_parsed(void *parsed_result, void *data)
 		opp2 = get_opponent2_xyda(&x2, &y2, &d2, &a2);
 		r2nd = get_robot_2nd_xyda(&x_r2nd, &y_r2nd, &d_r2nd, &a_r2nd);
     get_robot_2nd_a_abs(&a_abs_r2nd);
-	
-		if (opp1 == -1 && opp2 == -1)
-			printf_P(PSTR("No opponent"));
-	
+		
 		if (opp1 == -1)
 			printf_P(PSTR("opp1 not there"));
 		else
@@ -1017,7 +1014,11 @@ void uart_send_buffer (uint8_t *buff, uint16_t length)
   uint16_t i;
 
 	for(i=0; i<length; i++){
+#ifndef HOST_VERSION
 		uart_send(CMDLINE_UART, buff[i]);
+#else
+		robotsim_uart_send_BT (buff[i]);
+#endif
 	}	
 }
 

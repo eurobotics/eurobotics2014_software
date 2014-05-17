@@ -51,19 +51,20 @@ struct bt_robot_2nd_status_ans
 
 	/* running command info */
 	uint8_t cmd_id;
-#define BT_SET_COLOR			1
+#define BT_SET_COLOR		1
+#define BT_AUTOPOS			2
 
-#define BT_GOTO_XY_ABS		2
-#define BT_GOTO_XY_REL		3
-#define BT_GOTO_AVOID		4
-#define BT_GOTO_AVOID_FW	5
-#define BT_GOTO_AVOID_BW	6
+#define BT_GOTO_XY_ABS		3
+#define BT_GOTO_XY_REL		4
+#define BT_GOTO_AVOID		5
+#define BT_GOTO_AVOID_FW	6
+#define BT_GOTO_AVOID_BW	7
 
-#define BT_DO_FRESCO_INIT	7
-#define BT_DO_MAMMUT_1		8
-#define BT_DO_MAMMUT_2		9
-#define BT_DO_NET				10
-#define BT_DO_OPP_FIRES		11
+#define BT_DO_FRESCO_INIT	8
+#define BT_DO_MAMMUT_1		9
+#define BT_DO_MAMMUT_2		10
+#define BT_DO_NET			11
+#define BT_DO_OPP_FIRES		12
 
 	uint8_t cmd_ret; 		/* END_TRAJ flags rules, see strat_base.h */
 	uint8_t cmd_args_checksum;
@@ -86,10 +87,8 @@ struct bt_robot_2nd_status_ans
 	int16_t opponent1_x;
 	int16_t opponent1_y;
 
-#ifdef TWO_OPPONENTS
 	int16_t opponent2_x;
 	int16_t opponent2_y;
-#endif
 
 	uint16_t checksum;
 

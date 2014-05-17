@@ -316,9 +316,10 @@ int main(void)
 	/* beacon commnads and polling */
 	//scheduler_add_periodical_event_priority(beacon_protocol, NULL,
 	//				EVENT_PERIOD_BEACON_PULL / SCHEDULER_UNIT, EVENT_PRIORITY_BEACON_POLL);
+#endif
+	/* beacon and robot 2nd commnads and polling */
 	scheduler_add_periodical_event_priority(bt_protocol, NULL,
 					EVENT_PERIOD_BEACON_PULL / SCHEDULER_UNIT, EVENT_PRIORITY_BEACON_POLL);
-#endif
 
 	/* strat-related event */
 	scheduler_add_periodical_event_priority(strat_event, NULL,
@@ -348,6 +349,7 @@ int main(void)
 	printf("Don't turn it on, take it a part!!\r\n");
 
 #ifdef HOST_VERSION
+	mainboard.our_color = I2C_COLOR_YELLOW;
 	strat_reset_pos(COLOR_X(200), 500, COLOR_A_ABS(0));
 	//strat_event_enable();
 #endif

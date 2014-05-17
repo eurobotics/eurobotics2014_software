@@ -51,7 +51,7 @@ void wt11_send (uint8_t *buff, uint16_t length)
 #ifndef HOST_VERSION
 		uart_send(BT_UART, buff[i]);
 #else
-		robotsim_uart_send_BT(buff[i])
+		robotsim_uart_send_BT(buff[i]);
 #endif
 	}	
 }
@@ -75,6 +75,7 @@ void wt11_send_mux (uint8_t link_id, uint8_t *buff, uint16_t length)
     return;
   }
 
+#ifndef HOST_VERSION
   /* start of frame */
   __uart_send(WT11_MUX_SOF);
 
@@ -84,13 +85,16 @@ void wt11_send_mux (uint8_t link_id, uint8_t *buff, uint16_t length)
   /* flags and length */
   __uart_send(length >> 8);
   __uart_send(length & 0xFF);
+#endif
 
   /* data */
   for(i=0; i<length; i++)
     __uart_send(buff[i]);
 
+#ifndef HOST_VERSION
   /* nLINK */
   __uart_send(link_id ^ 0xFF);  
+#endif
 }
 
 /* flush recevied buffer */
@@ -213,10 +217,10 @@ int16_t wt11_bypass_to_stdo (uint8_t link_id)
   static uint8_t __link_id = 0;
   static uint16_t __length, i = 0;
 
+#ifndef HOST_VERSION
   do {
 
-    /* get byte */
-#ifndef HOST_VERSION
+    	/* get byte */
 		ret = uart_recv_nowait(BT_UART);
 #else
 		ret = robotsim_uart_recv_BT();  
@@ -227,7 +231,10 @@ int16_t wt11_bypass_to_stdo (uint8_t link_id)
 
 		/* cast to uint8_t */
 		c = (uint8_t)(ret & 0x00FF);
-
+#ifdef HOST_VERSION
+		uart_send_nowait(STDIO_UART, c);
+		return c;
+#else
 		switch (state) {
 
 			/* start of frame */
@@ -302,6 +309,7 @@ int16_t wt11_bypass_to_stdo (uint8_t link_id)
 	} while (ret != -1);
 
 	return -1;
+#endif
 }
 
 /* return received char and link_id, -1 if not valid char */
@@ -503,7 +511,7 @@ inline void wt11_reset_mux (void) {
 /* open serial link in multiplexin mode */
 void __wt11_open_link(uint8_t mode, uint8_t *addr, uint8_t *link_id)
 {
-	uint16_t __link_id;
+	uint8_t __link_id;
 	uint16_t size, i=0;
 	uint16_t ret = 0;
 

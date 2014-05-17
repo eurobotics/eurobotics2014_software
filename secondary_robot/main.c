@@ -240,9 +240,12 @@ int main(void)
 #endif
 
    beaconboard.opponent1_x = I2C_OPPONENT_NOT_THERE;
+   robot_2nd.opponent1_x = I2C_OPPONENT_NOT_THERE;
+   robot_2nd.x = I2C_OPPONENT_NOT_THERE;
 
 #ifdef TWO_OPPONENTS
    beaconboard.opponent2_x = I2C_OPPONENT_NOT_THERE;
+   robot_2nd.opponent2_x = I2C_OPPONENT_NOT_THERE;
 #endif
 
 #ifndef HOST_VERSION
@@ -376,6 +379,7 @@ int main(void)
    printf("Don't turn it on, take it a part!!\r\n");
 
 #ifdef HOST_VERSION
+	mainboard.our_color = I2C_COLOR_YELLOW;
    strat_reset_pos(COLOR_X(520), 420, COLOR_A_ABS(90));
    //strat_event_enable();
 #endif

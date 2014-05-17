@@ -746,66 +746,8 @@ static void cmd_goto_parsed(void * parsed_result, void * data)
     uint8_t err;
     microseconds t1, t2;
 
-    if (!strcmp_P(res->arg0, PSTR("robot2_goto")))
-    {
-#if 0
-        if (!strcmp_P(res->arg1, PSTR("a_rel")))
-        {
-            bt_robot_sec_send_ascii_cmd("goto %s %d", res->arg1, res->arg2);
-        }
-        else if (!strcmp_P(res->arg1, PSTR("d_rel")))
-        {
-            bt_robot_sec_send_ascii_cmd("goto %s %d", res->arg1, res->arg2);
-        }
-        else if (!strcmp_P(res->arg1, PSTR("a_abs")))
-        {
-            bt_robot_sec_send_ascii_cmd("goto %s %d %d", res->arg1, res->arg2);
-        }
-        else if (!strcmp_P(res->arg1, PSTR("a_to_xy")))
-        {
-            bt_robot_sec_send_ascii_cmd("goto %s %d %d", res->arg1, res->arg2, res->arg3);
-        }
-        else if (!strcmp_P(res->arg1, PSTR("a_behind_xy")))
-        {
-            bt_robot_sec_send_ascii_cmd("goto %s %d %d", res->arg1, res->arg2, res->arg3);
-        }
-        else if (!strcmp_P(res->arg1, PSTR("xy_rel")))
-        {
-            bt_robot_sec_send_ascii_cmd("goto %s %d %d", res->arg1, res->arg2, res->arg3);
-        }
-        else if (!strcmp_P(res->arg1, PSTR("xy_abs")))
-        {
-            bt_robot_sec_send_ascii_cmd("goto %s %d %d", res->arg1, res->arg2, res->arg3);
-        }
-        else if (!strcmp_P(res->arg1, PSTR("avoid")))
-        {
-            bt_robot_sec_send_ascii_cmd("goto %s %d %d", res->arg1, res->arg2, res->arg3);
-        }
-        else if (!strcmp_P(res->arg1, PSTR("avoid_fw")))
-        {
-            bt_robot_sec_send_ascii_cmd("goto %s %d %d", res->arg1, res->arg2, res->arg3);
-        }
-        else if (!strcmp_P(res->arg1, PSTR("avoid_bw")))
-        {
-            bt_robot_sec_send_ascii_cmd("goto %s %d %d", res->arg1, res->arg2, res->arg3);
-        }
-        else if (!strcmp_P(res->arg1, PSTR("xy_abs_fow")))
-        {
-            bt_robot_sec_send_ascii_cmd("goto %s %d", res->arg1, res->arg2, res->arg3);
-        }
-        else if (!strcmp_P(res->arg1, PSTR("xy_abs_back")))
-        {
-            bt_robot_sec_send_ascii_cmd("goto %s %d %d", res->arg1, res->arg2, res->arg3);
-        }
-        else if (!strcmp_P(res->arg1, PSTR("da_rel")))
-        {
-            bt_robot_sec_send_ascii_cmd("goto %s %d %d", res->arg1, res->arg2, res->arg3);
-        }
-#endif
-        return;
-    }
-
     interrupt_traj_reset();
+
     if (!strcmp_P(res->arg1, PSTR("a_rel")))
     {
         trajectory_a_rel(&mainboard.traj, res->arg2);
@@ -955,7 +897,7 @@ static void auto_position(void)
     wait_ms(100);
 
     /* set x and angle */
-    strat_reset_pos(COLOR_X(ROBOT_CENTER_TO_BACK), 0, COLOR_A_ABS(0));
+    strat_reset_pos(COLOR_X(ROBOT_CENTER_TO_BACK), DO_NOT_SET_POS, COLOR_A_ABS(0));
 
     /* prepare to y axis */
     trajectory_d_rel(&mainboard.traj, 90);

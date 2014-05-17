@@ -572,9 +572,7 @@ void bt_protocol (void * dummy)
 #else
   	c = robotsim_uart_recv_BT ();
   	while (c != -1) {
-		if ((mainboard.flags & DO_ROBOT_2ND))
-			bt_robot_2nd_status_parser (c);
-
+		bt_robot_2nd_status_parser (c);
 	  	c = robotsim_uart_recv_BT ();
 	}
 

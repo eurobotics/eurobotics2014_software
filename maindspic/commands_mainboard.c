@@ -236,8 +236,6 @@ static void cmd_opponent_parsed(void *parsed_result, void *data)
             r2nd = get_robot_2nd_xyda(&x_r2nd, &y_r2nd, &d_r2nd, &a_r2nd);
             get_robot_2nd_a_abs(&a_abs_r2nd);
 
-            if (opp1 == -1 && opp2 == -1)
-                printf_P(PSTR("No opponent"));
 
             if (opp1 == -1)
                 printf_P(PSTR("opp1 not there"));
@@ -704,9 +702,6 @@ struct cmd_robot_2nd_result
 
 static void cmd_robot_2nd_parsed(void * parsed_result, void * data)
 {
-#ifdef HOST_VERSION
-	printf("not implemented\n");
-#else
    int16_t c;
    int8_t cmd = 0;
    struct vt100 vt100;
@@ -756,11 +751,17 @@ static void cmd_robot_2nd_parsed(void * parsed_result, void * data)
 		IRQ_UNLOCK (flags);
 	}
 	else if (!strcmp_P(res->arg1, PSTR("open")))
+#ifdef HOST_VERSION
+		robot_2nd.link_id = 0;
+#else
 		wt11_open_link_mux(robot_2nd_addr, &robot_2nd.link_id);
-
+#endif
 	else if (!strcmp_P(res->arg1, PSTR("close")))
+#ifdef HOST_VERSION
+		robot_2nd.link_id = 0xFF;
+#else
 		wt11_close_link_mux(robot_2nd.link_id);
-
+#endif
     else if (!strcmp_P(res->arg1, "color"))
 		bt_robot_2nd_set_color ();
 
@@ -790,7 +791,6 @@ static void cmd_robot_2nd_parsed(void * parsed_result, void * data)
         while (!cmdline_keypressed());
 	}
 
-#endif
 }
 
 prog_char str_robot_2nd_arg0[] = "robot_2nd";
