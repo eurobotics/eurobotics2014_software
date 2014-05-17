@@ -211,17 +211,17 @@ static void beacon_update(void)
 
        /* update opponent 1 */
        IRQ_LOCK(flags);
-       if (beaconboard.opponent_x == I2C_OPPONENT_NOT_THERE) {
+       if (beaconboard.opponent1_x == I2C_OPPONENT_NOT_THERE) {
                IRQ_UNLOCK(flags);
                return;
        }
-       oppx = beaconboard.opponent_x;
-       oppy = beaconboard.opponent_y;
+       oppx = beaconboard.opponent1_x;
+       oppy = beaconboard.opponent1_y;
        abs_xy_to_rel_da(oppx, oppy, &oppd, &oppa);
-       beaconboard.opponent_a = DEG(oppa);
-       if (beaconboard.opponent_a < 0)
-               beaconboard.opponent_a += 360;
-       beaconboard.opponent_d = oppd;
+       beaconboard.opponent1_a = DEG(oppa);
+       if (beaconboard.opponent1_a < 0)
+               beaconboard.opponent1_a += 360;
+       beaconboard.opponent1_d = oppd;
        IRQ_UNLOCK(flags);
 
        /* update opponent 2 */
@@ -241,17 +241,17 @@ static void beacon_update(void)
 
        /* update robot mate */
        IRQ_LOCK(flags);
-       if (beaconboard.robot_2nd_x == I2C_OPPONENT_NOT_THERE) {
+       if (robot_2nd.x == I2C_OPPONENT_NOT_THERE) {
                IRQ_UNLOCK(flags);
                return;
        }
-       oppx = beaconboard.robot_2nd_x;
-       oppy = beaconboard.robot_2nd_y;
+       oppx = robot_2nd.x;
+       oppy = robot_2nd.y;
        abs_xy_to_rel_da(oppx, oppy, &oppd, &oppa);
-       beaconboard.robot_2nd_a = DEG(oppa);
-       if (beaconboard.robot_2nd_a < 0)
-               beaconboard.robot_2nd_a += 360;
-       beaconboard.robot_2nd_d = oppd;
+       robot_2nd.a = DEG(oppa);
+       if (robot_2nd.a < 0)
+               robot_2nd.a += 360;
+       robot_2nd.d = oppd;
        IRQ_UNLOCK(flags);
 }
 
@@ -308,47 +308,66 @@ void robotsim_update(void)
 	if (cmd[0] == 'o') {
 		if (sscanf(cmd, "opp_1 %d %d", &oppx, &oppy) == 2) {
 			abs_xy_to_rel_da(oppx, oppy, &oppd, &oppa);
-			IRQ_LOCK(flags);
-			beaconboard.opponent_x = oppx;
-			beaconboard.opponent_y = oppy;
-			beaconboard.opponent_a = DEG(oppa);
-			if (beaconboard.opponent_a < 0)
-				beaconboard.opponent_a += 360;
-			beaconboard.opponent_d = oppd;
-			IRQ_UNLOCK(flags);
+
+			/* limit to the real range */
+			if (oppd < 2300) {
+				IRQ_LOCK(flags);
+				beaconboard.opponent1_x = oppx;
+				beaconboard.opponent1_y = oppy;
+				beaconboard.opponent1_a = DEG(oppa);
+				if (beaconboard.opponent1_a < 0)
+					beaconboard.opponent1_a += 360;
+				beaconboard.opponent1_d = oppd;
+				IRQ_UNLOCK(flags);
+			}
+			else {
+				IRQ_LOCK(flags);
+				beaconboard.opponent1_x = I2C_OPPONENT_NOT_THERE;
+				IRQ_UNLOCK(flags);
+			}
 		}
 		else if (sscanf(cmd, "opp_2 %d %d", &oppx, &oppy) == 2) {
 			abs_xy_to_rel_da(oppx, oppy, &oppd, &oppa);
-			IRQ_LOCK(flags);
-			beaconboard.opponent2_x = oppx;
-			beaconboard.opponent2_y = oppy;
-			beaconboard.opponent2_a = DEG(oppa);
-			if (beaconboard.opponent2_a < 0)
-				beaconboard.opponent2_a += 360;
-			beaconboard.opponent2_d = oppd;
-			IRQ_UNLOCK(flags);
+
+			/* limit to the real range */			
+			if (oppd < 2300) {
+				IRQ_LOCK(flags);
+				beaconboard.opponent2_x = oppx;
+				beaconboard.opponent2_y = oppy;
+				beaconboard.opponent2_a = DEG(oppa);
+				if (beaconboard.opponent2_a < 0)
+					beaconboard.opponent2_a += 360;
+				beaconboard.opponent2_d = oppd;
+				IRQ_UNLOCK(flags);
+			}
+			else {
+				IRQ_LOCK(flags);
+				beaconboard.opponent1_x = I2C_OPPONENT_NOT_THERE;
+				IRQ_UNLOCK(flags);
+			}
 		}
 	}
 
   /* XXX HACK, pos from the robot mate */
+#if 0
 	if (cmd[0] == 'r') {
 		if (sscanf(cmd, "r2nd %d %d %d", &oppx, &oppy, &oppa_abs) == 3) {
 
 			abs_xy_to_rel_da(oppx, oppy, &oppd, &oppa);
 			IRQ_LOCK(flags);
-			beaconboard.robot_2nd_x = oppx;
-			beaconboard.robot_2nd_y = oppy;
-			beaconboard.robot_2nd_a = DEG(oppa);
-      beaconboard.robot_2nd_a_abs = oppa_abs;
-			if (beaconboard.robot_2nd_a < 0)
-				beaconboard.robot_2nd_a += 360;
-			beaconboard.robot_2nd_d = oppd;
+			robot_2nd.x = oppx;
+			robot_2nd.y = oppy;
+			robot_2nd.a = DEG(oppa);
+      robot_2nd.a_abs = oppa_abs;
+			if (robot_2nd.a < 0)
+				robot_2nd.a += 360;
+			robot_2nd.d = oppd;
 			IRQ_UNLOCK(flags);
 
 
 		}
 	}
-
+#endif
 	x = position_get_x_double(&mainboard.pos);
 	y = position_get_y_double(&mainboard.pos);
 	a = position_get_a_rad_double(&mainboard.pos);

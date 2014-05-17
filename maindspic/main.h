@@ -243,7 +243,7 @@ struct genboard
 struct mainboard 
 {
 	/* events flags */
-	uint8_t flags;                
+	uint16_t flags;                
 #define DO_ENCODERS   1
 #define DO_CS         2
 #define DO_RS         4
@@ -251,7 +251,9 @@ struct mainboard
 #define DO_BD         16
 #define DO_TIMER      32
 #define DO_POWER      64
-#define DO_OPP        128
+#define DO_BEACON     128
+#define DO_ROBOT_2ND  256
+#define DO_BT_PROTO	(DO_BEACON | DO_ROBOT_2ND)
 
 	/* control systems */
 	struct cs_block angle;
@@ -302,15 +304,19 @@ struct slavedspic
 /* state of beaconboard, synchronized through i2c */
 struct beaconboard 
 {
+#define BEACON_OFFSET_D	30
+#define BEACON_OFFSET_A	0
+
 	/* status and color */
 	uint8_t status;
 	uint8_t color;
+	uint8_t link_id;
 	
 	/* opponent pos */
-	int16_t opponent_x;
-	int16_t opponent_y;
-	int16_t opponent_a;
-	int16_t opponent_d;
+	int16_t opponent1_x;
+	int16_t opponent1_y;
+	int16_t opponent1_a;
+	int16_t opponent1_d;
 
 #ifdef TWO_OPPONENTS
 	int16_t opponent2_x;
@@ -319,33 +325,38 @@ struct beaconboard
 	int16_t opponent2_d;
 #endif
 
-#ifdef ROBOT_2ND
-	int16_t robot_2nd_x;
-	int16_t robot_2nd_y;
-	int16_t robot_2nd_a;
-  int16_t robot_2nd_a_abs;
-	int16_t robot_2nd_d;
-#endif
-
 };
 
 struct robot_2nd
 {
-  /* status */
-  uint8_t status;
+  	/* bt link id */
+	uint8_t link_id;
 
-  /* robot position */
+	/* running command info */
+	uint8_t cmd_id;					/* for ack test */
+	uint8_t cmd_ret; 					/* for end traj test, 
+												follows END_TRAJ flags rules, 
+												see strat_base.h */
+	/* for cmd ack test */
+	uint8_t cmd_args_checksum_send;	/* checksum of arguments sent */
+	uint8_t cmd_args_checksum_recv;	/* checksum received */
+
+	/* strat info */
+	uint8_t color;
+	uint16_t done_flags;
+
+  	/* robot position */
 	int16_t x;
 	int16_t y;
-  int16_t a_abs;
+  	int16_t a_abs;
 	int16_t a;
 	int16_t d;
 
-  /* opponent pos */
-	int16_t opponent_x;
-	int16_t opponent_y;
-	int16_t opponent_a;
-	int16_t opponent_d;
+  	/* opponent pos */
+	int16_t opponent1_x;
+	int16_t opponent1_y;
+	int16_t opponent1_a;
+	int16_t opponent1_d;
 
 #ifdef TWO_OPPONENTS
 	int16_t opponent2_x;

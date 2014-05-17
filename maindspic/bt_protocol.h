@@ -26,16 +26,44 @@
 /* number of bt devices, maximun 4 */
 #define BT_PROTO_NUM_DEVICES 2
 
-/* bt device structure */
-struct bt_proto_device
-{
-  uint8_t number;
-  uint8_t link_id;
-  uint8_t addr[6];
-};
+/* send and receive commands to/from bt devices, periodic dev status pulling */
+void bt_protocol (void * dummy);
 
 
-//void bt_robot_sec_send_ascii_cmd(const char * format, ...);
+/************************************************************
+ * BEACON COMMANDS 
+ ***********************************************************/
+
+/* set color */
+void bt_beacon_set_color (void);
+
+/* beacon on */
+void bt_beacon_set_on (void);
+
+/* beacon on with watchdog */
+void bt_beacon_set_on_watchdog (void);
+
+/* beacon off*/
+void bt_beacon_set_off (void);
+
+/* request opponent position */
+void bt_beacon_req_status(void);
+
+/************************************************************
+ * ROBOT 2ND COMMANDS 
+ ***********************************************************/
+
+/* set color */
+void bt_robot_2nd_set_color (void);
+
+/* goto xy_abs */
+void bt_robot_2nd_goto_xy_abs (int16_t x, int16_t y);
+
+/* goto xy_rel */
+void bt_robot_2nd_goto_xy_rel (int16_t x, int16_t y);
+
+/* request opponent position */
+void bt_robot_2nd_req_status(void);
 
 
 #endif

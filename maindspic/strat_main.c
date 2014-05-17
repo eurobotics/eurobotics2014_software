@@ -88,7 +88,7 @@ uint8_t strat_is_valid_zone(uint8_t zone_num)
 		return 0;
 
 	/* discard if opp is in zone */
-	if(opponent_is_in_area(COLOR_X(strat_infos.zones[zone_num].x_up), strat_infos.zones[zone_num].y_up,
+	if(opponents_are_in_area(COLOR_X(strat_infos.zones[zone_num].x_up), strat_infos.zones[zone_num].y_up,
 								  COLOR_X(strat_infos.zones[zone_num].x_down),	strat_infos.zones[zone_num].y_down)) {
 
 #if 0
@@ -175,7 +175,7 @@ uint8_t strat_goto_zone(uint8_t zone_num)
 									TRAJ_FLAGS_STD, TRAJ_FLAGS_NO_NEAR);
 	}
 	else if (zone_num == ZONE_BASKET_2) 	{
-		if (opp_x_is_more_than(3000-750) || opp2_x_is_more_than(3000-750) ) {
+		if (opp1_x_is_more_than(3000-750) || opp2_x_is_more_than(3000-750) ) {
 			err = goto_and_avoid (COLOR_X(strat_infos.zones[zone_num].init_x - BASKET_OFFSET_SIDE), 
 										strat_infos.zones[zone_num].init_y,  
 										TRAJ_FLAGS_STD, TRAJ_FLAGS_NO_NEAR);

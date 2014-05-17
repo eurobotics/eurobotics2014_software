@@ -201,6 +201,26 @@ void strat_reset_pos(int16_t x, int16_t y, int16_t a)
 	if (a == DO_NOT_SET_POS)
 		a = posa;
 
+	/* some issues with blocking on simulator */
+#ifdef HOST_VERSION
+	if (x == ROBOT_HALF_LENGTH_REAR)
+		x = ROBOT_HALF_LENGTH_REAR + 10;
+	if (x == AREA_X - ROBOT_HALF_LENGTH_REAR)
+		x = AREA_X - ROBOT_HALF_LENGTH_REAR - 10;
+	if (y == ROBOT_HALF_LENGTH_REAR)
+		y = ROBOT_HALF_LENGTH_REAR + 10;
+	if (y == AREA_Y - ROBOT_HALF_LENGTH_REAR)
+		y = AREA_Y - ROBOT_HALF_LENGTH_REAR - 10;
+	if (x == ROBOT_HALF_LENGTH_FRONT)
+		x = ROBOT_HALF_LENGTH_FRONT + 10;
+	if (x == AREA_X - ROBOT_HALF_LENGTH_FRONT)
+		x = AREA_X - ROBOT_HALF_LENGTH_FRONT - 10;
+	if (y == ROBOT_HALF_LENGTH_FRONT)
+		y = ROBOT_HALF_LENGTH_FRONT + 10;
+	if (y == AREA_Y - ROBOT_HALF_LENGTH_FRONT)
+		y = AREA_Y - ROBOT_HALF_LENGTH_FRONT - 10;
+#endif
+
 	DEBUG(E_USER_STRAT, "reset pos (%s%s%s)",
 	      x == DO_NOT_SET_POS ? "" : "x",
 	      y == DO_NOT_SET_POS ? "" : "y",
@@ -341,7 +361,7 @@ void strat_limit_speed(void)
 
 
 #ifdef TWO_OPPONENTS
-	ret[0] = get_opponent_da(&d[0], &a[0]);
+	ret[0] = get_opponent1_da(&d[0], &a[0]);
 	ret[1] = get_opponent2_da(&d[1], &a[1]);
 #ifdef ROBOT_2ND
 	ret[2] = get_robot_2nd_da(&d[2], &a[2]);
@@ -529,7 +549,7 @@ uint8_t __strat_obstacle(uint8_t which)
 	if (ABS(mainboard.speed_d) < 150)
 		return 0;
 
-
+#ifndef HOST_VERSION
 	/* opponent is in front of us */
 	if (mainboard.speed_d > 0 && (sensor_get(S_OBS_FRONT_R) || sensor_get(S_OBS_FRONT_L))) {
 		DEBUG(E_USER_STRAT, "opponent front");
@@ -548,10 +568,11 @@ uint8_t __strat_obstacle(uint8_t which)
 		sensor_obstacle_disable();
 		return 1;
 	}
+#endif
 
 #ifdef TWO_OPPONENTS
 	if(which == OBSTACLE_OPP1)
-		ret = get_opponent_xyda(&opp_x, &opp_y,&opp_d, &opp_a);
+		ret = get_opponent1_xyda(&opp_x, &opp_y,&opp_d, &opp_a);
 	else if(which == OBSTACLE_OPP2)
 		ret = get_opponent2_xyda(&opp_x, &opp_y,&opp_d, &opp_a);
 #ifdef ROBOT_2ND
@@ -705,7 +726,7 @@ uint8_t __wait_traj_end_debug(uint8_t why, uint16_t line)
 		ret = test_traj_end(why);
 	}
 	if (ret == END_OBSTACLE) {
-		if (get_opponent_xyda(&opp_x, &opp_y,
+		if (get_opponent1_xyda(&opp_x, &opp_y,
 				      &opp_d, &opp_a) != -1)
 			DEBUG(E_USER_STRAT, "Got %s at line %d"
 			      " xy=(%d,%d) da=(%d,%d)", get_err(ret),

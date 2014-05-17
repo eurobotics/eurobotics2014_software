@@ -17,7 +17,7 @@
  *
  *  Revision : $Id$
  *
- *  Javier Baliñas Santos <javier@arc-robots.org> and Silvia Santano
+ *  Javier Balias Santos <javier@arc-robots.org> and Silvia Santano
  */
 
 #include <stdio.h>
@@ -48,6 +48,7 @@
 #include <blocking_detection_manager.h>
 #include <robot_system.h>
 #include <position_manager.h>
+#include <scheduler.h>
 
 
 #include <rdline.h>
@@ -71,8 +72,182 @@
 		goto end;		 \
 	} while(0)
 
-
 /* Add here the main strategic, the inteligence of robot */
+
+/**
+ * STRAT EVENTS 
+ */
+
+/* schedule a single strat tevent */
+void strat_schedule_single_event(void (*f)(void *), void * data)
+{
+	uint8_t flags;
+	int8_t ret;
+
+	/* delete current event */
+	scheduler_del_event(mainboard.strat_event);
+
+	/* add event */
+	IRQ_LOCK(flags);
+	ret  = scheduler_add_single_event_priority(f, data, 
+											   EVENT_PERIOD_STRAT/SCHEDULER_UNIT, EVENT_PRIORITY_STRAT_EVENT);
+	mainboard.strat_event = ret;
+	IRQ_UNLOCK(flags);
+}
+
+/* schedule a periodical strat tevent */
+void strat_schedule_periodical_event(void (*f)(void *), void * data)
+{
+	uint8_t flags;
+	int8_t ret;
+
+	/* delete current event */
+	scheduler_del_event(mainboard.strat_event);
+
+	/* add event */
+	IRQ_LOCK(flags);
+	ret  = scheduler_add_periodical_event_priority(f, data,
+			EVENT_PERIOD_STRAT/SCHEDULER_UNIT, EVENT_PRIORITY_STRAT_EVENT);
+	mainboard.strat_event = ret;
+	IRQ_UNLOCK(flags);
+}
+
+
+/* wait for traj end event */
+void strat_wait_traj_end_event (void *data)
+{
+	uint16_t *__data = data;
+
+	uint8_t ret = wait_traj_end ((uint8_t)__data[0]);
+
+	/* return thru bt protocol */	
+	bt_set_cmd_ret (ret);
+}
+
+/* auto possition depending on color */
+void strat_auto_position (void)
+{
+#define AUTOPOS_SPEED_FAST 	1000
+#define BASKET_WIDTH		300
+
+	uint8_t err;
+	uint16_t old_spdd, old_spda;
+
+	/* save & set speeds */
+	interrupt_traj_reset();
+	strat_get_speed(&old_spdd, &old_spda);
+	strat_set_speed(AUTOPOS_SPEED_FAST, AUTOPOS_SPEED_FAST);
+
+	/* goto blocking to y axis */
+	trajectory_d_rel(&mainboard.traj, -200);
+	err = wait_traj_end(END_INTR|END_TRAJ|END_BLOCKING);
+	if (err == END_INTR)
+		goto intr;
+	wait_ms(100);
+
+	/* set y */
+	strat_reset_pos(DO_NOT_SET_POS, BASKET_WIDTH + ROBOT_CENTER_TO_BACK, 90);
+
+	/* prepare to x axis */
+	trajectory_d_rel(&mainboard.traj, 45);
+	err = wait_traj_end(END_INTR|END_TRAJ);
+	if (err == END_INTR)
+		goto intr;
+
+	trajectory_a_rel(&mainboard.traj, COLOR_A_REL(-90));
+	err = wait_traj_end(END_INTR|END_TRAJ);
+	if (err == END_INTR)
+		goto intr;
+
+
+	/* goto blocking to x axis */
+	trajectory_d_rel(&mainboard.traj, -700);
+	err = wait_traj_end(END_INTR|END_TRAJ|END_BLOCKING);
+	if (err == END_INTR)
+		goto intr;
+	wait_ms(100);
+	
+	/* set x and angle */
+	strat_reset_pos(COLOR_X(ROBOT_CENTER_TO_BACK), DO_NOT_SET_POS, COLOR_A_ABS(0));
+	
+	/* goto start position */
+	trajectory_d_rel(&mainboard.traj, 175);
+	err = wait_traj_end(END_INTR|END_TRAJ);
+	if (err == END_INTR)
+		goto intr;
+	wait_ms(100);
+	
+	/* restore speeds */	
+	strat_set_speed(old_spdd, old_spda);
+	return;
+
+intr:
+	strat_hardstop();
+	strat_set_speed(old_spdd, old_spda);
+}
+
+
+/* auto position event */
+void strat_auto_position_event (void *data)
+{
+	strat_auto_position ();
+
+	/* return thru bt protocol */	
+	bt_set_cmd_ret (END_TRAJ);
+
+	/* print end pos */
+	printf_P(PSTR("x=%.2f y=%.2f a=%.2f\r\n"), 
+		 position_get_x_double(&mainboard.pos),
+		 position_get_y_double(&mainboard.pos),
+		 DEG(position_get_a_rad_double(&mainboard.pos)));
+}
+
+
+/* patrol between 2 points depending on nearest opponent */
+uint8_t strat_patrol_between(int16_t x1, int16_t y1,int16_t x2, int16_t y2)
+{
+
+
+	int8_t opp_there, r2nd_there;
+	int16_t opp_x, opp_y, x_aux;
+	uint16_t old_spdd, old_spda, temp_spdd, temp_spda;
+	uint8_t err = 0;
+	/* save speed */
+	strat_get_speed (&old_spdd, &old_spda);
+  	strat_limit_speed_disable ();
+	strat_set_speed(SPEED_DIST_SLOW, SPEED_ANGLE_VERY_SLOW);
+	/* get robot coordenates */
+	opp_there = get_opponent1_xy(&opp_x, &opp_y);
+
+	if(opp_there == -1 )
+		printf_P("return 0;");
+ 	if(x1>x2) x_aux=x1;
+	else{
+		x_aux=x2;
+	}
+	if(opp1_x_is_more_than(COLOR_X(x_aux+600))){
+		if(opp1_y_is_more_than(y1)&&opp1_y_is_more_than(y2)){
+			printf_P("More than Ys opp 1.\n");
+		}
+		else if((opp1_y_is_more_than(y1)&&!opp1_y_is_more_than(y2))||(!opp1_y_is_more_than(y1)&&opp1_y_is_more_than(y2))){
+			printf_P("Between Ys opp 1.\n");
+			trajectory_goto_xy_abs (&mainboard.traj,(x1+x2)/2,opp_y);
+		}
+	}else{
+	printf_P("More than X opp 1.\n");
+	}
+		printf_P("X: %d Y: %d.\n",opp_x,opp_y);
+
+	err = wait_traj_end(TRAJ_FLAGS_NO_NEAR);
+
+	if (!TRAJ_SUCCESS(err))
+		ERROUT(err);
+end:
+	strat_set_speed(old_spdd, old_spda);
+	strat_limit_speed_enable();
+    return err;
+}
+
 
 #if notyet /* TODO 2014 */
 
@@ -574,20 +749,12 @@ end:
 uint8_t patrol_between(int16_t x1, int16_t y1,int16_t x2, int16_t y2)
 {	
 	#define REFERENCE_DISTANCE_TO_ROBOT 800
-	int8_t opp_there, r2nd_there;
 	int16_t opp_x, opp_y, opp2_x, opp2_y, reference_x;
-	uint16_t old_spdd, old_spda, temp_spdd, temp_spda;
-	uint8_t err = 0;
 	int16_t d,d2;
 	int16_t a,a2;
 	
-	/* save speed */
-	strat_get_speed (&old_spdd, &old_spda);
-  	strat_limit_speed_disable ();
-	strat_set_speed(SPEED_DIST_SLOW, SPEED_ANGLE_VERY_SLOW);
 	
 	/* get robot coordinates */
-	opp_there = get_opponent_xy(&opp_x, &opp_y);
 	get_opponent2_xy(&opp2_x, &opp2_y);
 	/*if(opp_there == -1 )
 		printf_P("Opp is not there");*/
@@ -599,7 +766,6 @@ uint8_t patrol_between(int16_t x1, int16_t y1,int16_t x2, int16_t y2)
 	{
 		if((opp_y_is_more_than(y1)&&!opp_y_is_more_than(y2))||(!opp_y_is_more_than(y1)&&opp_y_is_more_than(y2)))
 		{
-			trajectory_goto_xy_abs (&mainboard.traj,(x1+x2)/2,opp_y); 
 		}
 	}else if(d2<(REFERENCE_DISTANCE_TO_ROBOT))
 	{
@@ -607,14 +773,6 @@ uint8_t patrol_between(int16_t x1, int16_t y1,int16_t x2, int16_t y2)
 		{
 			trajectory_goto_xy_abs (&mainboard.traj,(x1+x2)/2,opp2_y); 
 		}
-	}
 		
-	err = wait_traj_end(TRAJ_FLAGS_NO_NEAR);
-	if (!TRAJ_SUCCESS(err))
-		ERROUT(err);
-end:
-	strat_set_speed(old_spdd, old_spda);	
-	strat_limit_speed_enable();
 	return err;
-}
 

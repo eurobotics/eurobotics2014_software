@@ -52,6 +52,7 @@
 #include "main.h"
 #include "cmdline.h"
 #include "../common/i2c_commands.h"
+#include "../common/bt_commands.h"
 #include "beacon.h"
 
 struct cmd_event_result {
@@ -242,8 +243,10 @@ struct cmd_opponent_result {
 	int16_t robot_x;
 	int16_t robot_y;
 	int16_t robot_a;
+	uint16_t checksum;
 };
 
+#if 0
 /* function called when cmd_opponent is parsed successfully */
 static void cmd_opponent_parsed(void * parsed_result, void *data)
 {
@@ -389,12 +392,163 @@ static void cmd_opponent_parsed(void * parsed_result, void *data)
 //			   (int16_t)opponent_angle, (int16_t)opponent_dist, checksum);
 
 }
+#endif
 
-prog_char str_opponent_arg0[] = "opponent";
+/* send data in norma mode, any protocol is used */
+void uart_send_buffer (uint8_t *buff, uint16_t length) 
+{
+  uint16_t i;
+
+	for(i=0; i<length; i++){
+		uart_send(CMDLINE_UART, buff[i]);
+	}	
+}
+
+/* function called when cmd_opponent is parsed successfully */
+static void cmd_opponent_parsed(void * parsed_result, void *data)
+{
+	struct cmd_opponent_result *res = parsed_result;
+	int32_t opponent1_x, opponent1_y, opponent1_dist, opponent1_angle;
+#ifdef TWO_OPPONENTS
+	int32_t opponent2_x, opponent2_y, opponent2_dist, opponent2_angle;
+#endif
+#ifdef ROBOT_2ND
+	int32_t robot_2nd_x, robot_2nd_y, robot_2nd_dist, robot_2nd_angle;
+#endif
+	uint8_t flags;
+	struct bt_beacon_status_ans ans;
+	static uint16_t i=0;
+
+	/* reset watchdog */
+	beaconboard.watchdog = WATCHDOG_NB_TIMES;
+
+	/* test checksum */
+	if (!strcmp_P(res->arg0, PSTR("opponent")))
+		res->checksum = (uint16_t) (res->robot_x + res->robot_y + res->robot_a);
+	else {
+
+		if (res->checksum != (uint16_t)(res->robot_x + res->robot_y + res->robot_a)) {
+			ERROR (E_USER_BEACON, "checksum ERROR");
+			return;
+		}
+	}
+
+	/* get robot and opponents position */
+	IRQ_LOCK(flags);
+	beacon.robot_x = (int32_t)res->robot_x;
+	beacon.robot_y = (int32_t)res->robot_y;
+	beacon.robot_a = (int32_t)res->robot_a;
+	
+	opponent1_x = beacon.opponent1_x;
+	opponent1_y = beacon.opponent1_y;
+	opponent1_angle = beacon.opponent1_angle;
+	opponent1_dist = beacon.opponent1_dist;
+
+#ifdef TWO_OPPONENTS
+	opponent2_x = beacon.opponent2_x;
+	opponent2_y = beacon.opponent2_y;
+	opponent2_angle = beacon.opponent2_angle;
+	opponent2_dist = beacon.opponent2_dist;
+#endif
+#ifdef ROBOT_2ND
+	robot_2nd_x = beacon.robot_2nd_x;
+	robot_2nd_y = beacon.robot_2nd_y;
+	robot_2nd_angle = beacon.robot_2nd_angle;
+	robot_2nd_dist = beacon.robot_2nd_dist;
+#endif
+
+	IRQ_UNLOCK(flags);
+
+#ifdef RECALC
+	/* get actual value of (x,y) */
+	if(opponent1_x != I2C_OPPONENT_NOT_THERE){
+		/* calculate (x,y) coordenates relative to (0,0) */
+		beacon_angle_dist_to_x_y(opponent1_angle, opponent1_dist, &opponent1_x, &opponent1_y);
+	}
+
+#ifdef TWO_OPPONENTS
+	if(opponent2_x != I2C_OPPONENT_NOT_THERE){
+		/* calculate (x,y) coordenates relative to (0,0) */
+		beacon_angle_dist_to_x_y(opponent2_angle, opponent2_dist, &opponent2_x, &opponent2_y);
+	}
+#endif
+#ifdef ROBOT_2ND
+	if(robot_2nd_x != I2C_OPPONENT_NOT_THERE){
+		/* calculate (x,y) coordenates relative to (0,0) */
+		beacon_angle_dist_to_x_y(robot_2nd_angle, robot_2nd_dist, &robot_2nd_x, &robot_2nd_y);
+	}
+#endif
+#endif /* RECALC */
+
+//#define DEBUG_STATUS
+#ifdef DEBUG_STATUS
+	/* fill answer structure */
+	ans.hdr.cmd = BT_BEACON_STATUS_ANS;
+	ans.opponent_x = i++;
+	ans.opponent_y = i+1000;
+	ans.opponent_a = i+2000;
+	ans.opponent_d = i+3000;
+
+#ifdef TWO_OPPONENTS
+	ans.opponent2_x = i;
+	ans.opponent2_y = i+1000;
+	ans.opponent2_a = i+2000;
+	ans.opponent2_d = i+3000;
+#endif
+
+#else
+	/* fill answer structure */
+	ans.hdr.cmd = BT_BEACON_STATUS_ANS;
+	ans.opponent1_x = opponent1_x;
+	ans.opponent1_y = opponent1_y;
+	ans.opponent1_a = opponent1_angle;
+	ans.opponent1_d = opponent1_dist;
+
+#ifdef TWO_OPPONENTS
+	ans.opponent2_x = opponent2_x;
+	ans.opponent2_y = opponent2_y;
+	ans.opponent2_a = opponent2_angle;
+	ans.opponent2_d = opponent2_dist;
+#endif
+
+#ifdef ROBOT_2ND
+	ans.robot_2nd_x = robot_2nd_x;
+	ans.robot_2nd_y = robot_2nd_y;
+	ans.robot_2nd_a = robot_2nd_angle;
+	ans.robot_2nd_d = robot_2nd_dist;
+#endif
+
+#endif
+
+	ans.checksum = bt_checksum ((uint8_t *)&ans, sizeof (ans)-sizeof(ans.checksum));
+
+	/* send answer */
+	if (!strcmp_P(res->arg0, PSTR("opponent"))) {
+		printf("\n\r");
+		printf("size %d \n\r", sizeof(ans));
+		printf("opp1 %d %d %d %d \n\r",
+		 			(int16_t)ans.opponent1_x, (int16_t)ans.opponent1_y,
+					(int16_t)ans.opponent1_a, (int16_t)ans.opponent1_d);
+		printf("opp2 %d %d %d %d \n\r",
+		 			(int16_t)ans.opponent2_x, (int16_t)ans.opponent2_y,
+					(int16_t)ans.opponent2_a, (int16_t)ans.opponent2_d);
+		printf("cksum %x \n\r", ans.checksum);
+	}
+	else {
+		uint8_t sync_header[] = BT_BEACON_SYNC_HEADER;
+		uart_send_buffer (sync_header, sizeof(sync_header)); 
+		uart_send_buffer ((uint8_t*) &ans, sizeof(ans)); 
+
+	}
+}
+
+
+prog_char str_opponent_arg0[] = "status#opponent";
 parse_pgm_token_string_t cmd_opponent_arg0 = TOKEN_STRING_INITIALIZER(struct cmd_opponent_result, arg0, str_opponent_arg0);
 parse_pgm_token_num_t cmd_opponent_robot_x = TOKEN_NUM_INITIALIZER(struct cmd_opponent_result, robot_x, INT16);
 parse_pgm_token_num_t cmd_opponent_robot_y = TOKEN_NUM_INITIALIZER(struct cmd_opponent_result, robot_y, INT16);
 parse_pgm_token_num_t cmd_opponent_robot_a = TOKEN_NUM_INITIALIZER(struct cmd_opponent_result, robot_a, INT16);
+parse_pgm_token_num_t cmd_opponent_checksum = TOKEN_NUM_INITIALIZER(struct cmd_opponent_result, checksum, UINT16);
 
 prog_char help_opponent[] = "Get opponent position (x,y,angle,dist)";
 parse_pgm_inst_t cmd_opponent = {
@@ -406,6 +560,7 @@ parse_pgm_inst_t cmd_opponent = {
 		(prog_void *)&cmd_opponent_robot_x, 
 		(prog_void *)&cmd_opponent_robot_y, 
 		(prog_void *)&cmd_opponent_robot_a, 
+		(prog_void *)&cmd_opponent_checksum, 
 		NULL,
 	},
 };

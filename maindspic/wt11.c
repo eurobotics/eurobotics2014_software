@@ -38,7 +38,7 @@
 #include "robotsim.h"
 #endif
 
-#define WT11_MUX_CTRL_CMD   0xFF
+
 
 uint8_t data[WT11_MUX_LENGTH_MAX];
 
@@ -48,7 +48,11 @@ void wt11_send (uint8_t *buff, uint16_t length)
   uint16_t i;
 
 	for(i=0; i<length; i++){
+#ifndef HOST_VERSION
 		uart_send(BT_UART, buff[i]);
+#else
+		robotsim_uart_send_BT(buff[i]);
+#endif
 	}	
 }
 
@@ -67,10 +71,11 @@ void wt11_send_mux (uint8_t link_id, uint8_t *buff, uint16_t length)
 
   /* check length */
   if (length > WT11_MUX_LENGTH_MAX) {
-    ERROR(E_USER_BT_PROTO, "BT_PROTO: ERROR, length > max");
+    ERROR(E_USER_WT11, "WT11: ERROR, length > max");
     return;
   }
 
+#ifndef HOST_VERSION
   /* start of frame */
   __uart_send(WT11_MUX_SOF);
 
@@ -80,13 +85,16 @@ void wt11_send_mux (uint8_t link_id, uint8_t *buff, uint16_t length)
   /* flags and length */
   __uart_send(length >> 8);
   __uart_send(length & 0xFF);
+#endif
 
   /* data */
   for(i=0; i<length; i++)
     __uart_send(buff[i]);
 
+#ifndef HOST_VERSION
   /* nLINK */
   __uart_send(link_id ^ 0xFF);  
+#endif
 }
 
 /* flush recevied buffer */
@@ -153,24 +161,21 @@ int16_t wt11_recv_mux (uint8_t *link_id, uint8_t *buff, uint16_t buff_size)
 
 			/* data */
 			case 4:
-				printf ("%c", (char)c);
+				//printf ("%c", (char)c);
 
 				if (i < buff_size)
 			  		buff[i++] = c;
-				else
-					i++;
-			  
-				if (i == __length) {
-
-					if (i < buff_size)
-						state ++;
-					else {
+				else {
 						state = 0;
 						i = 0;
 						ERROR (E_USER_WT11, "WT11: ERROR buffer overflow");
+						wt11_flush();
 						return -1;
-					}
 				}
+
+				if (i == __length)
+					state ++;
+
 				break;
 
 			/* nLINK */    
@@ -186,7 +191,7 @@ int16_t wt11_recv_mux (uint8_t *link_id, uint8_t *buff, uint16_t buff_size)
 				else {
 					state = 0;
 					i = 0;
-					ERROR (E_USER_WT11, "WT11: link ID ERROR");
+					//ERROR (E_USER_WT11, "WT11: link ID ERROR");
 					return -1;
 				}
 				break;
@@ -212,10 +217,10 @@ int16_t wt11_bypass_to_stdo (uint8_t link_id)
   static uint8_t __link_id = 0;
   static uint16_t __length, i = 0;
 
+#ifndef HOST_VERSION
   do {
 
-    /* get byte */
-#ifndef HOST_VERSION
+    	/* get byte */
 		ret = uart_recv_nowait(BT_UART);
 #else
 		ret = robotsim_uart_recv_BT();  
@@ -226,7 +231,10 @@ int16_t wt11_bypass_to_stdo (uint8_t link_id)
 
 		/* cast to uint8_t */
 		c = (uint8_t)(ret & 0x00FF);
-
+#ifdef HOST_VERSION
+		uart_send_nowait(STDIO_UART, c);
+		return c;
+#else
 		switch (state) {
 
 			/* start of frame */
@@ -287,8 +295,108 @@ int16_t wt11_bypass_to_stdo (uint8_t link_id)
 					state = 0;
 					i = 0;
 
-					ERROR (E_USER_WT11, "WT11: link ID ERROR");
+					//ERROR (E_USER_WT11, "WT11: link ID ERROR");
 					return -1;
+				}
+				break;
+			  
+			default:
+				state = 0;
+				i = 0;
+				break;
+		}
+
+	} while (ret != -1);
+
+	return -1;
+#endif
+}
+
+/* return received char and link_id, -1 if not valid char */
+int16_t wt11_recv_mux_char (uint8_t *link_id)
+{
+  int16_t ret = 0;
+  uint8_t c = 0;
+  static uint8_t state = 0;
+  static uint8_t __link_id = 0;
+  static uint16_t __length, i = 0;
+
+  do {
+
+    /* get byte */
+#ifndef HOST_VERSION
+		ret = uart_recv_nowait(BT_UART);
+#else
+		ret = robotsim_uart_recv_BT();  
+#endif
+  
+		if (ret == -1)
+			return ret;
+
+		/* cast to uint8_t */
+		c = (uint8_t)(ret & 0x00FF);
+
+		switch (state) {
+
+			/* start of frame */
+			case 0:
+				if (c == WT11_MUX_SOF)
+				 state ++;
+				break;
+
+			/* link ID */
+			case 1:
+				if ((((int8_t)c >= 0) && (c <=8)) || (c == WT11_MUX_CTRL_CMD)) {
+				 	__link_id = c;
+					*link_id = __link_id;
+					state ++;
+				}
+				else
+				 state = 0;
+
+				break;
+				 
+			/* flags and length */
+			case 2:
+				__length = ((uint16_t)c << 8);
+				state ++;
+				break;
+
+			case 3:
+			  	__length |= ((uint16_t)c & 0x00FF);
+
+				//DEBUG (E_USER_WT11, "WT11 (%d): length =  %d\n", __link_id, __length);
+			  	state ++;
+			 	i = 0;
+			  	break;
+
+			/* data */
+			case 4:
+				//uart_send_nowait(STDIO_UART, c);
+				i++;
+			  
+				if (i >= __length)
+					state ++;
+
+				return c;
+				break;
+
+			/* nLINK */    
+			case 5:
+				if ((c ^ 0xFF) == (__link_id)) {
+					state = 0;
+					i = 0;
+
+					//DEBUG (E_USER_WT11, "WT11 (%d): received %s", *link_id, data);
+					return -1;
+				}
+				else {
+					state = 0;
+					i = 0;
+
+					//ERROR (E_USER_WT11, "WT11: link ID ERROR");
+					return -1;
+
 				}
 				break;
 			  
@@ -403,7 +511,7 @@ inline void wt11_reset_mux (void) {
 /* open serial link in multiplexin mode */
 void __wt11_open_link(uint8_t mode, uint8_t *addr, uint8_t *link_id)
 {
-	uint16_t __link_id;
+	uint8_t __link_id;
 	uint16_t size, i=0;
 	uint16_t ret = 0;
 
@@ -449,6 +557,7 @@ void __wt11_open_link(uint8_t mode, uint8_t *addr, uint8_t *link_id)
 		i++;
 	}
 
+	*link_id = 0xFF;
 	ERROR(E_USER_WT11, "WT11: link KO");
 }
 

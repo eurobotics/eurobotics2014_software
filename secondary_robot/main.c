@@ -77,8 +77,8 @@
 
 struct genboard gen;
 struct mainboard mainboard;
-struct slavedspic slavedspic;
 struct beaconboard beaconboard;
+struct robot_2nd robot_2nd;
 
 /***************************************************************/
 
@@ -227,8 +227,8 @@ int main(void)
    /* reset data structures */
    memset(&gen, 0, sizeof(gen));
    memset(&mainboard, 0, sizeof(mainboard));
-   memset(&slavedspic, 0, sizeof(slavedspic));
    memset(&beaconboard, 0, sizeof(beaconboard));
+   memset(&robot_2nd, 0, sizeof(robot_2nd));
 
    /* init flags */
 #ifdef HOST_VERSION
@@ -239,14 +239,13 @@ int main(void)
       DO_POS | DO_POWER | DO_BD; // | DO_CS ;
 #endif
 
-   beaconboard.opponent_x = I2C_OPPONENT_NOT_THERE;
+   beaconboard.opponent1_x = I2C_OPPONENT_NOT_THERE;
+   robot_2nd.opponent1_x = I2C_OPPONENT_NOT_THERE;
+   robot_2nd.x = I2C_OPPONENT_NOT_THERE;
 
 #ifdef TWO_OPPONENTS
    beaconboard.opponent2_x = I2C_OPPONENT_NOT_THERE;
-#endif
-
-#ifdef ROBOT_2ND
-   beaconboard.robot_2nd_x = I2C_OPPONENT_NOT_THERE;
+   robot_2nd.opponent2_x = I2C_OPPONENT_NOT_THERE;
 #endif
 
 #ifndef HOST_VERSION
@@ -380,10 +379,21 @@ int main(void)
    printf("Don't turn it on, take it a part!!\r\n");
 
 #ifdef HOST_VERSION
-   strat_reset_pos(400, COLOR_Y(1000), COLOR_A_ABS(90));
-     strat_event_enable();
+	mainboard.our_color = I2C_COLOR_YELLOW;
+   strat_reset_pos(COLOR_X(520), 420, COLOR_A_ABS(90));
+   //strat_event_enable();
 #endif
 
+	/* program WT-11 */
+#if 0
+	time_wait_ms (1000);
+	printf ("+++\n\r");
+	time_wait_ms (1000);
+	printf ("SET BT NAME Seskapa\n\r");
+	time_wait_ms (1000);
+	printf ("SET BT AUTH * gomaespuminos\n\r");
+	time_wait_ms (1000);
+#endif
 
    /* start */
    //strat_start_match(1);

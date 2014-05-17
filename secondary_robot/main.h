@@ -146,17 +146,6 @@
 #define E_USER_BT_PROTO     200
 
 /* EVENTS PRIORITIES */
-#ifdef old_version
-#define EVENT_PRIORITY_LED 			  	170
-#define EVENT_PRIORITY_TIME           	160
-#define EVENT_PRIORITY_I2C_POLL       	140
-#define EVENT_PRIORITY_SENSORS        	120
-#define EVENT_PRIORITY_CS             	100
-#define EVENT_PRIORITY_BEACON_POLL    	80
-#define EVENT_PRIORITY_STRAT       		70
-
-#else
-
 #define EVENT_PRIORITY_LED 			170
 #define EVENT_PRIORITY_TIME         160
 #define EVENT_PRIORITY_I2C_POLL     140
@@ -164,12 +153,13 @@
 #define EVENT_PRIORITY_CS           100
 #define EVENT_PRIORITY_STRAT        30
 #define EVENT_PRIORITY_BEACON_POLL  20
+#define EVENT_PRIORITY_STRAT_EVENT	10
 
-#endif
 
 /* EVENTS PERIODS */
 #define EVENT_PERIOD_LED 	        1000000L
 #define EVENT_PERIOD_STRAT		  	25000L
+#define EVENT_PERIOD_STRAT_EVENT  	25000L
 #define EVENT_PERIOD_BEACON_PULL	10000L
 #define EVENT_PERIOD_SENSORS	  	10000L
 #define EVENT_PERIOD_I2C_POLL	  	8000L
@@ -245,7 +235,7 @@ struct mainboard
 	/* x,y positionning and traj*/
 	struct robot_system rs;
 	struct robot_position pos;
-   struct trajectory traj;
+   	struct trajectory traj;
 
 	/* robot status */
 	uint8_t our_color;
@@ -255,34 +245,12 @@ struct mainboard
 
 	int32_t pwm_l;  /* current left dac */
 	int32_t pwm_r;  /* current right dac */
+
+	/* strat events */
+	int8_t  strat_event;
+	int16_t strat_event_data[3];
 };
 
-
-/* state of slavedspic, synchronized through i2c */
-struct slavedspic 
-{
-	/* actuators blocking */
-	uint8_t fingers_floor_blocked;
-	uint8_t fingers_totem_blocked;
-	uint8_t arm_right_blocked;
-	uint8_t arm_left_blocked;
-	uint8_t lift_blocked;
-
-	/* sensors */
-	uint8_t turbine_sensors;
-
-	/* infos */
-	uint8_t status;
-
-	uint8_t harvest_mode;
-	uint8_t store_mode;
-	uint8_t dump_mode;
-
-	int8_t nb_goldbars_in_boot;
-	int8_t nb_goldbars_in_mouth;
-	int8_t nb_coins_in_boot;
-	int8_t nb_coins_in_mouth;
-};
 
 /* state of beaconboard, synchronized through i2c */
 struct beaconboard 
@@ -292,10 +260,10 @@ struct beaconboard
 	uint8_t color;
 	
 	/* opponent pos */
-	int16_t opponent_x;
-	int16_t opponent_y;
-	int16_t opponent_a;
-	int16_t opponent_d;
+	int16_t opponent1_x;
+	int16_t opponent1_y;
+	int16_t opponent1_a;
+	int16_t opponent1_d;
 
 #ifdef TWO_OPPONENTS
 	int16_t opponent2_x;
@@ -303,21 +271,64 @@ struct beaconboard
 	int16_t opponent2_a;
 	int16_t opponent2_d;
 #endif
+};
 
-#ifdef ROBOT_2ND
-	int16_t robot_2nd_x;
-	int16_t robot_2nd_y;
-	int16_t robot_2nd_a;
-  	int16_t robot_2nd_a_abs;
-	int16_t robot_2nd_d;
+/* main robot structure parameters */
+struct robot_2nd
+{
+	/* command requested */
+	uint8_t cmd_id;					/* for ack test */
+	uint8_t cmd_ret; 					/* for end traj test, 
+												follows END_TRAJ flags rules, 
+												see strat_base.h */
+	uint8_t cmd_args_checksum;		/* checksum of cmd arguments*/
+
+	/* strat info */
+	uint16_t done_flags;
+
+  	/* robot position */
+	int16_t x;
+	int16_t y;
+  	int16_t a_abs;
+	int16_t a;
+	int16_t d;
+
+  	/* opponent pos */
+	int16_t opponent1_x;
+	int16_t opponent1_y;
+	int16_t opponent1_a;
+	int16_t opponent1_d;
+
+#ifdef TWO_OPPONENTS
+	int16_t opponent2_x;
+	int16_t opponent2_y;
+	int16_t opponent2_a;
+	int16_t opponent2_d;
 #endif
-
 };
 
 extern struct genboard gen;
 extern struct mainboard mainboard;
-extern struct slavedspic slavedspic;
 extern struct beaconboard beaconboard;
+extern struct robot_2nd robot_2nd;
+
+
+/* set bt cmd id and args checksum */
+static inline void bt_set_cmd_id_and_checksum (uint8_t cmd_id, uint8_t args_sumatory) {
+	uint8_t flags;
+	IRQ_LOCK (flags);
+	robot_2nd.cmd_id = cmd_id;
+	robot_2nd.cmd_args_checksum = (uint8_t)(cmd_id + args_sumatory);
+	IRQ_UNLOCK (flags);
+}
+
+/* set bt cmd id and args checksum */
+static inline void bt_set_cmd_ret (uint8_t ret) {
+	uint8_t flags;
+	IRQ_LOCK (flags);
+	robot_2nd.cmd_ret = ret;
+	IRQ_UNLOCK (flags);
+}
 
 ///* TODO start the bootloader */
 //void bootloader(void);
