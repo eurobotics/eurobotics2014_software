@@ -341,6 +341,8 @@ struct robot_2nd
 	uint8_t cmd_args_checksum_send;	/* checksum of arguments sent */
 	uint8_t cmd_args_checksum_recv;	/* checksum received */
 
+	uint8_t valid_status;
+
 	/* strat info */
 	uint8_t color;
 	uint16_t done_flags;

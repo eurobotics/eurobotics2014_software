@@ -879,7 +879,7 @@ struct cmd_position_result
 #define AUTOPOS_SPEED_FAST 	500
 #define ROBOT_DIS2_WALL         (int16_t)(119)
 
-static void auto_position(void)
+void auto_position(void)
 {
     uint8_t err;
     uint16_t old_spdd, old_spda;

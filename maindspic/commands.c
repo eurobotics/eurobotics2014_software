@@ -106,6 +106,7 @@ extern parse_pgm_inst_t cmd_event;
 // TODO extern parse_pgm_inst_t cmd_spi_test;
 extern parse_pgm_inst_t cmd_opponent;
 extern parse_pgm_inst_t cmd_opponent_set;
+extern parse_pgm_inst_t cmd_init;
 extern parse_pgm_inst_t cmd_start;
 extern parse_pgm_inst_t cmd_color;
 extern parse_pgm_inst_t cmd_beacon;
@@ -243,6 +244,7 @@ parse_pgm_ctx_t main_ctx[] = {
     (parse_pgm_inst_t *) & cmd_event,
     (parse_pgm_inst_t *) & cmd_opponent,
     (parse_pgm_inst_t *) & cmd_opponent_set,
+    (parse_pgm_inst_t *) & cmd_init,
     (parse_pgm_inst_t *) & cmd_start,
     (parse_pgm_inst_t *) & cmd_color,
     (parse_pgm_inst_t *) & cmd_beacon,

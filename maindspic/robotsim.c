@@ -309,8 +309,12 @@ void robotsim_update(void)
 		if (sscanf(cmd, "opp_1 %d %d", &oppx, &oppy) == 2) {
 			abs_xy_to_rel_da(oppx, oppy, &oppd, &oppa);
 
-			/* limit to the real range */
-			if (oppd < 2300) {
+			/* limit to the real range.
+			   event flag and bt link simulation  */
+			if (oppd < 2300 
+				&& (mainboard.flags & DO_BEACON)
+				&& (beaconboard.link_id != 0xFF) ) {
+
 				IRQ_LOCK(flags);
 				beaconboard.opponent1_x = oppx;
 				beaconboard.opponent1_y = oppy;
@@ -329,8 +333,11 @@ void robotsim_update(void)
 		else if (sscanf(cmd, "opp_2 %d %d", &oppx, &oppy) == 2) {
 			abs_xy_to_rel_da(oppx, oppy, &oppd, &oppa);
 
-			/* limit to the real range */			
-			if (oppd < 2300) {
+			/* limit to the real range.
+			   event flag and bt link simulation  */		
+			if (oppd < 2300 
+				&& (mainboard.flags & DO_BEACON)
+				&& (beaconboard.link_id != 0xFF) ) {
 				IRQ_LOCK(flags);
 				beaconboard.opponent2_x = oppx;
 				beaconboard.opponent2_y = oppy;

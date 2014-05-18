@@ -62,6 +62,9 @@ void bt_robot_2nd_goto_xy_abs (int16_t x, int16_t y);
 /* goto xy_rel */
 void bt_robot_2nd_goto_xy_rel (int16_t x, int16_t y);
 
+/* wait for robot 2nd ends */
+uint8_t bt_robot_2nd_wait_end (void);
+
 /* request opponent position */
 void bt_robot_2nd_req_status(void);
 

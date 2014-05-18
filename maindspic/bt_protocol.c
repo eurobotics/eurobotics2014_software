@@ -308,7 +308,8 @@ void bt_robot_2nd_cmd_no_wait_ack (uint8_t cmd_id, int16_t arg0, int16_t arg1)
 	  	else
 			bt_send_ascii_cmd (robot_2nd.link_id, "color red");
 	}
-
+	else if (cmd_id == BT_AUTOPOS) 
+		bt_send_ascii_cmd (robot_2nd.link_id, "position autoset", arg0, arg1);
 	else if (cmd_id == BT_GOTO_XY_ABS)
 		bt_send_ascii_cmd (robot_2nd.link_id, "goto xy_abs %d %d", arg0, arg1);
 	else if (cmd_id == BT_GOTO_XY_REL)
@@ -320,6 +321,7 @@ void bt_robot_2nd_cmd_no_wait_ack (uint8_t cmd_id, int16_t arg0, int16_t arg1)
 	robot_2nd.cmd_args_checksum_send = (uint8_t) (cmd_id + arg0 + arg1);
 	robot_2nd.cmd_args_checksum_recv = 0;
 	robot_2nd.cmd_ret = 0;
+	robot_2nd.valid_status = 0;
 	IRQ_UNLOCK (flags);
 
 }
@@ -340,6 +342,19 @@ retry:
 		ERROR (E_USER_BT_PROTO, "ERROR sendind robot 2nd command (%d)", nb_tries);
 		goto retry;
 	}
+}
+
+/* wait for robot 2nd ends */
+uint8_t bt_robot_2nd_wait_end (void)
+{
+	volatile uint8_t ret = 0;
+
+	while (ret == 0) {
+		time_wait_ms(50); /*HACK FIXME */
+		ret = robot_2nd.cmd_ret;
+	}
+	
+	return ret;
 }
 
 /* set color */
@@ -397,6 +412,9 @@ void bt_robot_2nd_req_status(void)
 						opp2_x, opp2_y,
 						checksum);
 	wt11_send_mux (robot_2nd.link_id, buff, size);
+
+	if (robot_2nd.valid_status == 0)
+		robot_2nd.valid_status = 1;
 #endif
 
 }
@@ -448,15 +466,23 @@ void bt_robot_2nd_status_parser (int16_t c)
 			//DEBUG (E_USER_BEACON, "RX cmd id %d, args %d, ret %d", 
 			//		ans.cmd_id, ans.cmd_args_checksum, get_err(ans.cmd_ret));
 
+			/* be sure that an status cycle is complete */
+			if (robot_2nd.valid_status == 1)
+				robot_2nd.valid_status = 2;
+
 			/* running command info */
-			if (ans.cmd_id == robot_2nd.cmd_id) {
-				robot_2nd.cmd_ret = ans.cmd_ret;
+			if (ans.cmd_id == robot_2nd.cmd_id && robot_2nd.valid_status == 2) {
+				IRQ_LOCK(flags);
 				robot_2nd.cmd_args_checksum_recv = ans.cmd_args_checksum;
+				robot_2nd.cmd_ret = ans.cmd_ret;
+				IRQ_UNLOCK(flags);
 			}
 
 			/* strat infos */
+			IRQ_LOCK(flags);
 			robot_2nd.color = ans.color;
 			robot_2nd.done_flags = ans.done_flags;
+			IRQ_UNLOCK(flags);
 
 			/* robot pos */
 			x = ans.x;

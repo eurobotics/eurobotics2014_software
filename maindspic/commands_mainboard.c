@@ -65,6 +65,7 @@
 #include <parse_num.h>
 
 #include "../common/i2c_commands.h"
+#include "../common/bt_commands.h"
 
 #include "main.h"
 #include "sensor.h"
@@ -81,7 +82,10 @@
 #include "strat_avoid.h"
 #include "strat_utils.h"
 
-/* TODO extern int8_t beacon_connected; */
+
+static uint8_t beacon_addr [] = {0x00, 0x07 ,0x80, 0x85, 0x04, 0x70};
+static uint8_t robot_2nd_addr [] = {0x00, 0x07 ,0x80, 0x9A, 0xB8, 0x73};
+
 
 struct cmd_event_result
 {
@@ -309,6 +313,77 @@ parse_pgm_inst_t cmd_opponent_set = {
         (prog_void *) & cmd_opponent_arg1_set,
         (prog_void *) & cmd_opponent_arg2,
         (prog_void *) & cmd_opponent_arg3,
+        NULL,
+    },
+};
+
+
+/**********************************************************/
+/* Init match */
+
+/* from commands_traj.c */
+void auto_position(void);
+
+/* this structure is filled when cmd_init is parsed successfully */
+struct cmd_init_result
+{
+    fixed_string_t arg0;
+    fixed_string_t color;
+};
+
+/* function called when cmd_init is parsed successfully */
+static void cmd_init_parsed(void *parsed_result, void *data)
+{
+    struct cmd_init_result *res = parsed_result;
+
+
+	/* open bt links */
+#ifndef HOST_VERSION
+	wt11_open_link_mux(robot_2nd_addr, &robot_2nd.link_id);
+	wt11_open_link_mux(beacon_addr, &beaconboard.link_id);
+#else
+	robot_2nd.link_id = 0;
+	beaconboard.link_id = 1;
+#endif
+	/* enable bt protocol events */
+	mainboard.flags |= DO_BEACON | DO_ROBOT_2ND;
+	time_wait_ms (200);
+
+	/* set main robot color */
+    if (!strcmp_P(res->color, PSTR("red")))
+        mainboard.our_color = I2C_COLOR_RED;
+    else if (!strcmp_P(res->color, PSTR("yellow")))
+        mainboard.our_color = I2C_COLOR_YELLOW;
+
+	/* set secondary robot color */
+	bt_robot_2nd_set_color ();
+
+	/* autopos main robot */
+	auto_position();
+
+	/* TODO: init main robot mechanics */
+	
+	/* autopos secondary robot */
+	bt_robot_2nd_cmd (BT_AUTOPOS, 0, 0);
+	bt_robot_2nd_wait_end();
+
+	printf ("Done\n\r");
+}
+
+prog_char str_init_arg0[] = "init";
+parse_pgm_token_string_t cmd_init_arg0 = TOKEN_STRING_INITIALIZER(struct cmd_init_result, arg0, str_init_arg0);
+prog_char str_init_color[] = "red#yellow";
+parse_pgm_token_string_t cmd_init_color = TOKEN_STRING_INITIALIZER(struct cmd_init_result, color, str_init_color);
+
+prog_char help_init[] = "Init the robots";
+parse_pgm_inst_t cmd_init = {
+    .f = cmd_init_parsed, /* function to call */
+    .data = NULL, /* 2nd arg of func */
+    .help_str = help_init,
+    .tokens =
+    { /* token list, NULL terminated */
+        (prog_void *) & cmd_init_arg0,
+        (prog_void *) & cmd_init_color,
         NULL,
     },
 };
@@ -597,22 +672,21 @@ struct cmd_beacon_result
 
 static void cmd_beacon_parsed(void * parsed_result, void * data)
 {
-#ifdef HOST_VERSION
-	printf("not implemented\n");
-#else
    int16_t c;
    int8_t cmd = 0;
    struct vt100 vt100;
-	uint8_t mainboard_flags;
+	uint16_t mainboard_flags;
 	uint8_t flags;
 
    struct cmd_beacon_result *res = parsed_result;
 
    vt100_init(&vt100);
-	static uint8_t beacon_addr [] = {0x00, 0x07 ,0x80, 0x85, 0x04, 0x70};
+
 	
 	if(!strcmp_P(res->arg1, "raw")) {
-
+#ifdef HOST_VERSION
+		printf("not implemented\n");
+#else
 		/* save flags and disable BT_PROTO */
 		IRQ_LOCK (flags);
 		mainboard_flags = mainboard.flags;
@@ -647,8 +721,14 @@ static void cmd_beacon_parsed(void * parsed_result, void * data)
 		IRQ_LOCK (flags);
 		mainboard.flags = mainboard_flags;
 		IRQ_UNLOCK (flags);
+#endif
 	}
 	else if (!strcmp_P(res->arg1, PSTR("open")))
+#ifdef HOST_VERSION
+		beaconboard.link_id = 1;
+	else
+		printf("not implemented\n");
+#else
 		wt11_open_link_mux(beacon_addr, &beaconboard.link_id);
 
 	else if (!strcmp_P(res->arg1, PSTR("close")))
@@ -705,13 +785,12 @@ static void cmd_robot_2nd_parsed(void * parsed_result, void * data)
    int16_t c;
    int8_t cmd = 0;
    struct vt100 vt100;
-	uint8_t mainboard_flags;
+	uint16_t mainboard_flags;
 	uint8_t flags;
 
    struct cmd_robot_2nd_result *res = parsed_result;
 
    vt100_init(&vt100);
-	static uint8_t robot_2nd_addr [] = {0x00, 0x07 ,0x80, 0x9A, 0xB8, 0x73};
 	
 	if(!strcmp_P(res->arg1, "raw")) {
 
@@ -764,6 +843,8 @@ static void cmd_robot_2nd_parsed(void * parsed_result, void * data)
 #endif
     else if (!strcmp_P(res->arg1, "color"))
 		bt_robot_2nd_set_color ();
+    else if (!strcmp_P(res->arg1, "autopos"))
+		bt_robot_2nd_cmd (BT_AUTOPOS, 0, 0);
 
     else if (!strcmp_P(res->arg1, "status"))
 		bt_robot_2nd_req_status ();
@@ -771,9 +852,10 @@ static void cmd_robot_2nd_parsed(void * parsed_result, void * data)
 
 		 do 
 		 {
-				printf ("cmd %d %d %d %d\n\r", robot_2nd.cmd_id, robot_2nd.cmd_ret,
+				printf ("cmd %d %d %d %d %d\n\r", robot_2nd.cmd_id, robot_2nd.cmd_ret,
 													robot_2nd.cmd_args_checksum_send, 
-													robot_2nd.cmd_args_checksum_recv);
+													robot_2nd.cmd_args_checksum_recv,
+													robot_2nd.valid_status);
 				printf ("color %s\n\r", robot_2nd.color == I2C_COLOR_YELLOW? "yellow":"red");
 				printf ("done_flags 0x%.4X\n\r", robot_2nd.done_flags);
 				printf ("pos abs(%d %d %d) rel(%d %d)\n\r",
@@ -795,7 +877,7 @@ static void cmd_robot_2nd_parsed(void * parsed_result, void * data)
 
 prog_char str_robot_2nd_arg0[] = "robot_2nd";
 parse_pgm_token_string_t cmd_robot_2nd_arg0 = TOKEN_STRING_INITIALIZER(struct cmd_robot_2nd_result, arg0, str_robot_2nd_arg0);
-prog_char str_robot_2nd_arg1[] = "raw#open#close#color#status#show#opp";
+prog_char str_robot_2nd_arg1[] = "raw#open#close#color#autopos#status#show";
 parse_pgm_token_string_t cmd_robot_2nd_arg1 = TOKEN_STRING_INITIALIZER(struct cmd_robot_2nd_result, arg1, str_robot_2nd_arg1);
 
 prog_char help_robot_2nd[] = "robot_2nd commads";

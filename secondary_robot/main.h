@@ -322,6 +322,7 @@ static inline void bt_set_cmd_id_and_checksum (uint8_t cmd_id, uint8_t args_suma
 	IRQ_LOCK (flags);
 	robot_2nd.cmd_id = cmd_id;
 	robot_2nd.cmd_args_checksum = (uint8_t)(cmd_id + args_sumatory);
+	robot_2nd.cmd_ret = 0;
 	IRQ_UNLOCK (flags);
 }
 
