@@ -25,7 +25,7 @@
 #define _SCHEDULER_CONFIG_VERSION_ 4
 
 /** maximum number of allocated events */
-#define SCHEDULER_NB_MAX_EVENT 11
+#define SCHEDULER_NB_MAX_EVENT 12
 
 
 /* define it only if CONFIG_MODULE_SCHEDULER_USE_TIMERS is enabled. In

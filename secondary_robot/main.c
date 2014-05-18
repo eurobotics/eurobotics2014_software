@@ -399,7 +399,15 @@ int main(void)
    //strat_start_match(1);
 
    /* process commands, never returns */
-   cmdline_interact();
+   //cmdline_interact(NULL);
+
+	cmdline_init();
+
+	/* command line event */
+   	scheduler_add_periodical_event_priority(cmdline_interact_nowait, NULL,
+    		EVENT_PERIOD_CMDLINE / SCHEDULER_UNIT, EVENT_PRIORITY_CMDLINE);
+	
+	while (1);
 
    return 0;
 }
