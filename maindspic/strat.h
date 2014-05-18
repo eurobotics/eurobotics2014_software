@@ -285,6 +285,11 @@ typedef struct {
 	#define ZONE_SEC_ROBOT	   	4
 	#define ZONE_AVOID		   	8
   
+  
+	/* opponent statistics */
+	int32_t opp_time_zone_ms;
+	int32_t last_time_opp_here; 	/*in ms, since beginning of the match*/
+	
 	/* which robots can perform this action */
 	uint8_t robot;
 	#define MAIN_ROBOT  0
@@ -313,7 +318,6 @@ struct strat_infos {
 	/* state of the robot */
 	uint8_t harvested_trees;     /* One unity per harvested tree */
 	uint8_t fires_inside; 		 /* One unity per fire inside */
-	uint8_t spears_inside;
 
 	/* opponent zone position */
 	uint8_t opp_current_zone;
@@ -322,7 +326,6 @@ struct strat_infos {
 	/* opponent statistics */
 	uint8_t opp_score;
 	uint8_t opp_harvested_trees;
-	uint32_t opp_time_zone_ms;
 };
 
 extern struct strat_infos strat_infos;

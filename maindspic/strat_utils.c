@@ -790,7 +790,7 @@ uint8_t opponent_is_in_area(int16_t x_up, int16_t y_up,
 	int16_t r2nd_x, r2nd_y;
 
 
-	/* get robot coordenates */
+	/* get robot coordinates */
 	opp_there = get_opponent_xy(&opp_x, &opp_y);
 	opp2_there = get_opponent2_xy(&opp2_x, &opp2_y);
 	r2nd_there = get_robot_2nd_xy(&r2nd_x, &r2nd_y);
@@ -825,7 +825,7 @@ uint8_t opponent_is_in_area(int16_t x_up, int16_t y_up,
 	}
 
 	/* 2nd robot */
-	if (mainboard.our_color == I2C_COLOR_YELLOW) {
+	/*if (mainboard.our_color == I2C_COLOR_YELLOW) {
 		if ((r2nd_x > x_up && r2nd_x < x_down)
 			&& (r2nd_y < y_up && r2nd_y > y_down) )
 			return 1;
@@ -834,7 +834,7 @@ uint8_t opponent_is_in_area(int16_t x_up, int16_t y_up,
 		if ((r2nd_x < x_up && r2nd_x > x_down)
 			 && (r2nd_y < y_up && r2nd_y > y_down) )
 			return 1;
-	}
+	}*/
 
 	return 0;
 }
@@ -844,7 +844,7 @@ uint8_t opponent1_is_in_area(int16_t x_up, int16_t y_up, int16_t x_down, int16_t
 	int16_t opp_x, opp_y;
 
 
-	/* get robot coordenates */
+	/* get robot coordinates */
 	opp_there = get_opponent_xy(&opp_x, &opp_y);
 
 	/* return if no robots */
@@ -872,7 +872,7 @@ uint8_t opponent2_is_in_area(int16_t x_up, int16_t y_up,
 	int8_t opp2_there;
 	int16_t opp2_x, opp2_y;
 
-	/* get robot coordenates */
+	/* get robot coordinates */
 	opp2_there = get_opponent2_xy(&opp2_x, &opp2_y);
 
 	/* return if no robots */

@@ -481,7 +481,7 @@ uint8_t patrol_and_paint_fresco(void)
 
 uint8_t paint_fresco(void)
 {
-	static uint8_t state = 0;
+	static uint8_t state = 1;
 	uint16_t old_spdd, old_spda, temp_spdd, temp_spda;
 	uint8_t err = 0;
 #define BEGIN_LINE_Y 	450
@@ -490,17 +490,17 @@ uint8_t paint_fresco(void)
 	switch (state)
 	{
 		/* go in front of fresco */
-		case 0:
+		/*case 0:
 			printf_P("State 0\n");
-			//trajectory_goto_forward_xy_abs (&mainboard.traj, 
-			//							BEGIN_FRESCO_X, BEGIN_LINE_Y);
-			//err = wait_traj_end(TRAJ_FLAGS_STD);
-			//if (!TRAJ_SUCCESS(err))
-			//		ERROUT(err);
+			trajectory_goto_forward_xy_abs (&mainboard.traj, 
+										BEGIN_FRESCO_X, BEGIN_LINE_Y);
+			err = wait_traj_end(TRAJ_FLAGS_STD);
+			if (!TRAJ_SUCCESS(err))
+					ERROUT(err);
 
 			state ++;	
 			return 0;		
-			break;
+			break;*/
 
 		/* turn to fresco 1*/
 		case 1:
@@ -539,7 +539,7 @@ uint8_t paint_fresco(void)
 			if (!TRAJ_SUCCESS(err))
 					ERROUT(err);
 
-			/* save speed */
+			/* go backwards */
 			strat_get_speed(&old_spdd, &old_spda);
 			strat_set_speed(SPEED_DIST_VERY_SLOW, SPEED_ANGLE_FAST);
 			trajectory_d_rel(&mainboard.traj, -200);
@@ -615,6 +615,70 @@ uint8_t patrol_between(int16_t x1, int16_t y1,int16_t x2, int16_t y2)
 end:
 	strat_set_speed(old_spdd, old_spda);	
 	strat_limit_speed_enable();
+	return err;
+}
+
+uint8_t shoot_mamooth(uint8_t balls_mamooth_1, uint8_t balls_mamooth_2)
+{
+#define BEGIN_LINE_Y 	450
+#define BEGIN_MAMOOTH_X	750
+#define SERVO_SHOOT_POS_UP 80
+#define SERVO_SHOOT_POS_DOWN 300
+
+    uint8_t err = 0;
+
+	if(mainboard.our_color == I2C_COLOR_RED)
+	{
+		uint8_t aux=balls_mamooth_1;
+		balls_mamooth_1=balls_mamooth_2;
+		balls_mamooth_2=aux;
+	}
+
+	if(balls_mamooth_1 > 0)
+	{
+		trajectory_goto_forward_xy_abs (&mainboard.traj, COLOR_X(BEGIN_MAMOOTH_X), BEGIN_LINE_Y);
+		err = wait_traj_end(TRAJ_FLAGS_NO_NEAR);
+		if (!TRAJ_SUCCESS(err))
+				ERROUT(err);
+	
+		trajectory_a_abs (&mainboard.traj, COLOR_A_ABS(-90));
+		err = wait_traj_end(TRAJ_FLAGS_SMALL_DIST);
+		if (!TRAJ_SUCCESS(err))
+				ERROUT(err);
+				
+		printf_P("Shooting %d balls to mamooth 1\r\n", balls_mamooth_1);
+		/* TODO: on slavedspic: possibility to select the number of balls to be thrown */
+		#ifndef HOST_VERSION
+			pwm_servo_set(&gen.pwm_servo_oc3, SERVO_SHOOT_POS_UP);
+			pwm_servo_set(&gen.pwm_servo_oc4, SERVO_SHOOT_POS_DOWN);
+			time_wait_ms(1000);
+		#else
+			time_wait_ms(2000);
+		#endif
+	}
+	
+	if(balls_mamooth_2 > 0)
+	{
+		trajectory_goto_forward_xy_abs (&mainboard.traj, COLOR_X(3000-BEGIN_MAMOOTH_X), BEGIN_LINE_Y);
+		err = wait_traj_end(TRAJ_FLAGS_NO_NEAR);
+		if (!TRAJ_SUCCESS(err))
+			ERROUT(err);
+	
+		trajectory_a_abs (&mainboard.traj, COLOR_A_ABS(-90));
+		err = wait_traj_end(TRAJ_FLAGS_SMALL_DIST);
+		if (!TRAJ_SUCCESS(err))
+				ERROUT(err);
+				
+		printf_P("Shooting %d balls to mamooth 2\r\n", balls_mamooth_2);
+		#ifndef HOST_VERSION
+			pwm_servo_set(&gen.pwm_servo_oc3, SERVO_SHOOT_POS_UP);
+			pwm_servo_set(&gen.pwm_servo_oc4, SERVO_SHOOT_POS_DOWN);
+			time_wait_ms(1000);
+		#else
+			time_wait_ms(2000);
+		#endif
+	}
+end:	
 	return err;
 }
 

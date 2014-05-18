@@ -454,108 +454,94 @@ uint8_t strat_smart(void)
 	}
 }
 
+
 void strat_opp_tracking (void) 
 {
-#if 0
-    while(1){
-    int8_t i,status;
-    int16_t x_opp, y_opp;
+#define MAX_TIME_BETWEEN_VISITS	4000
+#define TIME_MS_TREE			1500
+#define TIME_MS_HEART			1000
+#define TIME_MS_BASKET			1500
+#define UPDATE_ZONES_PERIOD_MS	25	
+
     uint8_t flags;
-    /* get opponent position, return if not there */
-
-    if(get_opponent_xy(&x_opp, &y_opp) == -1)
-        return;
-
-    /* get actual zone */
-    for(i = 0; i <  ZONES_MAX; i++)
+	int8_t zone_opp;
+	
+	
+    /* check if there are opponents in every zone */
+    for(zone_opp = 0; zone_opp <  ZONES_MAX; zone_opp++)
     {
-            status=opponent1_is_in_area(strat_infos.zones[i].x_up, strat_infos.zones[i].y_up,
-                                     strat_infos.zones[i].x_down, strat_infos.zones[i].y_down);
-        if((status==1)&&!(strat_infos.zones[i].flags & ZONE_CHECKED_OPP)) {
-
-
-            switch(strat_infos.zones[i].type){
-
-                case ZONE_TYPE_TREE:
-
-                    strat_infos.opp_harvested_trees+=3;
-                    printf_P("Points_inside: %d\n",strat_infos.opp_harvested_trees);
-                    strat_infos.zones[i].flags |= ZONE_CHECKED_OPP;
-                    break;
-                case ZONE_TYPE_BASKET:
-                    if(strat_infos.opp_harvested_trees!=0){
-                        strat_infos.opp_score=strat_infos.opp_score+strat_infos.opp_harvested_trees;
-                        strat_infos.opp_harvested_trees=0;
-                    }
-                    printf_P("Points_inside: %d\n",strat_infos.opp_harvested_trees);
-                    break;
-                case ZONE_TYPE_TORCH:
-                case ZONE_M_TORCH_1:
-                case ZONE_TYPE_FIRE:
-                    strat_infos.zones[i].flags |= ZONE_CHECKED_OPP;
-                    strat_infos.opp_score++;
-                    break;
-                case ZONE_TYPE_HEART:
-                    strat_infos.zones[i].flags |= ZONE_CHECKED_OPP;
-                    break;
-                case ZONE_TYPE_FRESCO:
-                    strat_infos.opp_score+=6;
-                    strat_infos.zones[i].flags |= ZONE_CHECKED_OPP;
-                default:
-                    strat_infos.zones[i].flags |= ZONE_CHECKED_OPP;
-                    break;
-            }
-
-
-                printf_P("ZONE_CHECKED_OPP: %s\n",numzone2name[i]);
-                status=0;
-                break;
-        }
-    status=opponent2_is_in_area(strat_infos.zones[i].x_up, strat_infos.zones[i].y_up,
-                                     strat_infos.zones[i].x_down, strat_infos.zones[i].y_down);
-        if((status==1)&&!(strat_infos.zones[i].flags & ZONE_CHECKED_OPP)) {
-            switch(strat_infos.zones[i].type){
-
-                case ZONE_TYPE_TREE:
-
-                    strat_infos.opp_harvested_trees+=3;
-                    printf_P("Points_inside: %d\n",strat_infos.opp_harvested_trees);
-                    strat_infos.zones[i].flags |= ZONE_CHECKED_OPP;
-                    break;
-                case ZONE_TYPE_BASKET:
-                    if(strat_infos.opp_harvested_trees!=0){
-                        strat_infos.opp_score=strat_infos.opp_score+strat_infos.opp_harvested_trees;
-                        strat_infos.opp_harvested_trees=0;
-                        printf_P("Points_inside: %d\n",strat_infos.opp_harvested_trees);
-                    }
-                    break;
-                case ZONE_TYPE_TORCH:
-                case ZONE_M_TORCH_1:
-                case ZONE_TYPE_FIRE:
-                    strat_infos.zones[i].flags |= ZONE_CHECKED_OPP;
-                    strat_infos.opp_score++;
-                    break;
-                case ZONE_TYPE_HEART:
-                    strat_infos.zones[i].flags |= ZONE_CHECKED_OPP;
-                    break;
-                case ZONE_TYPE_FRESCO:
-                    strat_infos.opp_score+=6;
-                    strat_infos.zones[i].flags |= ZONE_CHECKED_OPP;
-                default:
-                    strat_infos.zones[i].flags |= ZONE_CHECKED_OPP;
-                    break;
-            }
-
-                printf_P("ZONE_CHECKED_OPP: %s\n",numzone2name[i]);
-                status=0;
-
-                break;
-        }
-        time_wait_ms (25);
-    }
-        printf_P("OPP_SCORE :%d\n",strat_infos.opp_score);
-    }
-#endif
+        if(opponent_is_in_area(strat_infos.zones[zone_opp].x_up, strat_infos.zones[zone_opp].y_up,
+                                     strat_infos.zones[zone_opp].x_down, strat_infos.zones[zone_opp].y_down))
+		{
+			printf_P("OPP IN AREA: %s\n", numzone2name[zone_opp]);
+			
+			#if 0
+			//if(strat_infos.zones[zone_opp].flags & ~(ZONE_CHECKED_OPP))
+			{
+				if((time_get_us2()/1000L - strat_infos.zones[zone_opp].last_time_opp_here) < MAX_TIME_BETWEEN_VISITS)
+				{
+					printf_P("	time < marca\n");
+					/* Opponent continues in the same zone: */
+					/* update zone time */
+					IRQ_LOCK(flags);
+					strat_infos.zones[zone_opp].opp_time_zone_ms += UPDATE_ZONES_PERIOD_MS;
+					strat_infos.zones[zone_opp].last_time_opp_here=time_get_s();
+					IRQ_UNLOCK(flags);
+					
+					
+					/* Mark zone as checked and sum points */
+					switch(strat_infos.zones[zone_opp].type)
+					{
+						case ZONE_TYPE_TREE:
+							if(strat_infos.zones[zone_opp].opp_time_zone_ms>=TIME_MS_TREE)
+							{
+								strat_infos.zones[zone_opp].flags |= ZONE_CHECKED_OPP;
+								strat_infos.opp_harvested_trees++;
+								printf_P("		OPP approximated score: %d\n", strat_infos.opp_score);
+							}
+							break;
+						case ZONE_TYPE_BASKET:
+							if(((mainboard.our_color==I2C_COLOR_YELLOW) && (zone_opp==ZONE_BASKET_1)) ||
+							((mainboard.our_color==I2C_COLOR_RED) && (zone_opp==ZONE_BASKET_2)))
+							{
+								if(strat_infos.zones[zone_opp].opp_time_zone_ms>=TIME_MS_BASKET)
+								{
+									if(strat_infos.opp_harvested_trees!=0)
+									{
+										strat_infos.zones[zone_opp].flags |= ZONE_CHECKED_OPP;
+										strat_infos.opp_score += strat_infos.opp_harvested_trees * 3;
+										strat_infos.opp_harvested_trees=0;
+										printf_P("OPP approximated score: %d\n", strat_infos.opp_score);
+									}
+								}
+							}
+							break;
+						case ZONE_TYPE_HEART:
+							if(strat_infos.zones[zone_opp].opp_time_zone_ms>=TIME_MS_HEART)
+							{
+								strat_infos.zones[zone_opp].flags |= ZONE_CHECKED_OPP;
+								strat_infos.opp_score += 4;
+								printf_P("OPP approximated score: %d\n", strat_infos.opp_score);
+							}
+							break;
+						default:
+							break;
+					}
+				}
+					
+				/* Zone has changed */
+				else
+				{
+					/* reset zone time */
+					IRQ_LOCK(flags);
+					strat_infos.zones[zone_opp].opp_time_zone_ms = 0;
+					IRQ_UNLOCK(flags);
+				}
+			}
+			#endif
+		}
+	}
+	
 }
 
 

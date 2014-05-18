@@ -352,26 +352,20 @@ uint8_t strat_main(void)
 #endif
 
 #define BEGIN_LINE_Y 	450
-#define BEGIN_MAMOOTH_X	750
 #define BEGIN_FRESCO_X	1295
 #define BEGIN_FRESCO_Y	600
-#define SERVO_SHOOT_POS_UP 80
-#define SERVO_SHOOT_POS_DOWN 300
 
     uint8_t err = 0;
 	uint16_t old_spdd, old_spda;
 	static uint8_t mamooth_done =0;
-	static uint8_t other_mamooth =0;
 	static uint8_t state = 0;
 	
 	switch (state)
 	{
-		/* go out of home */
+		/* Go out of home */
 		case 0:
-			trajectory_goto_forward_xy_abs (&mainboard.traj, 
-										position_get_x_s16(&mainboard.pos),	BEGIN_LINE_Y);
-//			err = wait_traj_end(TRAJ_FLAGS_NO_NEAR);
-			err = wait_traj_end(TRAJ_FLAGS_STD);
+			trajectory_goto_forward_xy_abs (&mainboard.traj,  position_get_x_s16(&mainboard.pos),	BEGIN_LINE_Y);
+			err = wait_traj_end(TRAJ_FLAGS_NO_NEAR);
 			if (!TRAJ_SUCCESS(err))
 					ERROUT(err);
 
@@ -379,7 +373,7 @@ uint8_t strat_main(void)
 			break;
 
 
-		/* Go to patrol position */
+		/* Go to the patrol position */
 		case 1:
 			trajectory_goto_forward_xy_abs (&mainboard.traj, COLOR_X(BEGIN_FRESCO_X),BEGIN_FRESCO_Y);
 			err = wait_traj_end(TRAJ_FLAGS_NO_NEAR);
@@ -390,105 +384,36 @@ uint8_t strat_main(void)
 			break;
 			
 
-		/* patrol and paint fresco */
+		/* Patrol and paint fresco */
 		case 2:
-			/* WHILE (NO COMMAND FROM MASTER ROBOT) */
-			while(1)	
-				patrol_and_paint_fresco();
+			printf_P(PSTR("Patrol and paint fresco. Press a key to move to next step\r\n"));
 			
-			//	state ++;			
-			break;
-			
-			
-		/* go in front of mamooth */
-		case 3:
-			trajectory_goto_forward_xy_abs (&mainboard.traj, 
-										COLOR_X(BEGIN_MAMOOTH_X), BEGIN_LINE_Y);
-			#define SIM_END_OBSTACLE
-			#ifdef SIM_END_OBSTACLE
-				while (!x_is_more_than(750/2));
-				strat_hardstop();
-				DEBUG (E_USER_STRAT, "End obstacle");
-				err = END_OBSTACLE;
+			#ifndef HOST_VERSION
+				// WHILE (NO COMMAND FROM MASTER ROBOT) 
+				while(!cmdline_keypressed())
+				{	
+					patrol_and_paint_fresco();
+				}
 			#else
-					err = wait_traj_end(TRAJ_FLAGS_NO_NEAR);
+				while(!cmdline_keypressed())
+				{	
+					patrol_and_paint_fresco();
+				}
 			#endif
-
-			if(err & END_OBSTACLE)
-			{
-				state=21;
-				other_mamooth=1;
-				break;
-			}
-
-			if (!TRAJ_SUCCESS(err))
-					ERROUT(err);
 			
-
-
-			trajectory_a_abs (&mainboard.traj, COLOR_A_ABS(-90));
-			err = wait_traj_end(TRAJ_FLAGS_SMALL_DIST);
-			if (!TRAJ_SUCCESS(err))
-					ERROUT(err);
 			state ++;			
 			break;
 
-		/* shoot to mamooth */
-		case 4:
-		#ifndef HOST_VERSION
-			pwm_servo_set(&gen.pwm_servo_oc3, SERVO_SHOOT_POS_UP);
-			pwm_servo_set(&gen.pwm_servo_oc4, SERVO_SHOOT_POS_DOWN);
-		#endif
-			time_wait_ms(1000);
+		/* Go to mamooths and shoot */
+		case 3:
+			err=shoot_mamooth(3,3);
+			if (!TRAJ_SUCCESS(err))
+					ERROUT(err);
+					
 			mamooth_done=1;
-			
 			state ++;			
 			break;
-		
-#if 0		
-		
-			if(other_mamooth==1)
-			{
-				state=31;
-				break;
-			}
-			state ++;
-			break;
-
-		case 31:
-			trajectory_goto_forward_xy_abs (&mainboard.traj, 
-										COLOR_X(BEGIN_FRESCO_X), 430);
-			err = wait_traj_end(TRAJ_FLAGS_STD);
-			//if (!TRAJ_SUCCESS(err))
-			//		ERROUT(err);
-
-
-			trajectory_goto_forward_xy_abs (&mainboard.traj, 
-										COLOR_X(3000-BEGIN_MAMOOTH_X), BEGIN_LINE_Y);
-			err = wait_traj_end(TRAJ_FLAGS_NO_NEAR);
-
-			//if (!TRAJ_SUCCESS(err))
-			//		ERROUT(err);
 			
-
-
-			trajectory_a_abs (&mainboard.traj, COLOR_A_ABS(-90));
-			err = wait_traj_end(TRAJ_FLAGS_SMALL_DIST);
-			if (!TRAJ_SUCCESS(err))
-					ERROUT(err);
-#ifndef HOST_VERSION
-			pwm_servo_set(&gen.pwm_servo_oc3, SERVO_SHOOT_POS_UP);
-			pwm_servo_set(&gen.pwm_servo_oc4, SERVO_SHOOT_POS_DOWN);
-#endif
-			time_wait_ms(1000);
-
-			trajectory_goto_forward_xy_abs (&mainboard.traj, 
-										COLOR_X(3000-300), BEGIN_LINE_Y);
-			err = wait_traj_end(TRAJ_FLAGS_NO_NEAR);
-
-			state++;
-			break;
-#endif
 		default:
 			break;
 	}

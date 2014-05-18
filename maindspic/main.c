@@ -316,7 +316,6 @@ int main(void)
 	scheduler_add_periodical_event_priority(strat_event, NULL,
 						EVENT_PERIOD_STRAT / SCHEDULER_UNIT, EVENT_PRIORITY_STRAT);
 
-
 	/* log setup */
  	gen.logs[0] = E_USER_STRAT;
  	//gen.logs[1] = E_USER_BEACON;

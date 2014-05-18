@@ -239,13 +239,13 @@ parse_pgm_ctx_t main_ctx[] = {
     (parse_pgm_inst_t *) & cmd_color,
     (parse_pgm_inst_t *) & cmd_beacon,
     (parse_pgm_inst_t *) & cmd_slavedspic,
+    (parse_pgm_inst_t *) & cmd_strat_event,
 
 #ifdef COMPILE_COMMANDS_MAINBOARD_OPTIONALS /*--------------------------------*/
     (parse_pgm_inst_t *) & cmd_interact,
     (parse_pgm_inst_t *) & cmd_rs,
     (parse_pgm_inst_t *) & cmd_clitoid,
     (parse_pgm_inst_t *) & cmd_time_monitor,
-    (parse_pgm_inst_t *) & cmd_strat_event,
     (parse_pgm_inst_t *) & cmd_sleep,
 #endif /* COMPILE_COMMANDS_MAINBOARD_OPTIONALS -------------------------------*/
 
