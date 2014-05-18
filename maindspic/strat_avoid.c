@@ -376,7 +376,7 @@ void set_opponent_poly(uint8_t type, poly_t *pol, const point_t *robot_pt, int16
 
 #ifndef HOST_VERSION_OA_TEST
    if(type == OPP1) {
-	   get_opponent_xy(&x, &y);
+	   get_opponent1_xy(&x, &y);
 	   name = opp1;
 	}
 	else if(type == OPP2) {
@@ -964,7 +964,7 @@ retry:
 	
 	/* opponent info */
 #ifndef HOST_VERSION_OA_TEST	
-	get_opponent_xy(&opp1_x, &opp1_y);
+	get_opponent1_xy(&opp1_x, &opp1_y);
   get_opponent2_xy(&opp2_x, &opp2_y);
 	
 	/* get second robot */
@@ -1185,7 +1185,7 @@ uint8_t goto_and_avoid(int16_t x, int16_t y, uint8_t flags_intermediate,
 	abs_xy_to_rel_da(x, y, &d, &a); 
 
 
-  if(robots_near()) {
+  if(robots_are_near()) {
       DEBUG(E_USER_STRAT, "Robots near");
 		  return __goto_and_avoid(x, y, flags_intermediate,
 					  flags_final, GO_AVOID_AUTO);

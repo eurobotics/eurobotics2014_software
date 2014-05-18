@@ -203,7 +203,7 @@ void strat_preinit(void)
     time_reset();
     interrupt_traj_reset();
     mainboard.flags =  DO_ENCODERS | DO_CS | DO_RS |
-                             DO_POS | DO_BD | DO_POWER | DO_OPP;
+                             DO_POS | DO_BD | DO_POWER | DO_BEACON | DO_ROBOT_2ND;
 
     /* XXX default conf */
     //strat_infos.conf.flags |= ENABLE_R2ND_POS;
@@ -325,7 +325,7 @@ void strat_init(void)
 
     /* used in strat_base for END_TIMER */
     mainboard.flags = DO_ENCODERS | DO_CS | DO_RS |
-        DO_POS | DO_BD | DO_TIMER | DO_POWER | DO_OPP;
+        DO_POS | DO_BD | DO_TIMER | DO_POWER | DO_BEACON | DO_ROBOT_2ND;
 }
 
 
@@ -349,10 +349,7 @@ void strat_exit(void)
 #endif
 
     /* stop beacon */
-    IRQ_LOCK(flags);
-    mainboard.flags &= ~(DO_OPP);
-    IRQ_UNLOCK(flags);
-    beacon_cmd_beacon_off();
+    /* TODO beacon_cmd_beacon_off(); */
 
     /* slavespic exit TODO 2014 */
     //i2c_slavedspic_mode_turbine_blow(0);
@@ -360,12 +357,12 @@ void strat_exit(void)
 
     /* turn off other devices (lasers...) */
 
-    /* stop beacon */
+    /* TODO stop beacon
     beacon_cmd_beacon_off();
     beacon_cmd_beacon_off();
     beacon_cmd_beacon_off();
     beacon_cmd_beacon_off();
-
+    */
 }
 
 /* called periodically */

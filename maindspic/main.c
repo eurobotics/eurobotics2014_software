@@ -69,6 +69,7 @@
 #include "cs.h"
 #include "i2c_protocol.h"
 #include "beacon.h"
+#include "bt_protocol.h"
 #include "robotsim.h"
 #include "strat_base.h"
 
@@ -226,17 +227,22 @@ int main(void)
 	memset(&beaconboard, 0, sizeof(beaconboard));
 
 	/* init flags */
-  mainboard.flags = DO_ENCODERS | DO_CS | DO_RS |
+  	mainboard.flags = DO_ENCODERS | DO_CS | DO_RS |
 		DO_POS | DO_POWER | DO_BD;
 	
-	beaconboard.opponent_x = I2C_OPPONENT_NOT_THERE;
+	/* bt protocol */
+	beaconboard.link_id = 0xFF;
+	robot_2nd.link_id = 0xFF;
+
+	/* opponents and robot 2nd positions */
+	beaconboard.opponent1_x = I2C_OPPONENT_NOT_THERE;
 
 #ifdef TWO_OPPONENTS
-   beaconboard.opponent2_x = I2C_OPPONENT_NOT_THERE;
+    beaconboard.opponent2_x = I2C_OPPONENT_NOT_THERE;
 #endif
 
 #ifdef ROBOT_2ND
-	beaconboard.robot_2nd_x = I2C_OPPONENT_NOT_THERE;
+	robot_2nd.x = I2C_OPPONENT_NOT_THERE;
 #endif
 
 #ifndef HOST_VERSION
@@ -311,6 +317,9 @@ int main(void)
 	//scheduler_add_periodical_event_priority(beacon_protocol, NULL,
 	//				EVENT_PERIOD_BEACON_PULL / SCHEDULER_UNIT, EVENT_PRIORITY_BEACON_POLL);
 #endif
+	/* beacon and robot 2nd commnads and polling */
+	scheduler_add_periodical_event_priority(bt_protocol, NULL,
+					EVENT_PERIOD_BEACON_PULL / SCHEDULER_UNIT, EVENT_PRIORITY_BEACON_POLL);
 
 	/* strat-related event */
 	scheduler_add_periodical_event_priority(strat_event, NULL,
@@ -319,10 +328,10 @@ int main(void)
 	/* log setup */
  	gen.logs[0] = E_USER_STRAT;
  	//gen.logs[1] = E_USER_BEACON;
- 	gen.logs[2] = E_USER_I2C_PROTO;
+ 	gen.logs[1] = E_USER_I2C_PROTO;
  	//gen.logs[3] = E_OA;
- 	gen.logs[1] = E_USER_WT11;
- 	gen.logs[2] = E_USER_BT_PROTO;
+ 	gen.logs[2] = E_USER_WT11;
+ 	//gen.logs[4] = E_USER_BT_PROTO;
  	gen.log_level = 5;
 	
 	/* reset strat infos */
@@ -339,8 +348,9 @@ int main(void)
 	printf("Don't turn it on, take it a part!!\r\n");
 
 #ifdef HOST_VERSION
-	strat_reset_pos(400, COLOR_Y(400), COLOR_A_ABS(90));
-  strat_event_enable();
+	mainboard.our_color = I2C_COLOR_YELLOW;
+	strat_reset_pos(COLOR_X(200), 500, COLOR_A_ABS(0));
+	//strat_event_enable();
 #endif
 
 	/* program WT-11 */

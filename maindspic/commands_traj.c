@@ -746,66 +746,8 @@ static void cmd_goto_parsed(void * parsed_result, void * data)
     uint8_t err;
     microseconds t1, t2;
 
-    if (!strcmp_P(res->arg0, PSTR("robot2_goto")))
-    {
-#if 0
-        if (!strcmp_P(res->arg1, PSTR("a_rel")))
-        {
-            bt_robot_sec_send_ascii_cmd("goto %s %d", res->arg1, res->arg2);
-        }
-        else if (!strcmp_P(res->arg1, PSTR("d_rel")))
-        {
-            bt_robot_sec_send_ascii_cmd("goto %s %d", res->arg1, res->arg2);
-        }
-        else if (!strcmp_P(res->arg1, PSTR("a_abs")))
-        {
-            bt_robot_sec_send_ascii_cmd("goto %s %d %d", res->arg1, res->arg2);
-        }
-        else if (!strcmp_P(res->arg1, PSTR("a_to_xy")))
-        {
-            bt_robot_sec_send_ascii_cmd("goto %s %d %d", res->arg1, res->arg2, res->arg3);
-        }
-        else if (!strcmp_P(res->arg1, PSTR("a_behind_xy")))
-        {
-            bt_robot_sec_send_ascii_cmd("goto %s %d %d", res->arg1, res->arg2, res->arg3);
-        }
-        else if (!strcmp_P(res->arg1, PSTR("xy_rel")))
-        {
-            bt_robot_sec_send_ascii_cmd("goto %s %d %d", res->arg1, res->arg2, res->arg3);
-        }
-        else if (!strcmp_P(res->arg1, PSTR("xy_abs")))
-        {
-            bt_robot_sec_send_ascii_cmd("goto %s %d %d", res->arg1, res->arg2, res->arg3);
-        }
-        else if (!strcmp_P(res->arg1, PSTR("avoid")))
-        {
-            bt_robot_sec_send_ascii_cmd("goto %s %d %d", res->arg1, res->arg2, res->arg3);
-        }
-        else if (!strcmp_P(res->arg1, PSTR("avoid_fw")))
-        {
-            bt_robot_sec_send_ascii_cmd("goto %s %d %d", res->arg1, res->arg2, res->arg3);
-        }
-        else if (!strcmp_P(res->arg1, PSTR("avoid_bw")))
-        {
-            bt_robot_sec_send_ascii_cmd("goto %s %d %d", res->arg1, res->arg2, res->arg3);
-        }
-        else if (!strcmp_P(res->arg1, PSTR("xy_abs_fow")))
-        {
-            bt_robot_sec_send_ascii_cmd("goto %s %d", res->arg1, res->arg2, res->arg3);
-        }
-        else if (!strcmp_P(res->arg1, PSTR("xy_abs_back")))
-        {
-            bt_robot_sec_send_ascii_cmd("goto %s %d %d", res->arg1, res->arg2, res->arg3);
-        }
-        else if (!strcmp_P(res->arg1, PSTR("da_rel")))
-        {
-            bt_robot_sec_send_ascii_cmd("goto %s %d %d", res->arg1, res->arg2, res->arg3);
-        }
-#endif
-        return;
-    }
-
     interrupt_traj_reset();
+
     if (!strcmp_P(res->arg1, PSTR("a_rel")))
     {
         trajectory_a_rel(&mainboard.traj, res->arg2);
@@ -880,7 +822,7 @@ static void cmd_goto_parsed(void * parsed_result, void * data)
     printf_P(PSTR("returned %s\r\n"), get_err(err));
 }
 
-prog_char str_goto_arg0[] = "goto#robot2_goto";
+prog_char str_goto_arg0[] = "goto";
 parse_pgm_token_string_t cmd_goto_arg0 = TOKEN_STRING_INITIALIZER(struct cmd_goto_result, arg0, str_goto_arg0);
 prog_char str_goto_arg1_a[] = "d_rel#a_rel#a_abs";
 parse_pgm_token_string_t cmd_goto_arg1_a = TOKEN_STRING_INITIALIZER(struct cmd_goto_result, arg1, str_goto_arg1_a);
@@ -937,7 +879,7 @@ struct cmd_position_result
 #define AUTOPOS_SPEED_FAST 	500
 #define ROBOT_DIS2_WALL         (int16_t)(119)
 
-static void auto_position(void)
+void auto_position(void)
 {
     uint8_t err;
     uint16_t old_spdd, old_spda;
@@ -955,7 +897,7 @@ static void auto_position(void)
     wait_ms(100);
 
     /* set x and angle */
-    strat_reset_pos(COLOR_X(ROBOT_DIS2_WALL), 0, COLOR_A_ABS(0));
+    strat_reset_pos(COLOR_X(ROBOT_CENTER_TO_BACK), DO_NOT_SET_POS, COLOR_A_ABS(0));
 
     /* prepare to y axis */
     trajectory_d_rel(&mainboard.traj, 90);
@@ -976,14 +918,7 @@ static void auto_position(void)
     wait_ms(100);
 
     /* set y */
-    strat_reset_pos(DO_NOT_SET_POS, COLOR_Y(ROBOT_DIS2_WALL), 90);
-
-    /* goto start position */
-    trajectory_d_rel(&mainboard.traj, 200 - 25);
-    err = wait_traj_end(END_INTR | END_TRAJ);
-    if (err == END_INTR)
-        goto intr;
-    wait_ms(100);
+    strat_reset_pos(DO_NOT_SET_POS, COLOR_Y(ROBOT_CENTER_TO_BACK), 90);
 
     /* restore speeds */
     strat_set_speed(old_spdd, old_spda);
@@ -1232,6 +1167,7 @@ static void cmd_strat_conf3_parsed(void *parsed_result, void *data)
     if (!strcmp_P(res->arg1, PSTR("something")))
     {
         /* set value of a strat parameter */
+			printf ("not implemented");
     }
 
     strat_infos.dump_enabled = 1;

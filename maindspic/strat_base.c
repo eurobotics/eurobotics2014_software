@@ -363,7 +363,7 @@ void strat_limit_speed(void)
 
 
 #ifdef TWO_OPPONENTS
-	ret[0] = get_opponent_da(&d[0], &a[0]);
+	ret[0] = get_opponent1_da(&d[0], &a[0]);
 	ret[1] = get_opponent2_da(&d[1], &a[1]);
 #ifdef ROBOT_2ND
 	ret[2] = get_robot_2nd_da(&d[2], &a[2]);
@@ -574,7 +574,7 @@ uint8_t __strat_obstacle(uint8_t which)
 
 #ifdef TWO_OPPONENTS
 	if(which == OBSTACLE_OPP1)
-		ret = get_opponent_xyda(&opp_x, &opp_y,&opp_d, &opp_a);
+		ret = get_opponent1_xyda(&opp_x, &opp_y,&opp_d, &opp_a);
 	else if(which == OBSTACLE_OPP2)
 		ret = get_opponent2_xyda(&opp_x, &opp_y,&opp_d, &opp_a);
 #ifdef ROBOT_2ND
@@ -728,10 +728,15 @@ uint8_t __wait_traj_end_debug(uint8_t why, uint16_t line)
 		ret = test_traj_end(why);
 	}
 	if (ret == END_OBSTACLE) {
-		if (get_opponent_xyda(&opp_x, &opp_y,
+		if (get_opponent1_xyda(&opp_x, &opp_y,
 				      &opp_d, &opp_a) != -1)
 			DEBUG(E_USER_STRAT, "Got %s at line %d"
-			      " xy=(%d,%d) da=(%d,%d)", get_err(ret),
+			      " opp1 xy=(%d,%d) da=(%d,%d)", get_err(ret),
+			      line, opp_x, opp_y, opp_d, opp_a);
+        if (get_opponent2_xyda(&opp_x, &opp_y,
+				      &opp_d, &opp_a) != -1)
+			DEBUG(E_USER_STRAT, "Got %s at line %d"
+			      " opp2 xy=(%d,%d) da=(%d,%d)", get_err(ret),
 			      line, opp_x, opp_y, opp_d, opp_a);
 	}
 	else {

@@ -58,6 +58,10 @@ extern parse_pgm_ctx_t main_ctx[];
 static void write_char(char c) 
 {
 	uart_send(CMDLINE_UART, c);
+#ifdef HOST_VERSION
+	robotsim_uart_send_BT(c);
+#endif
+
 }
 
 /* process commands */
@@ -156,7 +160,7 @@ void mylog(struct error * e, ...)
 }
 
 /* user interact */
-int cmdline_interact(void)
+void cmdline_interact(void *dummy)
 {
 	const char *history, *buffer;
 	int8_t ret, same = 0;
@@ -173,12 +177,14 @@ int cmdline_interact(void)
 	
 		if (c == -1) 
 #ifndef HOST_VERSION	
-			continue;
+			//continue;
+			return 0;
 #else
     {
 		  c = robotsim_uart_recv_BT();
 		  if (c == -1) 
-			  continue;    
+			  //continue;
+			  return 0;    
     }
 #endif
 
@@ -202,6 +208,57 @@ int cmdline_interact(void)
 	}
 
 	return 0;
+}
+
+/* init cmdline */
+void cmdline_init(void)
+{
+	rdline_init(&gen.rdl, write_char, valid_buffer, complete_buffer);	
+	sprintf(gen.prompt, "secondary > ");	
+	rdline_newline(&gen.rdl, gen.prompt);
+}
+
+/* user interact */
+void cmdline_interact_nowait (void *dummy)
+{
+	const char *history, *buffer;
+	int8_t ret, same = 0;
+	int16_t c;
+	
+	while (1)
+	{
+
+		/* get character */
+		c = uart_recv_nowait(CMDLINE_UART);
+		if (c == -1) 
+#ifndef HOST_VERSION	
+			return;
+#else
+    	{
+			c = robotsim_uart_recv_BT();
+			if (c == -1) 
+			  return;    
+    	}
+#endif
+
+		/* process character in */
+		ret = rdline_char_in(&gen.rdl, c);
+
+		/* if command executes save in history and print prompt */
+		if (ret != 2 && ret != 0) {
+			buffer = rdline_get_buffer(&gen.rdl);
+			history = rdline_get_history_item(&gen.rdl, 0);
+			if (history) {
+				same = !memcmp(buffer, history, strlen(history)) &&
+					buffer[strlen(history)] == '\n';
+			}
+			else
+				same = 0;
+			if (strlen(buffer) > 1 && !same)
+				rdline_add_history(&gen.rdl, buffer);
+			rdline_newline(&gen.rdl, gen.prompt);
+		}
+	}
 }
 
 

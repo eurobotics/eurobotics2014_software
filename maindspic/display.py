@@ -104,6 +104,8 @@ TREETRUNK_HEIGHT = 320.0
 TREETOP_HEIGHT = 10.0
 FIRE_HEIGHT= 140.0
 
+set_opp_nb = 1;
+
 def toggle_obj_disp():
     global area_objects
 
@@ -403,31 +405,30 @@ while True:
             """
             # DISPLAY EVENTS
             if scene.mouse.events != 0:
-                if not scene.mouse.getevent().shift:
-                  oppx, oppy, oppz = scene.mouse.getevent().project(normal=(0,0,1))
-                  set_opp(oppx, oppy)
-                  try:
-                      if color == YELLOW:
+                if set_opp_nb == 1:
+                    oppx, oppy, oppz = scene.mouse.getevent().project(normal=(0,0,1))
+                    set_opp(oppx, oppy)
+                    try:
+                        if color == YELLOW:
                           fw.write("opp_1 %d %d"%(int(oppx + 1500), int(oppy + 1050)))
                           fw2.write("opp_1 %d %d"%(int(oppx + 1500), int(oppy + 1050)))
-                      else:
+                        else:
                           fw.write("opp_1 %d %d"%(int(1500 - oppx), int(1050 - oppy)))
                           fw2.write("opp_1 %d %d"%(int(1500 - oppx), int(1050 - oppy)))
-                  except:
-                    print "not connected"
-                #elif scene.mouse.getevent().ctrl:
+                    except:
+                        print "not connected"
                 else:
-                  opp2x, opp2y, opp2z = scene.mouse.getevent().project(normal=(0,0,1))
-                  set_opp2(opp2x, opp2y)
-                  try:
-                      if color == YELLOW:
-                          fw.write("opp_2 %d %d"%(int(opp2x + 1500), int(opp2y + 1050)))
-                          fw2.write("opp_2 %d %d"%(int(opp2x + 1500), int(opp2y + 1050)))
-                      else:
-                          fw.write("opp_2 %d %d"%(int(1500 - opp2x), int(1050 - opp2y)))
-                          fw2.write("opp_2 %d %d"%(int(1500 - opp2x), int(1050 - opp2y)))
-                  except:
-                    print "not connected"
+                    opp2x, opp2y, opp2z = scene.mouse.getevent().project(normal=(0,0,1))
+                    set_opp2(opp2x, opp2y)
+                    try:
+                        if color == YELLOW:
+                            fw.write("opp_2 %d %d"%(int(opp2x + 1500), int(opp2y + 1050)))
+                            fw2.write("opp_2 %d %d"%(int(opp2x + 1500), int(opp2y + 1050)))
+                        else:
+                            fw.write("opp_2 %d %d"%(int(1500 - opp2x), int(1050 - opp2y)))
+                            fw2.write("opp_2 %d %d"%(int(1500 - opp2x), int(1050 - opp2y)))
+                    except:
+                        print "not connected"
 
             if scene.kb.keys == 0:
                 continue
@@ -460,6 +461,11 @@ while True:
                 toggle_obj_disp()
             elif k == "i":
                 toggle_color()
+            elif k == "1":
+                set_opp_nb = 1;
+            elif k == "2":
+                set_opp_nb = 2;
+
             else:
                 print k
 

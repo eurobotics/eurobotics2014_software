@@ -41,7 +41,6 @@
 //#define COMPILE_COMMANDS_TRAJ_OPTIONALS
 
 #define COMPILE_CODE
-
 #ifdef COMPILE_CODE /*---------------------------------------------------------------------------------------------*/
 #endif /* COMPILE_CODE --------------------------------------------------------------------------------------------*/
 
@@ -58,7 +57,11 @@ extern parse_pgm_inst_t cmd_encoders;
 extern parse_pgm_inst_t cmd_pwm_servo;
 extern parse_pgm_inst_t cmd_pwm_servo_show_range;
 extern parse_pgm_inst_t cmd_dac_mc;
+
+#ifdef COMPILE_COMMANDS_MAINBOARD_OPTIONALS /*--------------------------------*/
 extern parse_pgm_inst_t cmd_adc;
+#endif /* COMPILE_COMMANDS_MAINBOARD_OPTIONALS --------------------------------*/
+
 extern parse_pgm_inst_t cmd_sensor;
 extern parse_pgm_inst_t cmd_wt11;
 extern parse_pgm_inst_t cmd_log;
@@ -103,9 +106,11 @@ extern parse_pgm_inst_t cmd_event;
 // TODO extern parse_pgm_inst_t cmd_spi_test;
 extern parse_pgm_inst_t cmd_opponent;
 extern parse_pgm_inst_t cmd_opponent_set;
+extern parse_pgm_inst_t cmd_init;
 extern parse_pgm_inst_t cmd_start;
 extern parse_pgm_inst_t cmd_color;
 extern parse_pgm_inst_t cmd_beacon;
+extern parse_pgm_inst_t cmd_robot_2nd;
 extern parse_pgm_inst_t cmd_slavedspic;
 
 #ifdef COMPILE_COMMANDS_MAINBOARD_OPTIONALS /*--------------------------------*/
@@ -129,7 +134,7 @@ extern parse_pgm_inst_t cmd_dump_fruits;
 extern parse_pgm_inst_t cmd_update_zones;
 
 
-    /* TODO 2014*/
+/* TODO 2014*/
 #if 0
 extern parse_pgm_inst_t cmd_sensor_robot;
 #endif
@@ -182,9 +187,9 @@ extern parse_pgm_inst_t cmd_strat_conf3;
 extern parse_pgm_inst_t cmd_subtraj1;
 extern parse_pgm_inst_t cmd_subtraj2;
 
-extern parse_pgm_inst_t cmd_gotozone;
-extern parse_pgm_inst_t cmd_workonzone;
-extern parse_pgm_inst_t cmd_homologation;
+//extern parse_pgm_inst_t cmd_gotozone;
+//extern parse_pgm_inst_t cmd_workonzone;
+//extern parse_pgm_inst_t cmd_homologation;
 
 #endif /* COMPILE_COMMANDS_TRAJ*/
 
@@ -199,7 +204,11 @@ parse_pgm_ctx_t main_ctx[] = {
     (parse_pgm_inst_t *) & cmd_pwm_servo,
     (parse_pgm_inst_t *) & cmd_pwm_servo_show_range,
     (parse_pgm_inst_t *) & cmd_dac_mc,
+
+#ifdef COMPILE_COMMANDS_MAINBOARD_OPTIONALS /*--------------------------------*/
     (parse_pgm_inst_t *) & cmd_adc,
+#endif /* COMPILE_COMMANDS_MAINBOARD_OPTIONALS --------------------------------*/
+
     (parse_pgm_inst_t *) & cmd_sensor,
     (parse_pgm_inst_t *) & cmd_wt11,
     (parse_pgm_inst_t *) & cmd_log,
@@ -235,9 +244,11 @@ parse_pgm_ctx_t main_ctx[] = {
     (parse_pgm_inst_t *) & cmd_event,
     (parse_pgm_inst_t *) & cmd_opponent,
     (parse_pgm_inst_t *) & cmd_opponent_set,
+    (parse_pgm_inst_t *) & cmd_init,
     (parse_pgm_inst_t *) & cmd_start,
     (parse_pgm_inst_t *) & cmd_color,
     (parse_pgm_inst_t *) & cmd_beacon,
+    (parse_pgm_inst_t *) & cmd_robot_2nd,
     (parse_pgm_inst_t *) & cmd_slavedspic,
     (parse_pgm_inst_t *) & cmd_strat_event,
 
@@ -246,9 +257,11 @@ parse_pgm_ctx_t main_ctx[] = {
     (parse_pgm_inst_t *) & cmd_rs,
     (parse_pgm_inst_t *) & cmd_clitoid,
     (parse_pgm_inst_t *) & cmd_time_monitor,
+    (parse_pgm_inst_t *) & cmd_strat_event,
     (parse_pgm_inst_t *) & cmd_sleep,
 #endif /* COMPILE_COMMANDS_MAINBOARD_OPTIONALS -------------------------------*/
 
+    (parse_pgm_inst_t *) & cmd_strat_event,
 
     (parse_pgm_inst_t *) & cmd_boot,
     (parse_pgm_inst_t *) & cmd_combs,

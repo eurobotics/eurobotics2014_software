@@ -22,7 +22,7 @@
 
 /* NUMBER OF ROBOTS TO TRACK */
 #define TWO_OPPONENTS
-#define ROBOT_2ND
+//#define ROBOT_2ND
 
 #define BRAKE_ON()      do { _LATC6 = 0; _LATC7	= 0; } while(0)
 #define BRAKE_OFF()     do { Nop(); } while(0)
@@ -78,6 +78,7 @@ struct beaconboard
 #define DO_BD        4
 #define DO_POWER     8
 #define DO_BEACON	  	16
+#define DO_BT_PROTO	32
 
 	/* log */
 	uint8_t logs[NB_LOGS+1];

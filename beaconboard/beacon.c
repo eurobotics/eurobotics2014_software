@@ -164,8 +164,11 @@ void beacon_init(void)
     /* enable all inputs capture interrupts and Timer 2 */
     IPC0bits.IC1IP = 5;     // setup IC1 interrupt priority level XXX, higher than scheduler!
     IFS0bits.IC1IF = 0;     // clear IC1 Interrupt Status Flag
+#if ROBOT_2ND
     IEC0bits.IC1IE = 1;     // enable IC1 interrupt
-
+#else
+    IEC0bits.IC1IE = 1;     // disable IC1 interrupt
+#endif
     IPC1bits.IC2IP = 5;     // setup IC2 interrupt priority level XXX, higher than scheduler!
     IFS0bits.IC2IF = 0;     // clear IC2 Interrupt Status Flag
     IEC0bits.IC2IE = 1;     // enable IC2 interrupt
@@ -343,15 +346,21 @@ void beacon_start(void)
 /* stop turn and measures */
 void beacon_stop(void)
 {
+	 uint8_t flags;
+
     /* disable beacon_calc event flag */
     beaconboard.flags &= ~(DO_BEACON);
 
     /* disable cs */
-    beaconboard.speed.on = 0;
     cs_set_consign(&beaconboard.speed.cs, 0);
+    wait_ms(2000);
+
+	 IRQ_LOCK (flags);
+    beaconboard.speed.on = 0;
     pwm_mc_set(BEACON_PWM, 0);
-    wait_ms(1000);
     pid_reset(&beaconboard.speed.pid);
+    pid_reset(&beaconboard.speed.pid);
+	 IRQ_UNLOCK (flags);
 
     /* no opponent there */
     beacon.opponent1_x = I2C_OPPONENT_NOT_THERE;

@@ -283,7 +283,7 @@ void strat_exit(void)
 	IRQ_LOCK(flags);
 	mainboard.flags &= ~(DO_OPP);
 	IRQ_UNLOCK(flags);
-	beacon_cmd_beacon_off();
+	//beacon_cmd_beacon_off();
 
 	/* slavespic exit TODO 2014 */
   //i2c_slavedspic_mode_turbine_blow(0);
@@ -292,11 +292,12 @@ void strat_exit(void)
 	/* turn off other devices (lasers...) */
 
 	/* stop beacon */
+    /*
 	beacon_cmd_beacon_off();
 	beacon_cmd_beacon_off();
 	beacon_cmd_beacon_off();
 	beacon_cmd_beacon_off();
-
+*/
 }
 
 /* called periodically */
@@ -400,6 +401,10 @@ uint8_t strat_main(void)
 					patrol_and_paint_fresco();
 				}
 			#endif
+			beaconboard.opponent1_x = COLOR_X(750);
+			beaconboard.opponent1_y = 600;
+      beaconboard.opponent1_a = 90;
+      beaconboard.opponent1_d = 1000;
 			
 			state ++;			
 			break;
