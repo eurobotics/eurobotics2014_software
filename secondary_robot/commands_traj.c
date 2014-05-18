@@ -950,7 +950,7 @@ static void cmd_subtraj2_parsed(void *parsed_result, void *data)
 	uint8_t err = 0;
 
 	if (strcmp_P(res->arg1, PSTR("patrol_between")) == 0) {
-		err = strat_patrol_between(res->arg2,res->arg3,res->arg4,res->arg5);
+		err = patrol_between(res->arg2,res->arg3,res->arg4,res->arg5);
 	}
 
 	printf_P(PSTR("substrat returned %s\r\n"), get_err(err));
