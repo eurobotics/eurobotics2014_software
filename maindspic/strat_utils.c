@@ -461,10 +461,14 @@ int8_t get_best_opponent1_xyda (int16_t *x, int16_t *y, int16_t *d, int16_t *a)
 {
 	uint8_t flags;
 	IRQ_LOCK(flags);
-	*x = robot_2nd.opponent1_x;
-	*y = robot_2nd.opponent1_y;
-	*d = robot_2nd.opponent1_d;
-	*a = robot_2nd.opponent1_a;
+	if (x != NULL)
+		*x = robot_2nd.opponent1_x;
+	if (y != NULL)
+		*y = robot_2nd.opponent1_y;
+	if (d != NULL)
+		*d = robot_2nd.opponent1_d;
+	if (a != NULL)
+		*a = robot_2nd.opponent1_a;
 	IRQ_UNLOCK(flags);	
 
 	return 0;
@@ -474,10 +478,14 @@ int8_t get_best_opponent2_xyda (int16_t *x, int16_t *y, int16_t *d, int16_t *a)
 {
 	uint8_t flags;
 	IRQ_LOCK(flags);
-	*x = robot_2nd.opponent2_x;
-	*y = robot_2nd.opponent2_y;
-	*d = robot_2nd.opponent2_d;
-	*a = robot_2nd.opponent2_a;
+	if (x != NULL)
+		*x = robot_2nd.opponent2_x;
+	if (y != NULL)
+		*y = robot_2nd.opponent2_y;
+	if (d != NULL)
+		*d = robot_2nd.opponent2_d;
+	if (a != NULL)
+		*a = robot_2nd.opponent2_a;
 	IRQ_UNLOCK(flags);	
 
 	return 0;
