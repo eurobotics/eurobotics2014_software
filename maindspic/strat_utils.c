@@ -38,7 +38,6 @@
 #include <aversive/error.h>
 
 #include <uart.h>
-#include <dac_mc.h>
 #include <pwm_servo.h>
 #include <clock_time.h>
 
@@ -86,11 +85,11 @@ int16_t distance_from_robot(int16_t x, int16_t y)
 }
 
 /* return the distance to a point in the area */
+#if 0
 int16_t distance_from_robot_signed(int16_t x, int16_t y)
 {
-	double a;// = position_get_a_rad_double(&mainboard.pos);
-   double dis;//=distance_between(position_get_x_s16(&mainboard.pos),
-				//position_get_y_s16(&mainboard.pos), x, y);
+	double a;
+   double dis;
 
 	abs_xy_to_rel_da(x, y, &dis, &a);
 
@@ -112,6 +111,7 @@ int16_t distance_from_robot_signed(int16_t x, int16_t y)
 
    return dis;
 }
+#endif
 
 /** do a modulo 360 -> [-180,+180], knowing that 'a' is in [-3*180,+3*180] */  
 int16_t simple_modulo_360(int16_t a)
@@ -276,12 +276,12 @@ uint8_t x_is_more_than(int16_t x)
 	}
 }
 
-/* return 1 if x > x_opp or opponent not there */
-uint8_t opp_x_is_more_than(int16_t x)
+/* return 1 if x > x_opp or XXX opponent not there */
+uint8_t opp1_x_is_more_than(int16_t x)
 {
 	int16_t x_opp, y_opp;
 	
-	if(get_opponent_xy(&x_opp, &y_opp) == -1)
+	if(get_opponent1_xy(&x_opp, &y_opp) == -1)
 		return 1;
 
 	if (mainboard.our_color == I2C_COLOR_YELLOW) {
@@ -304,7 +304,7 @@ uint8_t opp2_x_is_more_than(int16_t x)
 #ifdef TWO_OPPONENTS
 	int16_t x_opp2, y_opp2;
 	
-	if(get_opponent_xy(&x_opp2, &y_opp2) == -1)
+	if(get_opponent2_xy(&x_opp2, &y_opp2) == -1)
 		return 1;
 
 	if (mainboard.our_color == I2C_COLOR_YELLOW) {
@@ -349,11 +349,11 @@ uint8_t robot_2nd_x_is_more_than(int16_t x)
 }
 
 /* return 1 if y > y_opp or opponent not there */
-uint8_t opp_y_is_more_than(int16_t y)
+uint8_t opp1_y_is_more_than(int16_t y)
 {
 	int16_t x_opp, y_opp;
 	
-	if(get_opponent_xy(&x_opp, &y_opp) == -1)
+	if(get_opponent1_xy(&x_opp, &y_opp) == -1)
 		return 1;
 
 	if (y_opp > y)
@@ -455,14 +455,49 @@ uint8_t get_opponent_color(void)
 		return I2C_COLOR_RED;
 }
 
-/* get the xy pos of the opponent robot */
-int8_t get_opponent_xy(int16_t *x, int16_t *y)
+
+#ifdef IM_SECONDARY_ROBOT
+int8_t get_best_opponent1_xyda (int16_t *x, int16_t *y, int16_t *d, int16_t *a)
 {
 	uint8_t flags;
 	IRQ_LOCK(flags);
-	*x = beaconboard.opponent_x;
-	*y = beaconboard.opponent_y;
+	*x = robot_2nd.opponent1_x;
+	*y = robot_2nd.opponent1_y;
+	*d = robot_2nd.opponent1_d;
+	*a = robot_2nd.opponent1_a;
+	IRQ_UNLOCK(flags);	
+
+	return 0;
+}
+
+int8_t get_best_opponent2_xyda (int16_t *x, int16_t *y, int16_t *d, int16_t *a)
+{
+	uint8_t flags;
+	IRQ_LOCK(flags);
+	*x = robot_2nd.opponent2_x;
+	*y = robot_2nd.opponent2_y;
+	*d = robot_2nd.opponent2_d;
+	*a = robot_2nd.opponent2_a;
+	IRQ_UNLOCK(flags);	
+
+	return 0;
+}
+
+#endif
+
+/* get the xy pos of a robot */
+int8_t get_opponent1_xy(int16_t *x, int16_t *y)
+{
+#ifndef IM_SECONDARY_ROBOT
+	uint8_t flags;
+	IRQ_LOCK(flags);
+	*x = beaconboard.opponent1_x;
+	*y = beaconboard.opponent1_y;
 	IRQ_UNLOCK(flags);
+#else
+	get_best_opponent1_xyda (x, y, NULL, NULL);
+#endif
+
 	if (*x == I2C_OPPONENT_NOT_THERE)
 		return -1;
 	return 0;
@@ -470,34 +505,30 @@ int8_t get_opponent_xy(int16_t *x, int16_t *y)
 int8_t get_opponent2_xy(int16_t *x, int16_t *y)
 {
 #ifdef TWO_OPPONENTS
+
+#ifndef IM_SECONDARY_ROBOT
 	uint8_t flags;
 	IRQ_LOCK(flags);
 	*x = beaconboard.opponent2_x;
 	*y = beaconboard.opponent2_y;
-	IRQ_UNLOCK(flags);
+    IRQ_UNLOCK(flags);
+#else
+	get_best_opponent2_xyda (x, y, NULL, NULL);
+#endif
+
 	if (*x == I2C_OPPONENT_NOT_THERE)
 		return -1;
 #endif
 	return 0;
 }
-
 int8_t get_robot_2nd_xy(int16_t *x, int16_t *y)
 {
 #ifdef ROBOT_2ND
 	uint8_t flags;
 
-	/* TODO if disable by strat return like it's not there */
-#if 0
-	if((strat_infos.conf.flags & ENABLE_R2ND_POS) == 0) {
-		beaconboard.robot_2nd_x = I2C_OPPONENT_NOT_THERE;
-		beaconboard.robot_2nd_y = 0;
-		return -1;
-	}
-#endif
-
 	IRQ_LOCK(flags);
-	*x = beaconboard.robot_2nd_x;
-	*y = beaconboard.robot_2nd_y;
+	*x = robot_2nd.x;
+	*y = robot_2nd.y;
 	IRQ_UNLOCK(flags);
 	if (*x == I2C_OPPONENT_NOT_THERE)
 		return -1;
@@ -505,56 +536,57 @@ int8_t get_robot_2nd_xy(int16_t *x, int16_t *y)
 	return 0;
 }
 
-/* get the da pos of the opponent robot */
-int8_t get_opponent_da(int16_t *d, int16_t *a)
+/* get the da pos of a robot */
+int8_t get_opponent1_da(int16_t *d, int16_t *a)
 {
-	uint8_t flags;
 	int16_t x_tmp;
+
+#ifndef IM_SECONDARY_ROBOT
+	uint8_t flags;
 	IRQ_LOCK(flags);
-	x_tmp = beaconboard.opponent_x;
-	*d = beaconboard.opponent_d;
-	*a = beaconboard.opponent_a;
+	x_tmp = beaconboard.opponent1_x;
+	*d = beaconboard.opponent1_d;
+	*a = beaconboard.opponent1_a;
 	IRQ_UNLOCK(flags);
+#else
+	get_best_opponent1_xyda (&x_tmp, NULL, d, a);
+#endif
+
 	if (x_tmp == I2C_OPPONENT_NOT_THERE)
 		return -1;
 	return 0;
 }
-
 int8_t get_opponent2_da(int16_t *d, int16_t *a)
 {
 #ifdef TWO_OPPONENTS
-	uint8_t flags;
 	int16_t x_tmp;
+
+#ifndef IM_SECONDARY_ROBOT
+	uint8_t flags;
 	IRQ_LOCK(flags);
 	x_tmp = beaconboard.opponent2_x;
 	*d = beaconboard.opponent2_d;
 	*a = beaconboard.opponent2_a;
-	IRQ_UNLOCK(flags);
+    IRQ_UNLOCK(flags);
+#else
+	get_best_opponent1_xyda (&x_tmp, NULL, d, a);
+#endif
+
 	if (x_tmp == I2C_OPPONENT_NOT_THERE)
 		return -1;
 #endif
 	return 0;
 }
-
 int8_t get_robot_2nd_da(int16_t *d, int16_t *a)
 {
 #ifdef ROBOT_2ND
 	uint8_t flags;
 	int16_t x_tmp;
 
-	/* TODO if disable by strat return like it's not there */
-#if 0 
-	if((strat_infos.conf.flags & ENABLE_R2ND_POS) == 0) {
-		beaconboard.robot_2nd_x = I2C_OPPONENT_NOT_THERE;
-		beaconboard.robot_2nd_y = 0;
-		return -1;
-	}
-#endif
-
 	IRQ_LOCK(flags);
-	x_tmp = beaconboard.robot_2nd_x;
-	*d = beaconboard.robot_2nd_d;
-	*a = beaconboard.robot_2nd_a;
+	x_tmp = robot_2nd.x;
+	*d = robot_2nd.d;
+	*a = robot_2nd.a;
 	IRQ_UNLOCK(flags);
 	if (x_tmp == I2C_OPPONENT_NOT_THERE)
 		return -1;
@@ -562,24 +594,16 @@ int8_t get_robot_2nd_da(int16_t *d, int16_t *a)
 	return 0;
 }
 
+/* get the absolute a of the robot 2nd */
 int8_t get_robot_2nd_a_abs(int16_t *a)
 {
 #ifdef ROBOT_2ND
 	uint8_t flags;
 	int16_t x_tmp;
 
-	/* TODO if disable by strat return like it's not there */
-#if 0 
-	if((strat_infos.conf.flags & ENABLE_R2ND_POS) == 0) {
-		beaconboard.robot_2nd_x = I2C_OPPONENT_NOT_THERE;
-		beaconboard.robot_2nd_y = 0;
-		return -1;
-	}
-#endif
-
 	IRQ_LOCK(flags);
-	x_tmp = beaconboard.robot_2nd_x;
-	*a = beaconboard.robot_2nd_a_abs;
+	x_tmp = robot_2nd.x;
+	*a = robot_2nd.a_abs;
 	IRQ_UNLOCK(flags);
 	if (x_tmp == I2C_OPPONENT_NOT_THERE)
 		return -1;
@@ -587,16 +611,20 @@ int8_t get_robot_2nd_a_abs(int16_t *a)
 	return 0;
 }
 
-/* get the da pos of the opponent robot */
-int8_t get_opponent_xyda(int16_t *x, int16_t *y, int16_t *d, int16_t *a)
+/* get the xyda pos of a robot */
+int8_t get_opponent1_xyda(int16_t *x, int16_t *y, int16_t *d, int16_t *a)
 {
+#ifndef IM_SECONDARY_ROBOT
 	uint8_t flags;
 	IRQ_LOCK(flags);
-	*x = beaconboard.opponent_x;
-	*y = beaconboard.opponent_y;
-	*d = beaconboard.opponent_d;
-	*a = beaconboard.opponent_a;
+	*x = beaconboard.opponent1_x;
+	*y = beaconboard.opponent1_y;
+	*d = beaconboard.opponent1_d;
+	*a = beaconboard.opponent1_a;
 	IRQ_UNLOCK(flags);
+#else
+	get_best_opponent1_xyda (x, y, d, a);
+#endif
 
 	if (*x == I2C_OPPONENT_NOT_THERE)
 		return -1;
@@ -605,6 +633,7 @@ int8_t get_opponent_xyda(int16_t *x, int16_t *y, int16_t *d, int16_t *a)
 int8_t get_opponent2_xyda(int16_t *x, int16_t *y, int16_t *d, int16_t *a)
 {
 #ifdef TWO_OPPONENTS
+#ifndef IM_SECONDARY_ROBOT
 	uint8_t flags;
 	IRQ_LOCK(flags);
 	*x = beaconboard.opponent2_x;
@@ -612,6 +641,9 @@ int8_t get_opponent2_xyda(int16_t *x, int16_t *y, int16_t *d, int16_t *a)
 	*d = beaconboard.opponent2_d;
 	*a = beaconboard.opponent2_a;
 	IRQ_UNLOCK(flags);
+#else
+	get_best_opponent1_xyda (x, y, d, a);
+#endif
 
 	if (*x == I2C_OPPONENT_NOT_THERE)
 		return -1;
@@ -623,34 +655,55 @@ int8_t get_robot_2nd_xyda(int16_t *x, int16_t *y, int16_t *d, int16_t *a)
 #ifdef ROBOT_2ND
 	uint8_t flags;
 
-	/* TODO if disable by strat return like it's not there */
-#if 0
-	if((strat_infos.conf.flags & ENABLE_R2ND_POS) == 0) {
-		beaconboard.robot_2nd_x = I2C_OPPONENT_NOT_THERE;
-		beaconboard.robot_2nd_y = 0;
-		return -1;
-	}
-#endif
-
 	IRQ_LOCK(flags);
-	*x = beaconboard.robot_2nd_x;
-	*y = beaconboard.robot_2nd_y;
-	*d = beaconboard.robot_2nd_d;
-	*a = beaconboard.robot_2nd_a;
+	*x = robot_2nd.x;
+	*y = robot_2nd.y;
+	*d = robot_2nd.d;
+	*a = robot_2nd.a;
 	IRQ_UNLOCK(flags);
-
 	if (*x == I2C_OPPONENT_NOT_THERE)
 		return -1;
 #endif
 	return 0;
 }
 
-uint8_t opponent_is_behind(void)
+/* check if a robot is behind */
+uint8_t opponent1_is_behind(void)
 {
 	int8_t opp_there;
 	int16_t opp_d, opp_a;
 
-	opp_there = get_opponent_da(&opp_d, &opp_a);
+	opp_there = get_opponent1_da(&opp_d, &opp_a);
+
+	if(opp_there == -1)
+		return 0;
+
+	if ((opp_a < 215 && opp_a > 145) && opp_d < 500)
+		return 1;
+
+	return 0;
+}
+uint8_t opponent2_is_behind(void)
+{
+	int8_t opp_there;
+	int16_t opp_d, opp_a;
+
+	opp_there = get_opponent2_da(&opp_d, &opp_a);
+
+	if(opp_there == -1)
+		return 0;
+
+	if ((opp_a < 215 && opp_a > 145) && opp_d < 500)
+		return 1;
+
+	return 0;
+}
+uint8_t robot_2nd_is_behind(void)
+{
+	int8_t opp_there;
+	int16_t opp_d, opp_a;
+
+	opp_there = get_robot_2nd_da(&opp_d, &opp_a);
 
 	if(opp_there == -1)
 		return 0;
@@ -661,46 +714,44 @@ uint8_t opponent_is_behind(void)
 	return 0;
 }
 
-uint8_t robots_behind(void)
-{
-	int8_t opp_there, opp2_there=-1, r2nd_there=-1;
-	int16_t opp_d, opp_a;
 
-	opp_there = get_opponent_da(&opp_d, &opp_a);
-#ifdef TWO_OPPONENTS
-	int16_t opp2_d, opp2_a;
-	opp2_there = get_opponent2_da(&opp2_d, &opp2_a);
-#endif
-#ifdef ROBOT_2ND
-	int16_t robot_2nd_d, robot_2nd_a;
-	r2nd_there = get_robot_2nd_da(&robot_2nd_d, &robot_2nd_a);
-#endif
-
-	if((opp_there == -1) && (opp2_there == -1) && (r2nd_there == -1))
-		return 0;
-
-	if ((opp_a < 215 && opp_a > 145) && opp_d < 500)
-		return 1;
-
-#ifdef TWO_OPPONENTS
-	if ((opp2_a < 215 && opp2_a > 145) && opp2_d < 500)
-		return 1;
-#endif
-
-#ifdef ROBOT_2ND
-	if ((robot_2nd_a < 215 && robot_2nd_a > 145) && robot_2nd_d < 500)
-		return 1;
-#endif
-
-	return 0;
-}
-
-uint8_t opponent_is_infront(void)
+/* check if a robot is in front */
+uint8_t opponent1_is_infront(void)
 {
 	int8_t opp_there;
 	int16_t opp_d, opp_a;
 
-	opp_there = get_opponent_da(&opp_d, &opp_a);
+	opp_there = get_opponent1_da(&opp_d, &opp_a);
+	
+	if(opp_there == -1)
+		return 0;
+
+	if ((opp_a > 325 || opp_a < 35) && opp_d < 500)
+		return 1;
+
+	return 0;
+}
+uint8_t opponent2_is_infront(void)
+{
+	int8_t opp_there;
+	int16_t opp_d, opp_a;
+
+	opp_there = get_opponent2_da(&opp_d, &opp_a);
+	
+	if(opp_there == -1)
+		return 0;
+
+	if ((opp_a > 325 || opp_a < 35) && opp_d < 500)
+		return 1;
+
+	return 0;
+}
+uint8_t robot_2nd_is_infront(void)
+{
+	int8_t opp_there;
+	int16_t opp_d, opp_a;
+
+	opp_there = get_robot_2nd_da(&opp_d, &opp_a);
 	
 	if(opp_there == -1)
 		return 0;
@@ -711,47 +762,13 @@ uint8_t opponent_is_infront(void)
 	return 0;
 }
 
-uint8_t robots_infront(void)
+/* returns 1 if any robot is near */
+uint8_t robots_are_near(void)
 {
 	int8_t opp_there, opp2_there=-1, r2nd_there=-1;
 	int16_t opp_d, opp_a;
 
-	opp_there = get_opponent_da(&opp_d, &opp_a);
-#ifdef TWO_OPPONENTS
-	int16_t opp2_d, opp2_a;
-	opp2_there = get_opponent2_da(&opp2_d, &opp2_a);
-#endif
-#ifdef ROBOT_2ND
-	int16_t robot_2nd_d, robot_2nd_a;
-	r2nd_there = get_robot_2nd_da(&robot_2nd_d, &robot_2nd_a);
-#endif
-	
-	if((opp_there == -1) && (opp2_there == -1) && (r2nd_there == -1))
-		return 0;
-
-	if ((opp_a > 325 || opp_a < 35) && opp_d < 500)
-		return 1;
-
-#ifdef TWO_OPPONENTS
-	if ((opp2_a > 325 || opp2_a < 35) && opp2_d < 500)
-		return 1;
-#endif
-
-#ifdef ROBOT_2ND
-	if ((robot_2nd_a > 325 || robot_2nd_a < 35) && robot_2nd_d < 500)
-		return 1;
-#endif
-
-	return 0;
-}
-
-
-uint8_t robots_near(void)
-{
-	int8_t opp_there, opp2_there=-1, r2nd_there=-1;
-	int16_t opp_d, opp_a;
-
-	opp_there = get_opponent_da(&opp_d, &opp_a);
+	opp_there = get_opponent1_da(&opp_d, &opp_a);
 #ifdef TWO_OPPONENTS
 	int16_t opp2_d, opp2_a;
 	opp2_there = get_opponent2_da(&opp2_d, &opp2_a);
@@ -780,25 +797,23 @@ uint8_t robots_near(void)
 	return 0;
 }
 
-/* return 1 if opp is in area, XXX pass coordinates with COLOR macro */
-uint8_t opponent_is_in_area(int16_t x_up, int16_t y_up,
+/* check if a robot is in area */
+/* return 1 if there are opponents in area, XXX pass coordinates with COLOR macro */
+uint8_t opponents_are_in_area(int16_t x_up, int16_t y_up,
 									 int16_t x_down, int16_t y_down)
 {
-	int8_t opp_there, opp2_there, r2nd_there;
+	int8_t opp1_there, opp2_there;
 	int16_t opp_x, opp_y;
 	int16_t opp2_x, opp2_y;
-	int16_t r2nd_x, r2nd_y;
 
 
-	/* get robot coordinates */
-	opp_there = get_opponent_xy(&opp_x, &opp_y);
+	/* get robot coordenates */
+	opp1_there = get_opponent1_xy(&opp_x, &opp_y);
 	opp2_there = get_opponent2_xy(&opp2_x, &opp2_y);
-	r2nd_there = get_robot_2nd_xy(&r2nd_x, &r2nd_y);
 
 	/* return if no robots */
-	if(opp_there == -1 && opp2_there == -1 && r2nd_there == -1)
+	if(opp1_there == -1 && opp2_there == -1)
 		return 0;
-
 
 	/* Opponent 1 */
 	if (mainboard.our_color == I2C_COLOR_YELLOW) {
@@ -824,18 +839,6 @@ uint8_t opponent_is_in_area(int16_t x_up, int16_t y_up,
 			return 1;
 	}
 
-	/* 2nd robot */
-	/*if (mainboard.our_color == I2C_COLOR_YELLOW) {
-		if ((r2nd_x > x_up && r2nd_x < x_down)
-			&& (r2nd_y < y_up && r2nd_y > y_down) )
-			return 1;
-	}
-	else {
-		if ((r2nd_x < x_up && r2nd_x > x_down)
-			 && (r2nd_y < y_up && r2nd_y > y_down) )
-			return 1;
-	}*/
-
 	return 0;
 }
 uint8_t opponent1_is_in_area(int16_t x_up, int16_t y_up, int16_t x_down, int16_t y_down)
@@ -844,8 +847,8 @@ uint8_t opponent1_is_in_area(int16_t x_up, int16_t y_up, int16_t x_down, int16_t
 	int16_t opp_x, opp_y;
 
 
-	/* get robot coordinates */
-	opp_there = get_opponent_xy(&opp_x, &opp_y);
+	/* get robot coordenates */
+	opp_there = get_opponent1_xy(&opp_x, &opp_y);
 
 	/* return if no robots */
 	if(opp_there == -1)
@@ -872,7 +875,7 @@ uint8_t opponent2_is_in_area(int16_t x_up, int16_t y_up,
 	int8_t opp2_there;
 	int16_t opp2_x, opp2_y;
 
-	/* get robot coordinates */
+	/* get robot coordenates */
 	opp2_there = get_opponent2_xy(&opp2_x, &opp2_y);
 
 	/* return if no robots */
@@ -892,93 +895,8 @@ uint8_t opponent2_is_in_area(int16_t x_up, int16_t y_up,
 			return 1;
 	}
 
-        return 1;
+   return 1;
 }
 
-/*
-uint8_t opponent_is_behind_side(uint8_t side)
-{
-#if 0
-	if(side == SIDE_FRONT)
-		return opponent_is_behind();
-	else
-		return opponent_is_infront();
-#endif
-	return 0;
-}
-
-uint8_t opponent_is_infront_side(uint8_t side)
-{
-#if 0
-	if(side == SIDE_REAR)
-		return opponent_is_behind();
-	else
-		return opponent_is_infront();
-#endif
-	return 0;
-}
-*/
-
-
-#if 0
-#define AUTOPOS_SPEED_FAST 	500
-#define ROBOT_DIS2_WALL 		(int16_t)(119)
-void strat_auto_position(void)
-{
-	uint8_t err;
-	uint16_t old_spdd, old_spda;
-
-	/* save & set speeds */
-	interrupt_traj_reset();
-	strat_get_speed(&old_spdd, &old_spda);
-	strat_set_speed(AUTOPOS_SPEED_FAST, AUTOPOS_SPEED_FAST);
-
-	/* goto blocking to y axis */
-	trajectory_d_rel(&mainboard.traj, -300);
-	err = wait_traj_end(END_INTR|END_TRAJ|END_BLOCKING);
-	if (err == END_INTR)
-		goto intr;
-	wait_ms(100);
-	
-	/* set y */
-	strat_reset_pos(0, COLOR_Y(ROBOT_DIS2_WALL), 90);
-	
-	/* prepare to x axis */
-	trajectory_d_rel(&mainboard.traj, 195); //35
-	err = wait_traj_end(END_INTR|END_TRAJ);
-	if (err == END_INTR)
-		goto intr;
-
-	trajectory_a_rel(&mainboard.traj, COLOR_A_REL(-90));
-	err = wait_traj_end(END_INTR|END_TRAJ);
-	if (err == END_INTR)
-		goto intr;
-
-	/* goto blocking to x axis */
-	trajectory_d_rel(&mainboard.traj, -800);
-	err = wait_traj_end(END_INTR|END_TRAJ|END_BLOCKING);
-	if (err == END_INTR)
-		goto intr;
-	wait_ms(100);
-
-	/* set x and angle */
-	strat_reset_pos(COLOR_X(ROBOT_DIS2_WALL), DO_NOT_SET_POS, COLOR_A_ABS(0));
-
-	/* goto start position */
-	trajectory_d_rel(&mainboard.traj, 500-(ROBOT_LENGTH));
-	err = wait_traj_end(END_INTR|END_TRAJ);
-	if (err == END_INTR)
-		goto intr;
-	wait_ms(100);
-	
-	/* restore speeds */	
-	strat_set_speed(old_spdd, old_spda);
-	return;
-
-intr:
-	strat_hardstop();
-	strat_set_speed(old_spdd, old_spda);
-}
-#endif
 
 

@@ -470,7 +470,7 @@ void strat_opp_tracking (void)
     /* check if there are opponents in every zone */
     for(zone_opp = 0; zone_opp <  ZONES_MAX; zone_opp++)
     {
-        if(opponent_is_in_area(strat_infos.zones[zone_opp].x_up, strat_infos.zones[zone_opp].y_up,
+        if(opponent1_is_in_area(strat_infos.zones[zone_opp].x_up, strat_infos.zones[zone_opp].y_up,
                                      strat_infos.zones[zone_opp].x_down, strat_infos.zones[zone_opp].y_down))
 		{
 			printf_P("OPP IN AREA: %s\n", numzone2name[zone_opp]);
