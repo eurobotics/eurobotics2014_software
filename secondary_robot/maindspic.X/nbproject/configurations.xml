@@ -43,9 +43,9 @@
         <itemPath>../strat_base.h</itemPath>
         <itemPath>../../common/i2c_commands.h</itemPath>
         <itemPath>../sensor.h</itemPath>
+        <itemPath>../beacon.h</itemPath>
         <itemPath>../i2c_protocol.h</itemPath>
         <itemPath>../ax12_user.h</itemPath>
-        <itemPath>../beacon.h</itemPath>
       </logicalFolder>
       <logicalFolder name="ax12" displayName="ax12" projectFiles="true">
         <itemPath>../../libs/aversive4dspic/modules/devices/servo/ax12/ax12.h</itemPath>
@@ -164,8 +164,11 @@
         <itemPath>../strat_base.c</itemPath>
         <itemPath>../../common/traps.c</itemPath>
         <itemPath>../i2c_protocol.c</itemPath>
+        <itemPath>../beacon.c</itemPath>
         <itemPath>../strat.c</itemPath>
+        <itemPath>../strat_begin.c</itemPath>
         <itemPath>../strat_main.c</itemPath>
+        <itemPath>../strat_treasure.c</itemPath>
         <itemPath>../../maindspic/strat_avoid.c</itemPath>
         <itemPath>../ax12_user.c</itemPath>
       </logicalFolder>
