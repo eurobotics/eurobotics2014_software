@@ -335,13 +335,17 @@ void bt_robot_2nd_cmd (uint8_t cmd_id, int16_t arg0, int16_t arg1)
 retry:
 
 	bt_robot_2nd_cmd_no_wait_ack (cmd_id, arg0, arg1);
+	DEBUG (E_USER_STRAT, "cmd send");
 
-	/* wait ack */
-	ret = BT_WAIT_COND_OR_TIMEOUT( bt_robot_2nd_test_checksum (), 150);
+	/* XXX wait ack */
+	ret = BT_WAIT_COND_OR_TIMEOUT( bt_robot_2nd_test_checksum (), 500);
 	if (!ret && nb_tries--) {
 		ERROR (E_USER_BT_PROTO, "ERROR sendind robot 2nd command (%d)", nb_tries);
 		goto retry;
 	}
+	else
+		DEBUG (E_USER_STRAT, "ACK received");
+
 }
 
 /* wait for robot 2nd ends */
@@ -361,6 +365,11 @@ uint8_t bt_robot_2nd_wait_end (void)
 inline void bt_robot_2nd_set_color (void) {
 	//bt_robot_2nd_cmd_no_wait_ack (BT_SET_COLOR, 0, 0);
 	bt_robot_2nd_cmd (BT_SET_COLOR, 0, 0);
+}
+
+/* auto set possition */
+inline void bt_robot_2nd_autopos (void) {
+	bt_robot_2nd_cmd (BT_AUTOPOS, 0, 0);
 }
 
 /* goto xy_abs */
@@ -623,6 +632,7 @@ void bt_protocol (void * dummy)
 
 	/* avoid send a command and pulling in the same cycle) */
 	if (cmd_sent) {
+
 		toggle = 1; /* force robot 2nd pulling next cycle */
 		pull_time_us = time_get_us2();
 		return;

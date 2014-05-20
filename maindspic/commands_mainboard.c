@@ -65,7 +65,6 @@
 #include <parse_num.h>
 
 #include "../common/i2c_commands.h"
-#include "../common/bt_commands.h"
 
 #include "main.h"
 #include "sensor.h"
@@ -364,7 +363,7 @@ static void cmd_init_parsed(void *parsed_result, void *data)
 	/* TODO: init main robot mechanics */
 	
 	/* autopos secondary robot */
-	bt_robot_2nd_cmd (BT_AUTOPOS, 0, 0);
+    bt_robot_2nd_autopos();
 	bt_robot_2nd_wait_end();
 
 	printf ("Done\n\r");
@@ -842,11 +841,13 @@ static void cmd_robot_2nd_parsed(void * parsed_result, void * data)
 #endif
     else if (!strcmp_P(res->arg1, "color"))
 		bt_robot_2nd_set_color ();
+
     else if (!strcmp_P(res->arg1, "autopos"))
-		bt_robot_2nd_cmd (BT_AUTOPOS, 0, 0);
+		bt_robot_2nd_autopos ();
 
     else if (!strcmp_P(res->arg1, "status"))
 		bt_robot_2nd_req_status ();
+
     else if (!strcmp_P(res->arg1, "show")) {
 
 		 do 

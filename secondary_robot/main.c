@@ -236,7 +236,7 @@ int main(void)
       DO_POS | DO_POWER | DO_BD;
 #else
   mainboard.flags = DO_ENCODERS  | DO_RS |
-      DO_POS | DO_POWER | DO_BD; // | DO_CS ;
+      DO_POS | DO_POWER | DO_BD | DO_CS ;
 #endif
 
    beaconboard.opponent1_x = I2C_OPPONENT_NOT_THERE;

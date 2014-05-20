@@ -177,8 +177,7 @@ void cmdline_interact(void *dummy)
 	
 		if (c == -1) 
 #ifndef HOST_VERSION	
-			//continue;
-			return 0;
+			continue;
 #else
     {
 		  c = robotsim_uart_recv_BT();
@@ -206,8 +205,6 @@ void cmdline_interact(void *dummy)
 			rdline_newline(&gen.rdl, gen.prompt);
 		}
 	}
-
-	return 0;
 }
 
 /* init cmdline */

@@ -164,7 +164,6 @@
         <itemPath>../strat_base.c</itemPath>
         <itemPath>../../common/traps.c</itemPath>
         <itemPath>../i2c_protocol.c</itemPath>
-        <itemPath>../beacon.c</itemPath>
         <itemPath>../strat.c</itemPath>
         <itemPath>../strat_begin.c</itemPath>
         <itemPath>../strat_main.c</itemPath>

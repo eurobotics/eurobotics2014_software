@@ -795,6 +795,8 @@ parse_pgm_inst_t cmd_goto2 = {
 /**********************************************************/
 /* Position tests */
 
+void bt_send_status (void);
+
 /* this structure is filled when cmd_position is parsed successfully */
 struct cmd_position_result {
 	fixed_string_t arg0;
@@ -826,8 +828,10 @@ static void cmd_position_parsed(void * parsed_result, void * data)
 		strat_auto_position ();
 	}
 	else if (!strcmp_P(res->arg1, PSTR("autoset"))) {
+		/* TODO simplify --> bt_protocol.c */
 		strat_schedule_single_event (strat_auto_position_event, NULL);
 		bt_set_cmd_id_and_checksum (BT_AUTOPOS, 0);
+		bt_send_status ();
 	}
 	else {
 		/* else it's just a "show" */

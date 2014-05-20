@@ -411,6 +411,8 @@ struct cmd_color_result {
 	fixed_string_t color;
 };
 
+void bt_send_status (void);
+
 /* function called when cmd_color is parsed successfully */
 static void cmd_color_parsed(void *parsed_result, void *data)
 {
@@ -430,6 +432,7 @@ static void cmd_color_parsed(void *parsed_result, void *data)
 	}
 
 	bt_set_cmd_id_and_checksum (BT_SET_COLOR, mainboard.our_color);
+	bt_send_status ();
 
 	printf_P(PSTR("Done\r\n"));
 }
@@ -1022,15 +1025,60 @@ void uart_send_buffer (uint8_t *buff, uint16_t length)
 	}	
 }
 
+void bt_send_status (void)
+{
+	struct bt_robot_2nd_status_ans ans;
+    uint8_t flags;
+	//static uint16_t i=0;
+
+	/* send status info */
+	IRQ_LOCK(flags);
+
+	/* robot possition */
+	ans.x = position_get_x_s16(&mainboard.pos);
+	ans.y = position_get_y_s16(&mainboard.pos);
+	ans.a_abs = position_get_a_deg_s16(&mainboard.pos);
+
+	/* opponent 1 */
+	ans.opponent1_x = beaconboard.opponent1_x;
+	ans.opponent1_y = beaconboard.opponent1_y;
+
+	/* opponent 2 */
+	ans.opponent2_x = beaconboard.opponent2_x;
+	ans.opponent2_y = beaconboard.opponent2_y;
+
+	ans.color = mainboard.our_color;
+
+	/* XXX cmd feedback: must be filld by cmds */
+	ans.cmd_id = robot_2nd.cmd_id;
+	ans.cmd_ret = robot_2nd.cmd_ret;
+	ans.cmd_args_checksum = robot_2nd.cmd_args_checksum;
+	IRQ_UNLOCK(flags);
+
+
+//#define DEBUG_STATUS
+#ifdef DEBUG_STATUS
+	/* fill answer structure */
+	ans.x = ans.opponent_x = ans.opponent2_x = i++;
+	ans.y = ans.opponent_y = ans.opponent2_y = i + 1000;
+	ans.a_abs = i + 2000;
+#endif
+
+	ans.checksum = bt_checksum ((uint8_t *)&ans, sizeof (ans)-sizeof(ans.checksum));
+
+	/* send answer */
+	uint8_t sync_header[] = BT_ROBOT_2ND_SYNC_HEADER;
+	uart_send_buffer (sync_header, sizeof(sync_header)); 
+	uart_send_buffer ((uint8_t*) &ans, sizeof(ans)); 
+}
+
 /* function called when cmd_opponent is parsed successfully */
 static void cmd_status_parsed(void * parsed_result, void *data)
 {
 	struct cmd_status_result *res = parsed_result;
 	uint8_t flags;
 	int16_t checksum = 0;
-	struct bt_robot_2nd_status_ans ans;
 	double x, y, a, d;
-	//static uint16_t i=0;
 
 	/* test checksum */
 	checksum = res->robot_x + res->robot_y + res->robot_a_abs;
@@ -1080,45 +1128,7 @@ static void cmd_status_parsed(void * parsed_result, void *data)
 	IRQ_UNLOCK(flags);
 
 send_status:
-	/* send status info */
-	IRQ_LOCK(flags);
-
-	/* robot possition */
-	ans.x = position_get_x_s16(&mainboard.pos);
-	ans.y = position_get_y_s16(&mainboard.pos);
-	ans.a_abs = position_get_a_deg_s16(&mainboard.pos);
-
-	/* opponent 1 */
-	ans.opponent1_x = beaconboard.opponent1_x;
-	ans.opponent1_y = beaconboard.opponent1_y;
-
-	/* opponent 2 */
-	ans.opponent2_x = beaconboard.opponent2_x;
-	ans.opponent2_y = beaconboard.opponent2_y;
-
-	ans.color = mainboard.our_color;
-
-	/* XXX cmd feedback: must be filld by cmds */
-	ans.cmd_id = robot_2nd.cmd_id;
-	ans.cmd_ret = robot_2nd.cmd_ret;
-	ans.cmd_args_checksum = robot_2nd.cmd_args_checksum;
-	IRQ_UNLOCK(flags);
-
-
-//#define DEBUG_STATUS
-#ifdef DEBUG_STATUS
-	/* fill answer structure */
-	ans.x = ans.opponent_x = ans.opponent2_x = i++;
-	ans.y = ans.opponent_y = ans.opponent2_y = i + 1000;
-	ans.a_abs = i + 2000;
-#endif
-
-	ans.checksum = bt_checksum ((uint8_t *)&ans, sizeof (ans)-sizeof(ans.checksum));
-
-	/* send answer */
-	uint8_t sync_header[] = BT_ROBOT_2ND_SYNC_HEADER;
-	uart_send_buffer (sync_header, sizeof(sync_header)); 
-	uart_send_buffer ((uint8_t*) &ans, sizeof(ans)); 
+	bt_send_status();
 }
 
 

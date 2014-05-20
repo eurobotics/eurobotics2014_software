@@ -43,10 +43,10 @@
         <itemPath>../strat_base.h</itemPath>
         <itemPath>../../common/i2c_commands.h</itemPath>
         <itemPath>../sensor.h</itemPath>
-        <itemPath>../beacon.h</itemPath>
         <itemPath>../i2c_protocol.h</itemPath>
         <itemPath>../bt_protocol.h</itemPath>
         <itemPath>../wt11.h</itemPath>
+        <itemPath>../../common/bt_commands.h</itemPath>
       </logicalFolder>
       <logicalFolder name="bd" displayName="bd" projectFiles="true">
         <itemPath>../../libs/aversive4dspic/modules/devices/robot/blocking_detection_manager/blocking_detection_manager.h</itemPath>
@@ -161,7 +161,6 @@
         <itemPath>../strat_base.c</itemPath>
         <itemPath>../../common/traps.c</itemPath>
         <itemPath>../i2c_protocol.c</itemPath>
-        <itemPath>../beacon.c</itemPath>
         <itemPath>../strat.c</itemPath>
         <itemPath>../strat_avoid.c</itemPath>
         <itemPath>../strat_begin.c</itemPath>
@@ -169,6 +168,7 @@
         <itemPath>../strat_treasure.c</itemPath>
         <itemPath>../strat_fruits.c</itemPath>
         <itemPath>../wt11.c</itemPath>
+        <itemPath>../bt_protocol.c</itemPath>
       </logicalFolder>
       <logicalFolder name="bd" displayName="bd" projectFiles="true">
         <itemPath>../../libs/aversive4dspic/modules/devices/robot/blocking_detection_manager/blocking_detection_manager.c</itemPath>
@@ -305,6 +305,7 @@
   </logicalFolder>
   <sourceRootList>
     <Elem>..</Elem>
+    <Elem>../../common</Elem>
   </sourceRootList>
   <projectmakefile>Makefile</projectmakefile>
   <confs>
