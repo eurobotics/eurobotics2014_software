@@ -45,6 +45,8 @@
 
 #include "../common/i2c_commands.h"
 
+#include "bt_protocol.h"
+
 
 /* SOME USEFUL MACROS AND VALUES  *********************************************/
 
@@ -315,24 +317,6 @@ extern struct mainboard mainboard;
 extern struct beaconboard beaconboard;
 extern struct robot_2nd robot_2nd;
 
-
-/* set bt cmd id and args checksum */
-static inline void bt_set_cmd_id_and_checksum (uint8_t cmd_id, uint8_t args_sumatory) {
-	uint8_t flags;
-	IRQ_LOCK (flags);
-	robot_2nd.cmd_id = cmd_id;
-	robot_2nd.cmd_args_checksum = (uint8_t)(cmd_id + args_sumatory);
-	robot_2nd.cmd_ret = 0;
-	IRQ_UNLOCK (flags);
-}
-
-/* set bt cmd id and args checksum */
-static inline void bt_set_cmd_ret (uint8_t ret) {
-	uint8_t flags;
-	IRQ_LOCK (flags);
-	robot_2nd.cmd_ret = ret;
-	IRQ_UNLOCK (flags);
-}
 
 ///* TODO start the bootloader */
 //void bootloader(void);

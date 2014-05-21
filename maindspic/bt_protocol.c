@@ -288,18 +288,28 @@ error_checksum:
  * ROBOT_2ND COMMANDS 
  ***********************************************************/
 
-/* return 1 if cmd arguments checksum matches */
-uint8_t bt_robot_2nd_test_checksum (void) {
-	return (robot_2nd.cmd_args_checksum_send == robot_2nd.cmd_args_checksum_recv);
-}
+
 
 /* send command, and return after received ack */
 void bt_robot_2nd_cmd_no_wait_ack (uint8_t cmd_id, int16_t arg0, int16_t arg1)
 {
+#define BT_SET_COLOR		1
+#define BT_AUTOPOS			2
+#define BT_GOTO_XY_ABS		3
+#define BT_GOTO_XY_REL		4
+#define BT_GOTO_AVOID		5
+#define BT_GOTO_AVOID_FW	6
+#define BT_GOTO_AVOID_BW	7
+#define BT_DO_FRESCO_INIT	8
+#define BT_DO_MAMMUT_1		9
+#define BT_DO_MAMMUT_2		10
+#define BT_DO_NET			11
+#define BT_DO_OPP_FIRES		12
+
     uint8_t flags;
 	//DEBUG (E_USER_BT_PROTO, "TX cmd: id %d arg0 %d arg1 %d", cmd_id, arg0, arg1);
 
-	/* command */
+	/* command id parsing */
 	if (cmd_id == BT_SET_COLOR) {
 		arg0 = mainboard.our_color;
 
@@ -308,44 +318,64 @@ void bt_robot_2nd_cmd_no_wait_ack (uint8_t cmd_id, int16_t arg0, int16_t arg1)
 	  	else
 			bt_send_ascii_cmd (robot_2nd.link_id, "color red");
 	}
-	else if (cmd_id == BT_AUTOPOS) 
-		bt_send_ascii_cmd (robot_2nd.link_id, "position autoset", arg0, arg1);
-	else if (cmd_id == BT_GOTO_XY_ABS)
-		bt_send_ascii_cmd (robot_2nd.link_id, "goto xy_abs %d %d", arg0, arg1);
-	else if (cmd_id == BT_GOTO_XY_REL)
-		bt_send_ascii_cmd (robot_2nd.link_id, "goto xy_rel %d %d", arg0, arg1);
 
-	/* set feedback info */
+	else if (cmd_id == BT_AUTOPOS) 
+		bt_send_ascii_cmd (robot_2nd.link_id, "position autoset");
+
+	else if (cmd_id == BT_GOTO_XY_ABS)
+		bt_send_ascii_cmd (robot_2nd.link_id, "bt_goto xy_abs %d %d %d", arg0, arg1, (arg0 + arg1));
+
+	else if (cmd_id == BT_GOTO_XY_REL)
+		bt_send_ascii_cmd (robot_2nd.link_id, "bt_goto xy_rel %d %d %d", arg0, arg1, (arg0 + arg1));
+
+	/* ACK mechanism */
 	IRQ_LOCK (flags);
-	robot_2nd.cmd_id = cmd_id;
-	robot_2nd.cmd_args_checksum_send = (uint8_t) (cmd_id + arg0 + arg1);
-	robot_2nd.cmd_args_checksum_recv = 0;
-	robot_2nd.cmd_ret = 0;
+	//robot_2nd.cmd_id = cmd_id;
+	//robot_2nd.cmd_args_checksum_send = (uint8_t) (cmd_id + arg0 + arg1);
+	//robot_2nd.cmd_args_checksum_recv = 0;
+	robot_2nd.cmd_ret = 0xFF;
 	robot_2nd.valid_status = 0;
 	IRQ_UNLOCK (flags);
 
 }
 
+/* return 1 if cmd arguments checksum matches */
+//uint8_t bt_robot_2nd_test_checksum (void) {
+//	return (robot_2nd.cmd_args_checksum_send == robot_2nd.cmd_args_checksum_recv);
+//}
+
+/* return 1 if cmd arguments checksum matches */
+uint8_t bt_robot_2nd_test_ack (void) {
+	return (robot_2nd.cmd_ret != 0xFF);
+}
+
+
 /* send command, and return after received ack */
-void bt_robot_2nd_cmd (uint8_t cmd_id, int16_t arg0, int16_t arg1)
+uint8_t bt_robot_2nd_cmd (uint8_t cmd_id, int16_t arg0, int16_t arg1)
 {
 	uint8_t nb_tries = 3;
 	int8_t ret;
 
-retry:
+//retry:
 
 	bt_robot_2nd_cmd_no_wait_ack (cmd_id, arg0, arg1);
 	DEBUG (E_USER_STRAT, "cmd send");
 
 	/* XXX wait ack */
-	ret = BT_WAIT_COND_OR_TIMEOUT( bt_robot_2nd_test_checksum (), 500);
-	if (!ret && nb_tries--) {
-		ERROR (E_USER_BT_PROTO, "ERROR sendind robot 2nd command (%d)", nb_tries);
-		goto retry;
-	}
-	else
-		DEBUG (E_USER_STRAT, "ACK received");
+	//ret = BT_WAIT_COND_OR_TIMEOUT( bt_robot_2nd_test_checksum (), 250);
+	ret = BT_WAIT_COND_OR_TIMEOUT( bt_robot_2nd_test_ack (), 250);
 
+	if (!ret) {// && nb_tries--) {
+		ERROR (E_USER_BT_PROTO, "TIMEOUT waiting command ACK", nb_tries);
+		//goto retry;
+		ret = END_ERROR;
+	}
+	else {
+		DEBUG (E_USER_STRAT, "ACK received");
+		ret = robot_2nd.cmd_ret;	
+	}
+
+	return ret;
 }
 
 /* wait for robot 2nd ends */
@@ -476,21 +506,25 @@ void bt_robot_2nd_status_parser (int16_t c)
 			//		ans.cmd_id, ans.cmd_args_checksum, get_err(ans.cmd_ret));
 
 			/* be sure that an status cycle is complete */
-			if (robot_2nd.valid_status == 1)
+			if (robot_2nd.valid_status == 1) {
 				robot_2nd.valid_status = 2;
 
-			/* running command info */
-			if (ans.cmd_id == robot_2nd.cmd_id && robot_2nd.valid_status == 2) {
 				IRQ_LOCK(flags);
-				robot_2nd.cmd_args_checksum_recv = ans.cmd_args_checksum;
 				robot_2nd.cmd_ret = ans.cmd_ret;
 				IRQ_UNLOCK(flags);
+
+				/* running command info */
+				/*if (ans.cmd_id == robot_2nd.cmd_id) {
+					IRQ_LOCK(flags);
+					robot_2nd.cmd_args_checksum_recv = ans.cmd_args_checksum;
+					IRQ_UNLOCK(flags);
+				}*/
 			}
 
 			/* strat infos */
 			IRQ_LOCK(flags);
 			robot_2nd.color = ans.color;
-			robot_2nd.done_flags = ans.done_flags;
+			//robot_2nd.done_flags = ans.done_flags;
 			IRQ_UNLOCK(flags);
 
 			/* robot pos */
@@ -566,13 +600,13 @@ error_checksum:
 /* send and receive commands to/from bt devices, periodic dev status pulling */
 void bt_protocol (void * dummy)
 {
-   int16_t c;
+   	int16_t c;
 	uint8_t link_id;
-	static microseconds pull_time_us = 0;
-   uint8_t flags;
-   uint8_t i;
+   	uint8_t flags;
+   	uint8_t i;
 	uint8_t cmd_sent = 0;
 
+	static microseconds pull_time_us = 0;
 	static uint8_t toggle = 1;
 
 	if ((mainboard.flags & DO_BT_PROTO)==0)
@@ -592,15 +626,8 @@ void bt_protocol (void * dummy)
 
 		//uart_send (CMDLINE_UART, c);
 
-		//if ( (link_id == beaconboard.link_id) && (mainboard.flags & DO_BEACON) )
-			bt_beacon_status_parser (c);
-		//else if ( (link_id == robot_2nd.link_id) && (mainboard.flags & DO_ROBOT_2ND))
-			bt_robot_2nd_status_parser (c);
-	  	//else if ( (link_id != beaconboard.link_id) 
-		//			&& (link_id != robot_2nd.link_id) ) {
-		//	NOTICE (E_USER_BT_PROTO, "Unexpected link id (%d)", link_id);
-			//uart_send (CMDLINE_UART, c);
-		//}
+		bt_beacon_status_parser (c);
+		bt_robot_2nd_status_parser (c);
 
 		c = wt11_recv_mux_char (&link_id);	
 	}
@@ -633,8 +660,14 @@ void bt_protocol (void * dummy)
 	/* avoid send a command and pulling in the same cycle) */
 	if (cmd_sent) {
 
-		toggle = 1; /* force robot 2nd pulling next cycle */
+		/* mainly a robot 2nd cmd has been sent right now */
+		/* request status inmediately */
+		bt_robot_2nd_req_status ();
+
+		/* force beacon pulling next cycle */
+		toggle = 0; 
 		pull_time_us = time_get_us2();
+
 		return;
 	}
 

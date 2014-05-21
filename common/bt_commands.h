@@ -50,33 +50,21 @@ struct bt_robot_2nd_status_ans
 	struct bt_cmd_hdr hdr;
 
 	/* running command info */
-	uint8_t cmd_id;
-#define BT_SET_COLOR		1
-#define BT_AUTOPOS			2
+	//uint8_t cmd_id;
 
-#define BT_GOTO_XY_ABS		3
-#define BT_GOTO_XY_REL		4
-#define BT_GOTO_AVOID		5
-#define BT_GOTO_AVOID_FW	6
-#define BT_GOTO_AVOID_BW	7
 
-#define BT_DO_FRESCO_INIT	8
-#define BT_DO_MAMMUT_1		9
-#define BT_DO_MAMMUT_2		10
-#define BT_DO_NET			11
-#define BT_DO_OPP_FIRES		12
-
-	uint8_t cmd_ret; 		/* END_TRAJ flags rules, see strat_base.h */
-	uint8_t cmd_args_checksum;
+	uint8_t cmd_ret; 		/* ACK and command return value, 
+							   END_TRAJ flags rules, see strat_base.h */
+	//uint8_t cmd_args_checksum;
 
 	/* strat info */
 	uint8_t color;
-	uint16_t done_flags;
-#define BT_DONE_MAMMUT_1	1
-#define BT_DONE_MAMMUT_2	2
-#define BT_DONE_FRESCO		4
-#define BT_DONE_NET			8
-#define BT_DONE_OPP_FIRES	16
+//	uint16_t done_flags;
+//#define BT_DONE_MAMMUT_1	1
+//#define BT_DONE_MAMMUT_2	2
+//#define BT_DONE_FRESCO		4
+//#define BT_DONE_NET			8
+//#define BT_DONE_OPP_FIRES	16
 
 	/* robot position */
 	int16_t x;

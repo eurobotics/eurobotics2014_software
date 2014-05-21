@@ -332,41 +332,46 @@ void strat_event_disable(void);
 void strat_start_match(uint8_t debug);
 
 
-
-/********************************************
- * in strat_fruits.c 
- *******************************************/
- /* TODO 2014*/
-
-/********************************************
- * in strat_fire.c 
- *******************************************/
-
-
-
-
 /********************************************
  * in strat_main.c 
  *******************************************/
 
-
-/* schedule a single strat event */
-void strat_schedule_single_event(void (*f)(void *), void * data);
-
-/* schedule a periodical strat event */
-void strat_schedule_periodical_event(void (*f)(void *), void * data);
-
-
-/* wait for traj end and  */
-void strat_wait_traj_end_event (void *why);
-
 /* auto possition depending on color */
 void strat_auto_position (void);
+
+/* match tasks */
+uint8_t strat_patrol_and_paint_fresco(void);
+uint8_t strat_paint_fresco(void);
+uint8_t strat_patrol_between(int16_t x1, int16_t y1,int16_t x2, int16_t y2);
+
+
+/********************************************
+ * in strat_event.c 
+ *******************************************/
+
+/*************** STRAT EVENT SCHEDULE FUNCTIONS *******************************/
+
+/* schedule a single strat tevent */
+void strat_event_schedule_single (void (*f)(void *), void * data);
+
+/* schedule a periodical strat tevent */
+void strat_event_schedule_periodical(void (*f)(void *), void * data);
+
+
+/*************** STRAT EVENT WRAPPER FUNCTIONS  *******************************/
+
+/* auto position event */
 void strat_auto_position_event (void *data);
 
-uint8_t patrol_and_paint_fresco(void);
-uint8_t paint_fresco(void);
-uint8_t patrol_between(int16_t x1, int16_t y1,int16_t x2, int16_t y2);
+/* trajectory functions */
+void strat_goto_xy_abs_event (void *data);
+
+/* match tasks */
+void strat_patrol_and_paint_fresco_event (void *data);
+void strat_paint_fresco_event (void *data);
+void strat_patrol_between_event (void *data);
+void strat_shoot_mamooth_event (void *data);
+
 
 
 #else /* HOST_VERSION_OA_TEST */

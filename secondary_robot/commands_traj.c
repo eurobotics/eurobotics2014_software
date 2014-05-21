@@ -69,7 +69,8 @@
 #include "../maindspic/strat_avoid.h"
 #include "strat.h"
 #include "../common/i2c_commands.h"
-#include "../common/bt_commands.h"
+//#include "../common/bt_commands.h"
+#include "bt_protocol.h"
 
 
 /**********************************************************/
@@ -792,6 +793,106 @@ parse_pgm_inst_t cmd_goto2 = {
 	},
 };
 
+
+/**********************************************************/
+/* Goto BT function */
+
+/* function called when cmd_goto is parsed successfully */
+static void cmd_bt_goto_parsed(void * parsed_result, void * data)
+{
+	struct cmd_goto_result * res = parsed_result;
+
+	/* TODO comment functions */
+
+	interrupt_traj_reset();
+	if (!strcmp_P(res->arg1, PSTR("a_rel"))) {
+		//bt_trajectory_a_rel(res->arg2, res->arg3);
+	}
+	else if (!strcmp_P(res->arg1, PSTR("d_rel"))) {
+		//bt_trajectory_d_rel(res->arg2, res->arg3);
+	}
+	else if (!strcmp_P(res->arg1, PSTR("a_abs"))) {
+		//bt_trajectory_a_abs(res->arg2, res->arg3);
+	}
+	else if (!strcmp_P(res->arg1, PSTR("a_to_xy"))) {
+		//bt_trajectory_turnto_xy(res->arg2, res->arg3, res->arg4);
+	}
+	else if (!strcmp_P(res->arg1, PSTR("a_behind_xy"))) {
+		//bt_trajectory_turnto_xy_behind(res->arg2, res->arg3, res->arg4);
+	}
+	else if (!strcmp_P(res->arg1, PSTR("xy_rel"))) {
+		//bt_trajectory_goto_xy_rel(res->arg2, res->arg3, res->arg4);
+	}
+	else if (!strcmp_P(res->arg1, PSTR("xy_abs"))) {
+		bt_trajectory_goto_xy_abs(res->arg2, res->arg3, res->arg4);
+	}
+	else if (!strcmp_P(res->arg1, PSTR("avoid"))) {
+		//bt_goto_and_avoid(res->arg2, res->arg3, res->arg4);
+		//err = bt_goto_and_avoid(res->arg2, res->arg3, TRAJ_FLAGS_STD, TRAJ_FLAGS_NO_NEAR);
+		//if (err != END_TRAJ && err != END_NEAR)
+		//	strat_hardstop();
+	}
+	else if (!strcmp_P(res->arg1, PSTR("avoid_fw"))) {
+		//bt_goto_and_avoid_forward(res->arg2, res->arg3, res->arg4);
+		//err = bt_goto_and_avoid_forward(res->arg2, res->arg3, TRAJ_FLAGS_STD, TRAJ_FLAGS_NO_NEAR);
+		//if (err != END_TRAJ && err != END_NEAR)
+		//	strat_hardstop();
+	}
+	else if (!strcmp_P(res->arg1, PSTR("avoid_bw"))) {
+		//bt_goto_and_avoid_backward(res->arg2, res->arg3, res->arg4);
+		//err = bt_goto_and_avoid_backward(res->arg2, res->arg3, TRAJ_FLAGS_STD, TRAJ_FLAGS_NO_NEAR);
+		//if (err != END_TRAJ && err != END_NEAR)
+		//	strat_hardstop();
+	}
+	else if (!strcmp_P(res->arg1, PSTR("xy_abs_fow"))) {
+		//bt_trajectory_goto_forward_xy_abs(res->arg2, res->arg3, res->arg4);
+	}
+	else if (!strcmp_P(res->arg1, PSTR("xy_abs_back"))) {
+		//bt_trajectory_goto_backward_xy_abs(res->arg2, res->arg3, res->arg4);
+	}
+	else if (!strcmp_P(res->arg1, PSTR("da_rel"))) {
+		//bt_trajectory_d_a_rel(res->arg2, res->arg3, res->arg4);
+	}
+}
+
+prog_char str_goto_arg0_bt[] = "bt_goto";
+parse_pgm_token_string_t cmd_goto_arg0_bt = TOKEN_STRING_INITIALIZER(struct cmd_goto_result, arg0, str_goto_arg0_bt);
+
+/* 1 params + checksum */
+prog_char help_bt_goto1[] = "Change orientation of the mainboard (+ checksum)";
+parse_pgm_inst_t cmd_bt_goto1 = {
+	.f = cmd_bt_goto_parsed,  /* function to call */
+	.data = NULL,      /* 2nd arg of func */
+	.help_str = help_bt_goto1,
+	.tokens = {        /* token list, NULL terminated */
+		(prog_void *)&cmd_goto_arg0_bt, 
+		(prog_void *)&cmd_goto_arg1_a, 
+		(prog_void *)&cmd_goto_arg2, 
+		(prog_void *)&cmd_goto_arg3,
+		NULL,
+	},
+};
+
+
+/* 2 params + checksum */
+parse_pgm_token_num_t cmd_goto_arg4 = TOKEN_NUM_INITIALIZER(struct cmd_goto_result, arg4, INT32);
+
+
+prog_char help_bt_goto2[] = "Go to a (x,y) or (d,a) position + checksum";
+parse_pgm_inst_t cmd_bt_goto2 = {
+	.f = cmd_bt_goto_parsed,  /* function to call */
+	.data = NULL,      /* 2nd arg of func */
+	.help_str = help_bt_goto2,
+	.tokens = {        /* token list, NULL terminated */
+		(prog_void *)&cmd_goto_arg0_bt, 
+		(prog_void *)&cmd_goto_arg1_b, 
+		(prog_void *)&cmd_goto_arg2,
+		(prog_void *)&cmd_goto_arg3, 
+		(prog_void *)&cmd_goto_arg4,
+		NULL,
+	},
+};
+
 /**********************************************************/
 /* Position tests */
 
@@ -828,10 +929,7 @@ static void cmd_position_parsed(void * parsed_result, void * data)
 		strat_auto_position ();
 	}
 	else if (!strcmp_P(res->arg1, PSTR("autoset"))) {
-		/* TODO simplify --> bt_protocol.c */
-		strat_schedule_single_event (strat_auto_position_event, NULL);
-		bt_set_cmd_id_and_checksum (BT_AUTOPOS, 0);
-		bt_send_status ();
+		bt_auto_position();
 	}
 	else {
 		/* else it's just a "show" */
@@ -954,7 +1052,7 @@ static void cmd_subtraj2_parsed(void *parsed_result, void *data)
 	uint8_t err = 0;
 
 	if (strcmp_P(res->arg1, PSTR("patrol_between")) == 0) {
-		err = patrol_between(res->arg2,res->arg3,res->arg4,res->arg5);
+		err = strat_patrol_between(res->arg2,res->arg3,res->arg4,res->arg5);
 	}
 
 	printf_P(PSTR("substrat returned %s\r\n"), get_err(err));

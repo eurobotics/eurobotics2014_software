@@ -188,7 +188,8 @@ extern parse_pgm_inst_t cmd_pt_list_show;
 
 extern parse_pgm_inst_t cmd_goto1;
 extern parse_pgm_inst_t cmd_goto2;
-extern parse_pgm_inst_t cmd_goto3;
+extern parse_pgm_inst_t cmd_bt_goto1;
+extern parse_pgm_inst_t cmd_bt_goto2;
 extern parse_pgm_inst_t cmd_position;
 extern parse_pgm_inst_t cmd_position_set;
 
@@ -321,6 +322,8 @@ parse_pgm_ctx_t main_ctx[] = {
 
 	(parse_pgm_inst_t *)&cmd_goto1,
 	(parse_pgm_inst_t *)&cmd_goto2,
+	(parse_pgm_inst_t *)&cmd_bt_goto1,
+	(parse_pgm_inst_t *)&cmd_bt_goto2,
 	(parse_pgm_inst_t *)&cmd_position,
 	(parse_pgm_inst_t *)&cmd_position_set,
 	(parse_pgm_inst_t *)&cmd_subtraj1,

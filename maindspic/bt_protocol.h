@@ -57,10 +57,10 @@ void bt_beacon_req_status(void);
 void bt_robot_2nd_cmd_no_wait_ack (uint8_t cmd_id, int16_t arg0, int16_t arg1);
 
 /* send command, and return after received ack */
-void bt_robot_2nd_cmd (uint8_t cmd_id, int16_t arg0, int16_t arg1);
+uint8_t bt_robot_2nd_cmd (uint8_t cmd_id, int16_t arg0, int16_t arg1);
 
 /* auto set possition */
-inline void bt_robot_2nd_autopos (void);
+void bt_robot_2nd_autopos (void);
 
 /* set color */
 void bt_robot_2nd_set_color (void);

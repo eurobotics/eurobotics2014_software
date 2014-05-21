@@ -1,9 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?><project-private xmlns="http://www.netbeans.org/ns/project-private/1">
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/1"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/1">
-        <file>file:/media/datos/Datos/Proyectos/ARC_Eurobotics/eurobotics/eurobot/eurobot2014/software/secondary_robot/beacon.c</file>
         <file>file:/media/datos/Datos/Proyectos/ARC_Eurobotics/eurobotics/eurobot/eurobot2014/software/secondary_robot/cmdline.c</file>
         <file>file:/media/datos/Datos/Proyectos/ARC_Eurobotics/eurobotics/eurobot/eurobot2014/software/secondary_robot/main.c</file>
         <file>file:/media/datos/Datos/Proyectos/ARC_Eurobotics/eurobotics/eurobot/eurobot2014/software/secondary_robot/commands_mainboard.c</file>
+        <file>file:/media/datos/Datos/Proyectos/ARC_Eurobotics/eurobotics/eurobot/eurobot2014/software/secondary_robot/commands_traj.c</file>
+        <file>file:/media/datos/Datos/Proyectos/ARC_Eurobotics/eurobotics/eurobot/eurobot2014/software/secondary_robot/bt_protocol.h</file>
+        <file>file:/media/datos/Datos/Proyectos/ARC_Eurobotics/eurobotics/eurobot/eurobot2014/software/secondary_robot/strat.c</file>
+        <file>file:/media/datos/Datos/Proyectos/ARC_Eurobotics/eurobotics/eurobot/eurobot2014/software/secondary_robot/strat_main.c</file>
+        <file>file:/media/datos/Datos/Proyectos/ARC_Eurobotics/eurobotics/eurobot/eurobot2014/software/secondary_robot/bt_protocol.c</file>
+        <file>file:/media/datos/Datos/Proyectos/ARC_Eurobotics/eurobotics/eurobot/eurobot2014/software/secondary_robot/strat.h</file>
+        <file>file:/media/datos/Datos/Proyectos/ARC_Eurobotics/eurobotics/eurobot/eurobot2014/software/secondary_robot/strat_event.c</file>
     </open-files>
 </project-private>

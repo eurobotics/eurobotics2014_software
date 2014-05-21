@@ -393,12 +393,12 @@ uint8_t strat_main(void)
 				// WHILE (NO COMMAND FROM MASTER ROBOT) 
 				while(!cmdline_keypressed())
 				{	
-					patrol_and_paint_fresco();
+					strat_patrol_and_paint_fresco();
 				}
 			#else
 				while(!cmdline_keypressed())
 				{	
-					patrol_and_paint_fresco();
+					strat_patrol_and_paint_fresco();
 				}
 			#endif
 			beaconboard.opponent1_x = COLOR_X(750);
@@ -411,7 +411,7 @@ uint8_t strat_main(void)
 
 		/* Go to mamooths and shoot */
 		case 3:
-			err=shoot_mamooth(3,3);
+			err=strat_shoot_mamooth(3,3);
 			if (!TRAJ_SUCCESS(err))
 					ERROUT(err);
 					

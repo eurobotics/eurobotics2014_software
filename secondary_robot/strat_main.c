@@ -74,55 +74,6 @@
 
 /* Add here the main strategic, the inteligence of robot */
 
-/**
- * STRAT EVENTS 
- */
-
-/* schedule a single strat tevent */
-void strat_schedule_single_event(void (*f)(void *), void * data)
-{
-	uint8_t flags;
-	int8_t ret;
-
-	/* delete current event */
-	scheduler_del_event(mainboard.strat_event);
-
-	/* add event */
-	IRQ_LOCK(flags);
-	ret  = scheduler_add_single_event_priority(f, data, 
-											   EVENT_PERIOD_STRAT/SCHEDULER_UNIT, EVENT_PRIORITY_STRAT_EVENT);
-	mainboard.strat_event = ret;
-	IRQ_UNLOCK(flags);
-}
-
-/* schedule a periodical strat tevent */
-void strat_schedule_periodical_event(void (*f)(void *), void * data)
-{
-	uint8_t flags;
-	int8_t ret;
-
-	/* delete current event */
-	scheduler_del_event(mainboard.strat_event);
-
-	/* add event */
-	IRQ_LOCK(flags);
-	ret  = scheduler_add_periodical_event_priority(f, data,
-			EVENT_PERIOD_STRAT/SCHEDULER_UNIT, EVENT_PRIORITY_STRAT_EVENT);
-	mainboard.strat_event = ret;
-	IRQ_UNLOCK(flags);
-}
-
-
-/* wait for traj end event */
-void strat_wait_traj_end_event (void *data)
-{
-	uint16_t *__data = data;
-
-	uint8_t ret = wait_traj_end ((uint8_t)__data[0]);
-
-	/* return thru bt protocol */	
-	bt_set_cmd_ret (ret);
-}
 
 /* auto possition depending on color */
 void strat_auto_position (void)
@@ -187,23 +138,7 @@ intr:
 }
 
 
-/* auto position event */
-void strat_auto_position_event (void *data)
-{
-	strat_auto_position ();
-
-	/* return thru bt protocol */	
-	bt_set_cmd_ret (END_TRAJ);
-
-	/* print end pos */
-	printf_P(PSTR("x=%.2f y=%.2f a=%.2f\r\n"), 
-		 position_get_x_double(&mainboard.pos),
-		 position_get_y_double(&mainboard.pos),
-		 DEG(position_get_a_rad_double(&mainboard.pos)));
-}
-
-
-uint8_t patrol_and_paint_fresco(void)
+uint8_t strat_patrol_and_paint_fresco(void)
 {
 	#define BEGIN_FRESCO_X	1295
 	#define REFERENCE_DISTANCE_TO_ROBOT 800
@@ -216,22 +151,22 @@ uint8_t patrol_and_paint_fresco(void)
 	get_opponent2_da(&d2,&a2);
 	
 	if(d2>REFERENCE_DISTANCE_TO_ROBOT && d1>REFERENCE_DISTANCE_TO_ROBOT && fresco_done!=1)
-		return (fresco_done=paint_fresco());
+		return (fresco_done=strat_paint_fresco());
 		
 	else
 	{
 		get_opponent1_xy(&opp1_x, &opp1_y);
 		get_opponent2_xy(&opp2_x, &opp2_y);
 		if((opp1_y<300) || (opp2_y<300) && (fresco_done!=1))
-			return (fresco_done=paint_fresco());
+			return (fresco_done=strat_paint_fresco());
 			
 		else
-			return patrol_between(COLOR_X(BEGIN_FRESCO_X),300,COLOR_X(BEGIN_FRESCO_X),900);
+			return strat_patrol_between(COLOR_X(BEGIN_FRESCO_X),300,COLOR_X(BEGIN_FRESCO_X),900);
 	}
 }
 
 
-uint8_t paint_fresco(void)
+uint8_t strat_paint_fresco(void)
 {
 	static uint8_t state = 1;
 	uint16_t old_spdd, old_spda, temp_spdd, temp_spda;
@@ -323,7 +258,7 @@ end:
 }
 
 
-uint8_t patrol_between(int16_t x1, int16_t y1,int16_t x2, int16_t y2)
+uint8_t strat_patrol_between(int16_t x1, int16_t y1,int16_t x2, int16_t y2)
 {	
 	#define REFERENCE_DISTANCE_TO_ROBOT 800
 	int8_t opp1_there, r2nd_there;
@@ -370,7 +305,7 @@ end:
 	return err;
 }
 
-uint8_t shoot_mamooth(uint8_t balls_mamooth_1, uint8_t balls_mamooth_2)
+uint8_t strat_shoot_mamooth(uint8_t balls_mamooth_1, uint8_t balls_mamooth_2)
 {
 #define BEGIN_LINE_Y 	450
 #define BEGIN_MAMOOTH_X	750

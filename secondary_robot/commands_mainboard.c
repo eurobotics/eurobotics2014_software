@@ -65,7 +65,7 @@
 #include <parse_num.h>
 
 #include "../common/i2c_commands.h"
-#include "../common/bt_commands.h"
+//#include "../common/bt_commands.h"
 
 #include "main.h"
 #include "sensor.h"
@@ -77,7 +77,7 @@
 #include "actuator.h"
 #include "beacon.h"
 #include "robotsim.h"
-//#include "bt_protocol.h"
+#include "bt_protocol.h"
 
 extern int8_t beacon_connected;
 
@@ -419,8 +419,7 @@ static void cmd_color_parsed(void *parsed_result, void *data)
 	struct cmd_color_result *res = (struct cmd_color_result *) parsed_result;
 
 	if (!strcmp_P(res->color, PSTR("yellow"))) {
-		mainboard.our_color = I2C_COLOR_YELLOW;
-	}
+		mainboard.our_color = I2C_COLOR_YELLOW;	}
 	else if (!strcmp_P(res->color, PSTR("red"))) {
 		mainboard.our_color = I2C_COLOR_RED;
 	}
@@ -431,8 +430,7 @@ static void cmd_color_parsed(void *parsed_result, void *data)
 			printf("color is RED\n\r");
 	}
 
-	bt_set_cmd_id_and_checksum (BT_SET_COLOR, mainboard.our_color);
-	bt_send_status ();
+	bt_set_color (mainboard.our_color);
 
 	printf_P(PSTR("Done\r\n"));
 }
@@ -1011,67 +1009,6 @@ struct cmd_status_result {
 };
 
 
-/* send data in norma mode, any protocol is used */
-void uart_send_buffer (uint8_t *buff, uint16_t length) 
-{
-  uint16_t i;
-
-	for(i=0; i<length; i++){
-#ifndef HOST_VERSION
-		uart_send(CMDLINE_UART, buff[i]);
-#else
-		robotsim_uart_send_BT (buff[i]);
-#endif
-	}	
-}
-
-void bt_send_status (void)
-{
-	struct bt_robot_2nd_status_ans ans;
-    uint8_t flags;
-	//static uint16_t i=0;
-
-	/* send status info */
-	IRQ_LOCK(flags);
-
-	/* robot possition */
-	ans.x = position_get_x_s16(&mainboard.pos);
-	ans.y = position_get_y_s16(&mainboard.pos);
-	ans.a_abs = position_get_a_deg_s16(&mainboard.pos);
-
-	/* opponent 1 */
-	ans.opponent1_x = beaconboard.opponent1_x;
-	ans.opponent1_y = beaconboard.opponent1_y;
-
-	/* opponent 2 */
-	ans.opponent2_x = beaconboard.opponent2_x;
-	ans.opponent2_y = beaconboard.opponent2_y;
-
-	ans.color = mainboard.our_color;
-
-	/* XXX cmd feedback: must be filld by cmds */
-	ans.cmd_id = robot_2nd.cmd_id;
-	ans.cmd_ret = robot_2nd.cmd_ret;
-	ans.cmd_args_checksum = robot_2nd.cmd_args_checksum;
-	IRQ_UNLOCK(flags);
-
-
-//#define DEBUG_STATUS
-#ifdef DEBUG_STATUS
-	/* fill answer structure */
-	ans.x = ans.opponent_x = ans.opponent2_x = i++;
-	ans.y = ans.opponent_y = ans.opponent2_y = i + 1000;
-	ans.a_abs = i + 2000;
-#endif
-
-	ans.checksum = bt_checksum ((uint8_t *)&ans, sizeof (ans)-sizeof(ans.checksum));
-
-	/* send answer */
-	uint8_t sync_header[] = BT_ROBOT_2ND_SYNC_HEADER;
-	uart_send_buffer (sync_header, sizeof(sync_header)); 
-	uart_send_buffer ((uint8_t*) &ans, sizeof(ans)); 
-}
-
 /* function called when cmd_opponent is parsed successfully */
 static void cmd_status_parsed(void * parsed_result, void *data)
 {
@@ -1079,6 +1016,8 @@ static void cmd_status_parsed(void * parsed_result, void *data)
 	uint8_t flags;
 	int16_t checksum = 0;
 	double x, y, a, d;
+
+	/* received status from main robot */
 
 	/* test checksum */
 	checksum = res->robot_x + res->robot_y + res->robot_a_abs;
@@ -1127,6 +1066,7 @@ static void cmd_status_parsed(void * parsed_result, void *data)
 	robot_2nd.opponent2_d = d;
 	IRQ_UNLOCK(flags);
 
+	/* send status of sencondary robot */
 send_status:
 	bt_send_status();
 }
