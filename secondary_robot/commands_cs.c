@@ -63,6 +63,10 @@
 #include "cs.h"
 #include "cmdline.h"
 
+#ifdef HOST_VERSION
+#define COMPILE_COMMANDS_CS
+#endif
+
 struct csb_list {
 	const prog_char *name;
 	struct cs_block *csb;

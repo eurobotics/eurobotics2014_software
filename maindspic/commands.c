@@ -32,6 +32,8 @@
 #include <aversive/pgmspace.h>
 #include <parse.h>
 
+#ifndef HOST_VERSION
+
 #define COMPILE_COMMANDS_GEN
 //#define COMPILE_COMMANDS_GEN_OPTIONALS
 //#define COMPILE_COMMANDS_CS
@@ -39,6 +41,16 @@
 //#define COMPILE_COMMANDS_MAINBOARD_OPTIONALS
 #define COMPILE_COMMANDS_TRAJ
 //#define COMPILE_COMMANDS_TRAJ_OPTIONALS
+
+#else /* HOST_VERSION */
+#define COMPILE_COMMANDS_GEN
+#define COMPILE_COMMANDS_GEN_OPTIONALS
+#define COMPILE_COMMANDS_CS
+#define COMPILE_COMMANDS_MAINBOARD
+#define COMPILE_COMMANDS_MAINBOARD_OPTIONALS
+#define COMPILE_COMMANDS_TRAJ
+#define COMPILE_COMMANDS_TRAJ_OPTIONALS
+#endif
 
 #define COMPILE_CODE
 #ifdef COMPILE_CODE /*---------------------------------------------------------------------------------------------*/
@@ -111,6 +123,8 @@ extern parse_pgm_inst_t cmd_start;
 extern parse_pgm_inst_t cmd_color;
 extern parse_pgm_inst_t cmd_beacon;
 extern parse_pgm_inst_t cmd_robot_2nd;
+extern parse_pgm_inst_t cmd_robot_2nd_goto1;
+extern parse_pgm_inst_t cmd_robot_2nd_goto2;
 extern parse_pgm_inst_t cmd_slavedspic;
 
 #ifdef COMPILE_COMMANDS_MAINBOARD_OPTIONALS /*--------------------------------*/
@@ -205,9 +219,9 @@ parse_pgm_ctx_t main_ctx[] = {
     (parse_pgm_inst_t *) & cmd_pwm_servo_show_range,
     (parse_pgm_inst_t *) & cmd_dac_mc,
 
-#ifdef COMPILE_COMMANDS_MAINBOARD_OPTIONALS /*--------------------------------*/
+#ifdef COMPILE_COMMANDS_GEN_OPTIONALS /*--------------------------------*/
     (parse_pgm_inst_t *) & cmd_adc,
-#endif /* COMPILE_COMMANDS_MAINBOARD_OPTIONALS --------------------------------*/
+#endif /* COMPILE_COMMANDS_GEN_OPTIONALS --------------------------------*/
 
     (parse_pgm_inst_t *) & cmd_sensor,
     (parse_pgm_inst_t *) & cmd_wt11,
@@ -249,6 +263,8 @@ parse_pgm_ctx_t main_ctx[] = {
     (parse_pgm_inst_t *) & cmd_color,
     (parse_pgm_inst_t *) & cmd_beacon,
     (parse_pgm_inst_t *) & cmd_robot_2nd,
+    (parse_pgm_inst_t *) & cmd_robot_2nd_goto1,
+    (parse_pgm_inst_t *) & cmd_robot_2nd_goto2,
     (parse_pgm_inst_t *) & cmd_slavedspic,
     (parse_pgm_inst_t *) & cmd_strat_event,
 

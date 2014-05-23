@@ -82,6 +82,11 @@
 #include "strat_utils.h"
 
 
+#ifdef HOST_VERSION
+#define COMPILE_COMMANDS_MAINBOARD
+#define COMPILE_COMMANDS_MAINBOARD_OPTIONALS
+#endif
+
 static uint8_t beacon_addr [] = {0x00, 0x07 ,0x80, 0x85, 0x04, 0x70};
 static uint8_t robot_2nd_addr [] = {0x00, 0x07 ,0x80, 0x9A, 0xB8, 0x73};
 
@@ -338,6 +343,7 @@ static void cmd_init_parsed(void *parsed_result, void *data)
 
 	/* open bt links */
 #ifndef HOST_VERSION
+	wt11_reset_mux();
 	wt11_open_link_mux(robot_2nd_addr, &robot_2nd.link_id);
 	wt11_open_link_mux(beacon_addr, &beaconboard.link_id);
 #else
@@ -780,17 +786,19 @@ struct cmd_robot_2nd_result
 
 static void cmd_robot_2nd_parsed(void * parsed_result, void * data)
 {
-   int16_t c;
-   int8_t cmd = 0;
-   struct vt100 vt100;
+   	int16_t c;
+   	int8_t cmd = 0;
+   	struct vt100 vt100;
 	uint16_t mainboard_flags;
 	uint8_t flags;
+	uint8_t err = 0;
 
-   struct cmd_robot_2nd_result *res = parsed_result;
+   	struct cmd_robot_2nd_result *res = parsed_result;
 
-   vt100_init(&vt100);
+   	vt100_init(&vt100);
 	
-	if(!strcmp_P(res->arg1, "raw")) {
+	if(!strcmp_P(res->arg1, "raw")) 
+	{
 
 		/* save flags and disable BT_PROTO */
 		IRQ_LOCK (flags);
@@ -839,11 +847,20 @@ static void cmd_robot_2nd_parsed(void * parsed_result, void * data)
 #else
 		wt11_close_link_mux(robot_2nd.link_id);
 #endif
-    else if (!strcmp_P(res->arg1, "color"))
-		bt_robot_2nd_set_color ();
+    else if (!strcmp_P(res->arg1, "color")) {
+		if (bt_robot_2nd_set_color ())
+			printf_P(PSTR("bt cmd ERROR"));
+	}
 
-    else if (!strcmp_P(res->arg1, "autopos"))
-		bt_robot_2nd_autopos ();
+    else if (!strcmp_P(res->arg1, "autopos")) {
+
+		if(bt_robot_2nd_autopos ())
+			printf_P(PSTR("bt cmd ERROR"));
+
+		/* wait end traj */
+		err = bt_robot_2nd_wait_end();	
+	    printf_P(PSTR("traj returned %s\r\n"), get_err(err));
+	}
 
     else if (!strcmp_P(res->arg1, "status"))
 		bt_robot_2nd_req_status ();
@@ -892,6 +909,138 @@ parse_pgm_inst_t cmd_robot_2nd = {
         NULL,
     },
 };
+
+
+/**********************************************************/
+/* Robot 2nd goto function */
+
+/* this structure is filled when cmd_goto is parsed successfully */
+struct cmd_robot_2nd_goto_result
+{
+    fixed_string_t arga;
+    fixed_string_t arg0;
+    fixed_string_t arg1;
+    int32_t arg2;
+    int32_t arg3;
+    int32_t arg4;
+};
+
+/* function called when cmd_goto is parsed successfully */
+static void cmd_robot_2nd_goto_parsed(void * parsed_result, void * data)
+{
+    struct cmd_robot_2nd_goto_result * res = parsed_result;
+    uint8_t err = END_ERROR;
+
+    /* TODO commented functions */
+
+    if (!strcmp_P(res->arg1, PSTR("a_rel")))
+    {
+        //err = bt_robot_2nd_goto_a_rel(res->arg2);
+    }
+    else if (!strcmp_P(res->arg1, PSTR("d_rel")))
+    {
+        //err = bt_robot_2nd_goto_d_rel(res->arg2);
+    }
+    else if (!strcmp_P(res->arg1, PSTR("a_abs")))
+    {
+        //err = bt_robot_2nd_goto_a_abs(res->arg2);
+    }
+    else if (!strcmp_P(res->arg1, PSTR("a_to_xy")))
+    {
+        //err = bt_robot_2nd_goto_turnto_xy(res->arg2, res->arg3);
+    }
+    else if (!strcmp_P(res->arg1, PSTR("a_behind_xy")))
+    {
+        //err = bt_robot_2nd_goto_turnto_xy_behind(res->arg2, res->arg3);
+    }
+    else if (!strcmp_P(res->arg1, PSTR("xy_rel")))
+    {
+        //err = bt_robot_2nd_goto_xy_rel(res->arg2, res->arg3);
+    }
+    else if (!strcmp_P(res->arg1, PSTR("xy_abs")))
+    {
+        err = bt_robot_2nd_goto_xy_abs(res->arg2, res->arg3);
+    }
+    else if (!strcmp_P(res->arg1, PSTR("avoid")))
+    {
+        //err = bt_robot_2nd_goto_and_avoid(res->arg2, res->arg3, TRAJ_FLAGS_STD, TRAJ_FLAGS_NO_NEAR);
+    }
+    else if (!strcmp_P(res->arg1, PSTR("avoid_fw")))
+    {
+        //err = bt_robot_2nd_goto_and_avoid_forward(res->arg2, res->arg3, TRAJ_FLAGS_STD, TRAJ_FLAGS_NO_NEAR);
+    }
+    else if (!strcmp_P(res->arg1, PSTR("avoid_bw")))
+    {
+        //err = bt_robot_2nd_goto_and_avoid_backward(res->arg2, res->arg3, TRAJ_FLAGS_STD, TRAJ_FLAGS_NO_NEAR);
+    }
+    else if (!strcmp_P(res->arg1, PSTR("xy_abs_fow")))
+    {
+        //err = bt_robot_2nd_goto_forward_xy_abs(res->arg2, res->arg3);
+    }
+    else if (!strcmp_P(res->arg1, PSTR("xy_abs_back")))
+    {
+        //err = bt_robot_2nd_goto_backward_xy_abs(res->arg2, res->arg3);
+    }
+    else if (!strcmp_P(res->arg1, PSTR("da_rel")))
+    {
+        //err = bt_robot_2nd_goto_d_a_rel(res->arg2, res->arg3);
+    }
+
+	/* check if command has been received */
+	if (err)
+		printf_P(PSTR("bt cmd ERROR"));
+
+	/* wait end traj */
+	err = bt_robot_2nd_wait_end();
+    printf_P(PSTR("traj returned %s\r\n"), get_err(err));
+}
+
+prog_char str_robot_2nd_goto_arga[] = "robot_2nd";
+parse_pgm_token_string_t cmd_robot_2nd_goto_arga = TOKEN_STRING_INITIALIZER(struct cmd_robot_2nd_goto_result, arga, str_robot_2nd_goto_arga);
+
+prog_char str_robot_2nd_goto_arg0[] = "goto";
+parse_pgm_token_string_t cmd_robot_2nd_goto_arg0 = TOKEN_STRING_INITIALIZER(struct cmd_robot_2nd_goto_result, arg0, str_robot_2nd_goto_arg0);
+prog_char str_robot_2nd_goto_arg1_a[] = "d_rel#a_rel#a_abs";
+parse_pgm_token_string_t cmd_robot_2nd_goto_arg1_a = TOKEN_STRING_INITIALIZER(struct cmd_robot_2nd_goto_result, arg1, str_robot_2nd_goto_arg1_a);
+parse_pgm_token_num_t cmd_robot_2nd_goto_arg2 = TOKEN_NUM_INITIALIZER(struct cmd_robot_2nd_goto_result, arg2, INT32);
+
+/* 1 params */
+prog_char help_robot_2nd_goto1[] = "Change orientation of the mainboard";
+parse_pgm_inst_t cmd_robot_2nd_goto1 = {
+    .f = cmd_robot_2nd_goto_parsed, /* function to call */
+    .data = NULL, /* 2nd arg of func */
+    .help_str = help_robot_2nd_goto1,
+    .tokens =
+    { /* token list, NULL terminated */
+		(prog_void *) & cmd_robot_2nd_goto_arga,
+        (prog_void *) & cmd_robot_2nd_goto_arg0,
+        (prog_void *) & cmd_robot_2nd_goto_arg1_a,
+        (prog_void *) & cmd_robot_2nd_goto_arg2,
+        NULL,
+    },
+};
+
+prog_char str_robot_2nd_goto_arg1_b[] = "xy_rel#xy_abs#xy_abs_fow#xy_abs_back#da_rel#a_to_xy#avoid#avoid_fw#avoid_bw#a_behind_xy";
+parse_pgm_token_string_t cmd_robot_2nd_goto_arg1_b = TOKEN_STRING_INITIALIZER(struct cmd_robot_2nd_goto_result, arg1, str_robot_2nd_goto_arg1_b);
+parse_pgm_token_num_t cmd_robot_2nd_goto_arg3 = TOKEN_NUM_INITIALIZER(struct cmd_robot_2nd_goto_result, arg3, INT32);
+
+/* 2 params */
+prog_char help_robot_2nd_goto2[] = "Go to a (x,y) or (d,a) position";
+parse_pgm_inst_t cmd_robot_2nd_goto2 = {
+    .f = cmd_robot_2nd_goto_parsed, /* function to call */
+    .data = NULL, /* 2nd arg of func */
+    .help_str = help_robot_2nd_goto2,
+    .tokens =
+    { /* token list, NULL terminated */
+		(prog_void *) & cmd_robot_2nd_goto_arga,
+        (prog_void *) & cmd_robot_2nd_goto_arg0,
+        (prog_void *) & cmd_robot_2nd_goto_arg1_b,
+        (prog_void *) & cmd_robot_2nd_goto_arg2,
+        (prog_void *) & cmd_robot_2nd_goto_arg3,
+        NULL,
+    },
+};
+
 
 
 /**********************************************************/

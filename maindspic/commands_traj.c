@@ -70,6 +70,10 @@
 #include "../common/i2c_commands.h"
 #include "bt_protocol.h"
 
+#ifdef HOST_VERSION
+#define COMPILE_COMMANDS_TRAJ
+#define COMPILE_COMMANDS_TRAJ_OPTIONALS
+#endif
 
 /**********************************************************/
 /* Traj_Speeds for trajectory_manager */

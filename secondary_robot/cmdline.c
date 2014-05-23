@@ -75,15 +75,18 @@ static void valid_buffer(const char *buf, uint8_t size)
 
 	ret = parse(main_ctx, buf);
 	
-	if (ret != PARSE_SUCCESS)
-		bt_status_set_cmd_ack (END_ERROR);
-
-	if (ret == PARSE_AMBIGUOUS)
+	if (ret == PARSE_AMBIGUOUS) {
 		printf_P(PSTR("Ambiguous command\r\n"));
-	else if (ret == PARSE_NOMATCH)
+		bt_status_set_cmd_ack (END_ERROR);
+	}	
+	else if (ret == PARSE_NOMATCH) {
 		printf_P(PSTR("Command not found\r\n"));
-	else if (ret == PARSE_BAD_ARGS)
+		bt_status_set_cmd_ack (END_ERROR);
+	}	
+	else if (ret == PARSE_BAD_ARGS) {
 		printf_P(PSTR("Bad arguments\r\n"));
+		bt_status_set_cmd_ack (END_ERROR);
+	}
 }
 
 /* complete commands */

@@ -60,16 +60,16 @@ void bt_robot_2nd_cmd_no_wait_ack (uint8_t cmd_id, int16_t arg0, int16_t arg1);
 uint8_t bt_robot_2nd_cmd (uint8_t cmd_id, int16_t arg0, int16_t arg1);
 
 /* auto set possition */
-void bt_robot_2nd_autopos (void);
+uint8_t bt_robot_2nd_autopos (void);
 
 /* set color */
-void bt_robot_2nd_set_color (void);
+uint8_t bt_robot_2nd_set_color (void);
 
 /* goto xy_abs */
-void bt_robot_2nd_goto_xy_abs (int16_t x, int16_t y);
+uint8_t bt_robot_2nd_goto_xy_abs (int16_t x, int16_t y);
 
 /* goto xy_rel */
-void bt_robot_2nd_goto_xy_rel (int16_t x, int16_t y);
+uint8_t bt_robot_2nd_goto_xy_rel (int16_t x, int16_t y);
 
 /* wait for robot 2nd ends */
 uint8_t bt_robot_2nd_wait_end (void);

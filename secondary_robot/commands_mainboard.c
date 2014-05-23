@@ -79,6 +79,11 @@
 #include "robotsim.h"
 #include "bt_protocol.h"
 
+#ifdef HOST_VERSION
+#define COMPILE_COMMANDS_MAINBOARD
+#define COMPILE_COMMANDS_MAINBOARD_OPTIONALS
+#endif
+
 extern int8_t beacon_connected;
 
 struct cmd_event_result {
@@ -218,7 +223,7 @@ static void cmd_opponent_parsed(void *parsed_result, void *data)
 		opp1 = get_opponent1_xyda(&x, &y, &d, &a);
 		opp2 = get_opponent2_xyda(&x2, &y2, &d2, &a2);
 		r2nd = get_robot_2nd_xyda(&x_r2nd, &y_r2nd, &d_r2nd, &a_r2nd);
-    get_robot_2nd_a_abs(&a_abs_r2nd);
+    	get_robot_2nd_a_abs(&a_abs_r2nd);
 		
 		if (opp1 == -1)
 			printf_P(PSTR("opp1 not there"));
@@ -1038,7 +1043,7 @@ static void cmd_status_parsed(void * parsed_result, void *data)
 	robot_2nd.x = res->robot_x;
 	robot_2nd.y = res->robot_y;
 	robot_2nd.a_abs = res->robot_a_abs;
-	robot_2nd.a = a;
+	robot_2nd.a = DEG(a);
 	robot_2nd.d = d;
 	IRQ_UNLOCK(flags);
 
@@ -1050,7 +1055,7 @@ static void cmd_status_parsed(void * parsed_result, void *data)
 	IRQ_LOCK(flags);
 	robot_2nd.opponent1_x = res->opp1_x;
 	robot_2nd.opponent1_y = res->opp1_y;
-	robot_2nd.opponent1_a = a;
+	robot_2nd.opponent1_a = DEG(a);
 	robot_2nd.opponent1_d = d;
 	IRQ_UNLOCK(flags);
 
@@ -1062,7 +1067,7 @@ static void cmd_status_parsed(void * parsed_result, void *data)
 	IRQ_LOCK(flags);
 	robot_2nd.opponent2_x = res->opp2_x;
 	robot_2nd.opponent2_y = res->opp2_y;
-	robot_2nd.opponent2_a = a;
+	robot_2nd.opponent2_a = DEG(a);
 	robot_2nd.opponent2_d = d;
 	IRQ_UNLOCK(flags);
 

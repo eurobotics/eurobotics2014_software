@@ -65,6 +65,11 @@
 #include "sensor.h"
 #include "wt11.h"
 
+#ifdef HOST_VERSION
+#define COMPILE_COMMANDS_GEN
+#define COMPILE_COMMANDS_GEN_OPTIONALS
+#endif
+
 /**********************************************************/
 /* Reset */
 
@@ -343,7 +348,7 @@ parse_pgm_inst_t cmd_dac_mc = {
 	},
 };
 
-#ifdef COMPILE_COMMANDS_MAINBOARD_OPTIONALS /*--------------------------------*/
+#ifdef COMPILE_COMMANDS_GEN_OPTIONALS /*--------------------------------*/
 
 /**********************************************************/
 /* Adcs tests */
@@ -394,7 +399,7 @@ parse_pgm_inst_t cmd_adc = {
 	},
 };
 
-#endif /* COMPILE_COMMANDS_MAINBOARD_OPTIONALS --------------------------------*/
+#endif /* COMPILE_COMMANDS_GEN_OPTIONALS --------------------------------*/
 
 
 /**********************************************************/

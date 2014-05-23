@@ -4,8 +4,8 @@ TARGET = main
 AVERSIVE_DIR = ../libs/aversive4dspic
 #AVERSIVE_DIR = ../libs/microb_2010
 
-SRC  = $(TARGET).c cmdline.c commands_gen.c
-SRC += commands_cs.c commands_mainboard.c commands_traj.c commands.c
+SRC  = $(TARGET).c cmdline.c
+SRC += commands_gen.c commands_cs.c commands_mainboard.c commands_traj.c commands.c
 SRC += i2c_mem.c i2c_protocol.c sensor.c actuator.c cs.c
 SRC += strat_utils.c strat_base.c strat_avoid.c strat.c strat_main.c strat_event.c
 SRC += bt_protocol.c

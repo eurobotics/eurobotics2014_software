@@ -239,6 +239,7 @@ static void beacon_update(void)
        beaconboard.opponent2_d = oppd;
        IRQ_UNLOCK(flags);
 
+#if 0
        /* update robot mate */
        IRQ_LOCK(flags);
        if (robot_2nd.x == I2C_OPPONENT_NOT_THERE) {
@@ -253,6 +254,7 @@ static void beacon_update(void)
                robot_2nd.a += 360;
        robot_2nd.d = oppd;
        IRQ_UNLOCK(flags);
+#endif
 }
 
 /* must be called periodically */

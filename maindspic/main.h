@@ -44,7 +44,6 @@
 
 #include "../common/i2c_commands.h"
 
-
 /* SOME USEFUL MACROS AND VALUES  *********************************************/
 
 /* NUMBER OF ROBOTS TO TRACK */

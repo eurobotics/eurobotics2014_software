@@ -32,6 +32,8 @@
 #include <aversive/pgmspace.h>
 #include <parse.h>
 
+#ifndef HOST_VERSION
+
 #define COMPILE_COMMANDS_GEN
 //#define COMPILE_COMMANDS_GEN_OPTIONALS
 //#define COMPILE_COMMANDS_CS
@@ -39,6 +41,17 @@
 //#define COMPILE_COMMANDS_MAINBOARD_OPTIONALS
 #define COMPILE_COMMANDS_TRAJ
 //#define COMPILE_COMMANDS_TRAJ_OPTIONALS
+
+#else /* HOST_VERSION */
+#define COMPILE_COMMANDS_GEN
+#define COMPILE_COMMANDS_GEN_OPTIONALS
+#define COMPILE_COMMANDS_CS
+#define COMPILE_COMMANDS_MAINBOARD
+#define COMPILE_COMMANDS_MAINBOARD_OPTIONALS
+#define COMPILE_COMMANDS_TRAJ
+#define COMPILE_COMMANDS_TRAJ_OPTIONALS
+#endif /* !HOST_VERSION */
+
 
 #ifndef HOST_VERSION
 #define COMPILE_COMMANDS_AX12
@@ -69,9 +82,9 @@ extern parse_pgm_inst_t cmd_pwm_servo;
 extern parse_pgm_inst_t cmd_pwm_servo_show_range;
 extern parse_pgm_inst_t cmd_pwm;
 
-#ifdef COMPILE_COMMANDS_MAINBOARD_OPTIONALS /*--------------------------------*/
+#ifdef COMPILE_COMMANDS_GEN_OPTIONALS /*--------------------------------*/
 extern parse_pgm_inst_t cmd_adc;
-#endif /* COMPILE_COMMANDS_MAINBOARD_OPTIONALS --------------------------------*/
+#endif /* COMPILE_COMMANDS_GEN_OPTIONALS --------------------------------*/
 
 extern parse_pgm_inst_t cmd_sensor;
 extern parse_pgm_inst_t cmd_log;

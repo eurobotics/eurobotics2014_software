@@ -366,12 +366,12 @@ uint8_t bt_robot_2nd_cmd (uint8_t cmd_id, int16_t arg0, int16_t arg1)
 	ret = BT_WAIT_COND_OR_TIMEOUT( bt_robot_2nd_test_ack (), 250);
 
 	if (!ret) {// && nb_tries--) {
-		ERROR (E_USER_BT_PROTO, "TIMEOUT waiting command ACK", nb_tries);
+		ERROR (E_USER_BT_PROTO, "TIMEOUT waiting command ACK");
 		//goto retry;
 		ret = END_ERROR;
 	}
 	else {
-		DEBUG (E_USER_STRAT, "ACK received");
+		DEBUG (E_USER_STRAT, "ACK received (%d)", robot_2nd.cmd_ret);
 		ret = robot_2nd.cmd_ret;	
 	}
 
@@ -384,7 +384,7 @@ uint8_t bt_robot_2nd_wait_end (void)
 	volatile uint8_t ret = 0;
 
 	while (ret == 0) {
-		time_wait_ms(50); /*HACK FIXME */
+		time_wait_ms(50); /* HACK */
 		ret = robot_2nd.cmd_ret;
 	}
 	
@@ -392,24 +392,23 @@ uint8_t bt_robot_2nd_wait_end (void)
 }
 
 /* set color */
-inline void bt_robot_2nd_set_color (void) {
-	//bt_robot_2nd_cmd_no_wait_ack (BT_SET_COLOR, 0, 0);
-	bt_robot_2nd_cmd (BT_SET_COLOR, 0, 0);
+inline uint8_t bt_robot_2nd_set_color (void) {
+	return bt_robot_2nd_cmd (BT_SET_COLOR, 0, 0);
 }
 
 /* auto set possition */
-inline void bt_robot_2nd_autopos (void) {
-	bt_robot_2nd_cmd (BT_AUTOPOS, 0, 0);
+inline uint8_t bt_robot_2nd_autopos (void) {
+	return bt_robot_2nd_cmd (BT_AUTOPOS, 0, 0);
 }
 
 /* goto xy_abs */
-inline void bt_robot_2nd_goto_xy_abs (int16_t x, int16_t y) {
-	bt_robot_2nd_cmd (BT_GOTO_XY_ABS, x, y);
+inline uint8_t bt_robot_2nd_goto_xy_abs (int16_t x, int16_t y) {
+	return bt_robot_2nd_cmd (BT_GOTO_XY_ABS, x, y);
 }
 
 /* goto xy_rel */
-inline void bt_robot_2nd_goto_xy_rel (int16_t x, int16_t y) {
-	bt_robot_2nd_cmd (BT_GOTO_XY_REL, x, y);
+inline uint8_t bt_robot_2nd_goto_xy_rel (int16_t x, int16_t y) {
+	return bt_robot_2nd_cmd (BT_GOTO_XY_REL, x, y);
 }
 
 
@@ -506,9 +505,10 @@ void bt_robot_2nd_status_parser (int16_t c)
 			//		ans.cmd_id, ans.cmd_args_checksum, get_err(ans.cmd_ret));
 
 			/* be sure that an status cycle is complete */
-			if (robot_2nd.valid_status == 1) {
+			if (robot_2nd.valid_status == 1)
 				robot_2nd.valid_status = 2;
 
+			if (robot_2nd.valid_status == 2) {
 				IRQ_LOCK(flags);
 				robot_2nd.cmd_ret = ans.cmd_ret;
 				IRQ_UNLOCK(flags);

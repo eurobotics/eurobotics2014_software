@@ -282,14 +282,14 @@ struct beaconboard
 struct robot_2nd
 {
 	/* command requested */
-	uint8_t cmd_id;					/* for ack test */
+	//uint8_t cmd_id;					/* for ack test */
 	uint8_t cmd_ret; 					/* for end traj test, 
 												follows END_TRAJ flags rules, 
 												see strat_base.h */
-	uint8_t cmd_args_checksum;		/* checksum of cmd arguments*/
+	//uint8_t cmd_args_checksum;		/* checksum of cmd arguments*/
 
 	/* strat info */
-	uint16_t done_flags;
+	//uint16_t done_flags;
 
   	/* robot position */
 	int16_t x;

@@ -72,6 +72,11 @@
 //#include "../common/bt_commands.h"
 #include "bt_protocol.h"
 
+#ifdef HOST_VERSION
+#define COMPILE_COMMANDS_TRAJ
+#define COMPILE_COMMANDS_TRAJ_OPTIONALS
+#endif
+
 
 /**********************************************************/
 /* Traj_Speeds for trajectory_manager */
@@ -805,6 +810,7 @@ static void cmd_bt_goto_parsed(void * parsed_result, void * data)
 	/* TODO comment functions */
 
 	interrupt_traj_reset();
+
 	if (!strcmp_P(res->arg1, PSTR("a_rel"))) {
 		//bt_trajectory_a_rel(res->arg2, res->arg3);
 	}
@@ -895,8 +901,6 @@ parse_pgm_inst_t cmd_bt_goto2 = {
 
 /**********************************************************/
 /* Position tests */
-
-void bt_send_status (void);
 
 /* this structure is filled when cmd_position is parsed successfully */
 struct cmd_position_result {
