@@ -208,9 +208,9 @@ struct sensor_filter {
 };
 
 static struct sensor_filter sensor_filter[SENSOR_MAX] = {
-	[S_SENSOR_1] =  { 1, 0, 0, 1, 0, 1 }, /* 0 */
-	[S_SENSOR_2] =  { 1, 0, 0, 1, 0, 1 }, /* 1 */
-	[S_SENSOR_3] =  { 1, 0, 0, 1, 0, 1 }, /* 2 */
+	[S_SENSOR_1] =  { 1, 0, 0, 1, 0, 0 }, /* 0 */
+	[S_SENSOR_2] =  { 1, 0, 0, 1, 0, 0 }, /* 1 */
+	[S_SENSOR_3] =  { 1, 0, 0, 1, 0, 0 }, /* 2 */
 	[S_RESERVED4] = { 0, 0, 0, 1, 0, 0 }, /* 3 */
 	[S_RESERVED5] = { 0, 0, 0, 1, 0, 0 }, /* 4 */
 	[S_RESERVED6] = { 0, 0, 0, 1, 0, 0 }, /* 5 */

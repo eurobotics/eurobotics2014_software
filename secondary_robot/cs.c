@@ -306,7 +306,7 @@ void maindspic_cs_init(void)
 	/* ---- CS beacon speed */
 	/* PID */
 	pid_init(&mainboard.beacon_speed.pid);
-	pid_set_gains(&mainboard.beacon_speed.pid, 80, 80, 250);
+	pid_set_gains(&mainboard.beacon_speed.pid, 1000, 20, 100);
 	pid_set_maximums(&mainboard.beacon_speed.pid, 0, 10000, 2600);
 	pid_set_out_shift(&mainboard.beacon_speed.pid, 6);
 	pid_set_derivate_filter(&mainboard.beacon_speed.pid, 6);

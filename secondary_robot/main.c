@@ -138,7 +138,7 @@ void io_pins_init(void)
 	_IC7R		 = 25;  // IC7 <- RP25
 
    _TRISB2   = 1;   /* SENSOR_2 */
-   _IC2R		 = 24;  // IC2 <- RP24
+   _IC2R		 = 2;  // IC2 <- RP2
 
    _TRISA8   = 1;   /* SENSOR_3 */
 
@@ -366,7 +366,7 @@ int main(void)
 
    /* log setup */
     gen.logs[0] = E_USER_STRAT;
-    //gen.logs[1] = E_USER_BEACON;
+    gen.logs[1] = E_USER_BEACON;
     //gen.logs[2] = E_USER_I2C_PROTO;
     //gen.logs[3] = E_OA;
     gen.logs[2] = E_USER_BT_PROTO;

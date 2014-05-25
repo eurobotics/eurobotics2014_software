@@ -74,9 +74,12 @@ struct csb_list {
 
 prog_char csb_angle_str[] = "angle";
 prog_char csb_distance_str[] = "distance";
+prog_char csb_beacon_speed_str[] = "beacon_speed";
+
 struct csb_list csb_list[] = {
 	{ .name = csb_angle_str, .csb = &mainboard.angle },
 	{ .name = csb_distance_str, .csb = &mainboard.distance },
+	{ .name = csb_beacon_speed_str, .csb = &mainboard.beacon_speed },
 };
 
 struct cmd_cs_result {
@@ -85,7 +88,7 @@ struct cmd_cs_result {
 };
 
 /* token to be used for all cs-related commands */
-prog_char str_csb_name[] = "angle#distance";
+prog_char str_csb_name[] = "angle#distance#beacon_speed";
 parse_pgm_token_string_t cmd_csb_name_tok = TOKEN_STRING_INITIALIZER(struct cmd_cs_result, csname, str_csb_name);
 
 struct cs_block *cs_from_name(const char *name)

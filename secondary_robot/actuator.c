@@ -55,7 +55,7 @@ static volatile int32_t beacon_speed = 0;
  * used by cs as feedback. Must be compatible format with cs */
 int32_t encoders_update_beacon_speed(void * dummy)
 {
-	uint32_t ret;
+	int32_t ret;
 	uint8_t flags;
 
 
@@ -64,7 +64,7 @@ int32_t encoders_update_beacon_speed(void * dummy)
 	IRQ_LOCK(flags);
 	
 	/* get encoder position */
-	ret = beacon_encoder_get_value();
+	ret = (int32_t)beacon_encoder_get_value();
 
 	/* calulate speed */
 	beacon_speed = ret - beacon_pos;

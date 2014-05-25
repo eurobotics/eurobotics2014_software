@@ -122,7 +122,7 @@ static void cmd_event_parsed(void *parsed_result, void *data)
 				 (DO_TIMER & mainboard.flags) ? "on":"off");
 			printf_P(PSTR("power is %s\r\n"), 
 				 (DO_POWER & mainboard.flags) ? "on":"off");
-			printf_P(PSTR("opp is %s\r\n"), 
+			printf_P(PSTR("beacon is %s\r\n"), 
 				 (DO_BEACON & mainboard.flags) ? "on":"off");
 		}
 		return;
@@ -146,7 +146,7 @@ static void cmd_event_parsed(void *parsed_result, void *data)
 	}
 	else if (!strcmp_P(res->arg1, PSTR("power")))
 		bit = DO_POWER;
-	else if (!strcmp_P(res->arg1, PSTR("opp")))
+	else if (!strcmp_P(res->arg1, PSTR("beacon")))
 		bit = DO_BEACON;
 
 	if (!strcmp_P(res->arg2, PSTR("on")))
