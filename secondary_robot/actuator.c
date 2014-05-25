@@ -28,6 +28,7 @@
 #include "actuator.h"
 #include "main.h"
 #include "robotsim.h"
+#include "beacon.h"
 
 void dac_set_and_save(void *pwm_mc, int32_t val)
 {
@@ -44,6 +45,40 @@ void dac_set_and_save(void *pwm_mc, int32_t val)
 #else
 	pwm_mc_set(pwm_mc, val);
 #endif
+}
+
+/* actual beacon position and speed */
+static volatile int32_t beacon_pos;
+static volatile int32_t beacon_speed = 0;
+
+/* beacon speed calculation based on encoder position,
+ * used by cs as feedback. Must be compatible format with cs */
+int32_t encoders_update_beacon_speed(void * dummy)
+{
+	uint32_t ret;
+	uint8_t flags;
+
+
+
+	/* critical section */
+	IRQ_LOCK(flags);
+	
+	/* get encoder position */
+	ret = beacon_encoder_get_value();
+
+	/* calulate speed */
+	beacon_speed = ret - beacon_pos;
+	beacon_pos = ret;
+
+	IRQ_UNLOCK(flags);
+	
+	return beacon_speed;
+}
+
+/* read actual beacon speed */
+int32_t encoders_get_beacon_speed(void * dummy)
+{
+	return beacon_speed;
 }
 
 

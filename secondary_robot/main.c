@@ -135,7 +135,11 @@ void io_pins_init(void)
 
    /* sensor inputs */
    _TRISC9   = 1;   /* SENSOR_1 */
+	_IC7R		 = 25;  // IC7 <- RP25
+
    _TRISB2   = 1;   /* SENSOR_2 */
+   _IC2R		 = 24;  // IC2 <- RP24
+
    _TRISA8   = 1;   /* SENSOR_3 */
 
    /* L6203 H bridges (outputs) */
@@ -180,7 +184,9 @@ void io_pins_init(void)
    _QEB2R    = 4;   /* QEB2 <- RP4(RB4)  <- ENC_2_CHB */
    _TRISB4   = 1;
 
-   /* TODO ENC 3 */
+   /* ENC 3 */
+	_TRISB11 = 1;
+	_T4CKR = 11;	/* T3CK <-- RP11 */
 
    /* i2c */
    /* XXX open collector */
@@ -236,7 +242,7 @@ int main(void)
       DO_POS | DO_POWER | DO_BD;
 #else
   mainboard.flags = DO_ENCODERS  | DO_RS |
-      DO_POS | DO_POWER | DO_BD | DO_CS ;
+      DO_POS | DO_POWER | DO_BD;// | DO_CS ;
 #endif
 
    beaconboard.opponent1_x = I2C_OPPONENT_NOT_THERE;
@@ -312,6 +318,7 @@ int main(void)
 
    /* MAIN TIMER */
    main_timer_init();
+
 #endif
 
    /* SCHEDULER */
@@ -355,18 +362,19 @@ int main(void)
    scheduler_add_periodical_event_priority(strat_event, NULL,
     EVENT_PERIOD_STRAT / SCHEDULER_UNIT, EVENT_PRIORITY_STRAT);
 
+	beacon_init();
 
    /* log setup */
     gen.logs[0] = E_USER_STRAT;
     //gen.logs[1] = E_USER_BEACON;
     //gen.logs[2] = E_USER_I2C_PROTO;
     //gen.logs[3] = E_OA;
-    gen.logs[1] = E_USER_BT_WT11;
     gen.logs[2] = E_USER_BT_PROTO;
     gen.log_level = 5;
 
    /* reset strat infos */
    strat_reset_infos();
+
 
    /* enable interrupts */
    sei();

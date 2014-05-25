@@ -50,6 +50,7 @@
 #include "main.h"
 #include "beacon.h"
 #include "beacon_calib.h"
+#include "../maindspic/strat_utils.h"
 
 /* functional modes of beacon */
 #undef BEACON_MODE_EXTERNAL
@@ -76,8 +77,7 @@
 #endif /* BEACON_MODE_EXTERNAL */
 
 /* IR sensors pin read value */
-#define IR_SENSOR_0_DEG_PIN()     (!(_RC4))
-#define IR_SENSOR_180_DEG_PIN()     (!(_RC5))
+#define IR_SENSOR_180_DEG_PIN()     (!(_RB2))
 
 #define EDGE_RISING        0
 #define EDGE_FALLING     1
@@ -131,44 +131,24 @@ void beacon_init(void)
     beacon.robot_2nd_x = I2C_OPPONENT_NOT_THERE;
 #endif
 
-    /* default values */
-    beaconboard.our_color = I2C_COLOR_RED;
-
-
     /* HARDWARE INIT */
 
     /* XXX: all measures are syncronized with then Timer 2 */
 
-    /* initialize input capture (IC) 1 and 2 for IR sensors events */
-    IC1CONbits.ICM =0b000;        // disable Input Capture module
-    IC1CONbits.ICTMR = 1;         // select Timer2 as the IC time base
-    IC1CONbits.ICI = 0b00;         // interrupt on every capture event
-    IC1CONbits.ICM = 0b001;     // generate capture event on every edge
-
+    /* initialize input capture (IC) 2 for IR sensors events */
     IC2CONbits.ICM =0b00;         // disable Input Capture module
     IC2CONbits.ICTMR = 1;         // select Timer2 as the IC time base
     IC2CONbits.ICI = 0b00;         // interrupt on every capture event
     IC2CONbits.ICM = 0b001;     // generate capture event on every edge
 
-    /* initialize input capture 7 and 8 for turn sensors */
+    /* initialize input capture 7 */
     IC7CONbits.ICM =0b000;        // disable Input Capture module
-    IC7CONbits.ICTMR = 1;         // select Timer2 as the IC1 time base
+    IC7CONbits.ICTMR = 1;         // select Timer2 as the IC time base
     IC7CONbits.ICI = 0b00;         // interrupt on every capture event
     IC7CONbits.ICM = 0b011;     // generate capture event on every rising edge
 
-    IC8CONbits.ICM =0b000;        // disable Input Capture module
-    IC8CONbits.ICTMR = 1;         // select Timer2 as the IC1 time base
-    IC8CONbits.ICI = 0b00;         // interrupt on every capture event
-    IC8CONbits.ICM = 0b011;     // generate capture event on every rising edge
 
     /* enable all inputs capture interrupts and Timer 2 */
-    IPC0bits.IC1IP = 5;     // setup IC1 interrupt priority level XXX, higher than scheduler!
-    IFS0bits.IC1IF = 0;     // clear IC1 Interrupt Status Flag
-#if ROBOT_2ND
-    IEC0bits.IC1IE = 1;     // enable IC1 interrupt
-#else
-    IEC0bits.IC1IE = 1;     // disable IC1 interrupt
-#endif
     IPC1bits.IC2IP = 5;     // setup IC2 interrupt priority level XXX, higher than scheduler!
     IFS0bits.IC2IF = 0;     // clear IC2 Interrupt Status Flag
     IEC0bits.IC2IE = 1;     // enable IC2 interrupt
@@ -177,11 +157,12 @@ void beacon_init(void)
     IFS1bits.IC7IF = 0;     // clear IC7 Interrupt Status Flag
     IEC1bits.IC7IE = 1;     // enable IC7 interrupt
 
-    /* TODO: for the moment beacon only uses one turn sensor */
-/*    IPC5bits.IC8IP = 5;     // setup IC1 interrupt priority level XXX, higher than scheduler!
-    IFS1bits.IC8IF = 0;     // clear IC1 Interrupt Status Flag
-    IEC1bits.IC8IE = 1;     // enable IC1 interrupt
-*/
+
+	/* config encoder input */
+	T4CONbits.TCS = 1;      // TXCK pin is the clock */
+    T4CONbits.TON = 1;      // enable Timer
+	 
+
 
     /* config and enable Timer 2 */
     PR2 = 65535;
@@ -197,43 +178,8 @@ void beacon_init(void)
 
 }
 
-/* input compare 1 interrupt connected to IR_SENSOR_0_DEG */
-void __attribute__((__interrupt__, no_auto_psv)) _IC1Interrupt(void)
-{
-    uint8_t flags;
 
-    /* reset flag */
-    _IC1IF=0;
-
-    /* Capture of Timer 2 counts on falling and risign edge of IR sensor.
-    * After falling edge set valid_pulse.
-     */
-
-    /* NOTE: Timer 2 count is hardware buffered by Input capture so,
-     *       we don't lose counts.
-     */
-
-    /* rising edge */
-    if ( IR_SENSOR_0_DEG_PIN()) {
-        IRQ_LOCK(flags);
-        count_edge[IR_SENSOR_0_DEG][EDGE_RISING] = (int32_t)IC1BUF;
-        count_edge_ov[IR_SENSOR_0_DEG][EDGE_RISING] = _T2IF;
-        IRQ_UNLOCK(flags);
-        valid_pulse[IR_SENSOR_0_DEG] = 0;
-    }
-    /* falling edge */
-    else {
-        IRQ_LOCK(flags);
-        count_edge[IR_SENSOR_0_DEG][EDGE_FALLING] = (int32_t)IC1BUF;
-        count_edge_ov[IR_SENSOR_0_DEG][EDGE_FALLING] = _T2IF;
-        IRQ_UNLOCK(flags);
-        valid_pulse[IR_SENSOR_0_DEG] = 1;
-
-    }
-
-}
-
-/* input compare 2 interrupt connected to IR_SENSOR_180_DEG */
+/* input compare 2 interrupt connected to IR_SENSOR */
 void __attribute__((__interrupt__, no_auto_psv)) _IC2Interrupt(void)
 {
     uint8_t flags;
@@ -304,43 +250,64 @@ void __attribute__((__interrupt__, no_auto_psv)) _IC7Interrupt(void)
     IRQ_UNLOCK(flags);
 }
 
-/* TODO: input compare 7 interrupt connected to turn sensor aligned with IR_SENSOR_180_DEG */
-/*
-void __attribute__((__interrupt__, no_auto_psv)) _IC8Interrupt(void)
+/* beacon enconder */
+static int32_t encoder_val = 0, encoder_val_previous = 0;
+
+void beacon_encoder_manage(void) 
 {
-    uint8_t flags;
+	uint8_t flags;
+	uint16_t val;
+	int32_t temp;
+	
 
-    IFS1bits.IC8IF=0;
-
-    IRQ_LOCK(flags);
-    TMR2 = 0;
-    count_period[1] = (int32_t)IC8BUF;
-    valid_period[1] = 1;
-    IRQ_UNLOCK(flags);
-
+	IRQ_LOCK (flags);
+	val = TMR4;      
+	IRQ_UNLOCK (flags);               		
+                    							
+	temp = (val - encoder_val_previous); 
+	encoder_val_previous = val;        
+                                             	
+	encoder_val += temp ;
 }
-*/
+
+
+int32_t beacon_encoder_get_value(void) 
+{
+  int32_t value;
+  uint8_t flags;
+  
+  IRQ_LOCK(flags);
+  value = encoder_val;
+  IRQ_UNLOCK(flags);
+
+  return value;
+}
+
+void beacon_encoder_set_value(int32_t val) 
+{
+	uint8_t flags;
+	IRQ_LOCK (flags);
+	encoder_val = val;
+	IRQ_UNLOCK (flags);  
+}
 
 /* reset of position of beacon */
 void beacon_reset_pos(void)
 {
-    encoders_dspic_set_value(BEACON_ENCODER, 0);
+   beacon_encoder_set_value(0);
 }
 
 /* start turn and measures */
 void beacon_start(void)
 {
-    /* init watchdog */
-    beaconboard.watchdog = 40000;
-
     /* enable beacon_calc event flag */
-    beaconboard.flags |= DO_BEACON;
+    mainboard.flags |= DO_BEACON;
 
     /* enable cs */
     beacon_reset_pos();
-    pid_reset(&beaconboard.speed.pid);
-    beaconboard.speed.on = 1;
-    cs_set_consign(&beaconboard.speed.cs, 80/4);
+    pid_reset(&mainboard.beacon_speed.pid);
+    mainboard.beacon_speed.on = 1;
+    cs_set_consign(&mainboard.beacon_speed.cs, 80/4);
 }
 
 /* stop turn and measures */
@@ -349,18 +316,18 @@ void beacon_stop(void)
 	 uint8_t flags;
 
     /* disable beacon_calc event flag */
-    beaconboard.flags &= ~(DO_BEACON);
+    mainboard.flags &= ~(DO_BEACON);
 
     /* disable cs */
-    cs_set_consign(&beaconboard.speed.cs, 0);
+    cs_set_consign(&mainboard.beacon_speed.cs, 0);
     wait_ms(2000);
 
-	 IRQ_LOCK (flags);
-    beaconboard.speed.on = 0;
-    pwm_mc_set(BEACON_PWM, 0);
-    pid_reset(&beaconboard.speed.pid);
-    pid_reset(&beaconboard.speed.pid);
-	 IRQ_UNLOCK (flags);
+	IRQ_LOCK (flags);
+    mainboard.beacon_speed.on = 0;
+    pwm_mc_set(BEACON_MOTOR, 0);
+    pid_reset(&mainboard.beacon_speed.pid);
+    pid_reset(&mainboard.beacon_speed.pid);
+	IRQ_UNLOCK (flags);
 
     /* no opponent there */
     beacon.opponent1_x = I2C_OPPONENT_NOT_THERE;
@@ -376,6 +343,7 @@ void beacon_stop(void)
  * HELPERS FOR BEACON CALCULUS
  *********************************************************************/
 
+#if 0
 /* return the distance between two points */
 int16_t distance_between(int16_t x1, int16_t y1, int16_t x2, int16_t y2)
 {
@@ -388,7 +356,7 @@ int16_t distance_between(int16_t x1, int16_t y1, int16_t x2, int16_t y2)
 }
 
 /* return the normal of a vector with origin (0,0) */
-double norm(double x, double y)
+static double norm(double x, double y)
 {
     return sqrt(x*x + y*y);
 }
@@ -414,6 +382,7 @@ void abs_xy_to_rel_da(double x_robot, double y_robot, double a_robot,
     *d_rel = (int32_t)(norm(x_abs-x_robot, y_abs-y_robot));
 }
 
+#endif
 
 /* return true if the point (x,y) is in area defined by margin */
 uint8_t is_in_margin(int16_t dx, int16_t dy, int16_t margin)
@@ -892,18 +861,7 @@ error:
 /* beacon calculus event */
 void beacon_calc(void *dummy)
 {
-    if (beaconboard.flags & DO_BEACON){
-
-        /* watchdog, in case of robot emergency stop */
-        if(beaconboard.watchdog_enable && (beaconboard.watchdog-- == 0)) {
-            beaconboard.watchdog_enable = 0;
-            beacon_stop();
-            BEACON_ERROR("Pulling watchdog TIMEOUT");
-        }
-
-#ifdef ROBOT_2ND
-        sensor_calc(IR_SENSOR_0_DEG);
-#endif
+    if (mainboard.flags & DO_BEACON){
         sensor_calc(IR_SENSOR_180_DEG);
     }
 }

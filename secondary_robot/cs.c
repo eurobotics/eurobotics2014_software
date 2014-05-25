@@ -62,6 +62,7 @@
 #include "strat.h"
 #include "actuator.h"
 #include "i2c_protocol.h"
+#include "beacon.h"
 
 void dump_cs(const char *name, struct cs *cs);
 
@@ -77,6 +78,7 @@ static void do_cs(void *dummy)
 	/* read encoders */
 	if (mainboard.flags & DO_ENCODERS) {
 		encoders_dspic_manage(NULL);
+		beacon_encoder_manage();
 	}
 #endif
 
@@ -109,6 +111,11 @@ static void do_cs(void *dummy)
 		if (mainboard.distance.on)
 			cs_manage(&mainboard.distance.cs);
 	}
+
+	if (mainboard.flags & DO_BEACON) {
+		if (mainboard.beacon_speed.on)
+			cs_manage(&mainboard.beacon_speed.cs);
+ 	}
 
 	/* position calculus */
 	if ((cpt & 1) && (mainboard.flags & DO_POS)) {
@@ -153,10 +160,10 @@ static void do_cs(void *dummy)
 #endif	
 
 	/* motors brakes */
-	if (mainboard.flags & DO_POWER)
-		BRAKE_OFF();
-	else
-		BRAKE_ON();
+	//if (mainboard.flags & DO_POWER)
+		//BRAKE_OFF();
+	//else
+		//BRAKE_ON();
 	
 	cpt++;
 
@@ -296,9 +303,25 @@ void maindspic_cs_init(void)
 	//bd_set_current_thresholds(struct blocking_detection *bd, int32_t k1, int32_t k2, uint32_t i_thres, uint16_t cpt_thres);
 	bd_set_current_thresholds(&mainboard.distance.bd, 250, 5000, 1000000, 50);
 
+	/* ---- CS beacon speed */
+	/* PID */
+	pid_init(&mainboard.beacon_speed.pid);
+	pid_set_gains(&mainboard.beacon_speed.pid, 80, 80, 250);
+	pid_set_maximums(&mainboard.beacon_speed.pid, 0, 10000, 2600);
+	pid_set_out_shift(&mainboard.beacon_speed.pid, 6);
+	pid_set_derivate_filter(&mainboard.beacon_speed.pid, 6);
+
+	/* CS */
+	cs_init(&mainboard.beacon_speed.cs);
+	cs_set_correct_filter(&mainboard.beacon_speed.cs, pid_do_filter, &mainboard.beacon_speed.pid);
+	cs_set_process_in(&mainboard.beacon_speed.cs, pwm_mc_set, BEACON_MOTOR);
+	cs_set_process_out(&mainboard.beacon_speed.cs, encoders_update_beacon_speed, NULL);
+	cs_set_consign(&mainboard.beacon_speed.cs, 0);
+
 	/* set them on !! */
 	mainboard.angle.on = 1;
 	mainboard.distance.on = 1;
+	mainboard.beacon_speed.on = 1;
 
 	/* EVENT CS */
 	scheduler_add_periodical_event_priority(do_cs, NULL,

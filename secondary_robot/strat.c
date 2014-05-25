@@ -151,7 +151,7 @@ void strat_preinit(void)
 	time_reset();
 	interrupt_traj_reset();
 	mainboard.flags =  DO_ENCODERS | DO_CS | DO_RS |
-							 DO_POS | DO_BD | DO_POWER | DO_OPP;
+							 DO_POS | DO_BD | DO_POWER | DO_BEACON;
 
 	/* XXX default conf */
 	//strat_infos.conf.flags |= ENABLE_R2ND_POS;
@@ -256,7 +256,7 @@ void strat_init(void)
 
 	/* used in strat_base for END_TIMER */
 	mainboard.flags = DO_ENCODERS | DO_CS | DO_RS | 
-		DO_POS | DO_BD | DO_TIMER | DO_POWER | DO_OPP;
+		DO_POS | DO_BD | DO_TIMER | DO_POWER | DO_BEACON;
 }
 
 
@@ -281,7 +281,7 @@ void strat_exit(void)
 
 	/* stop beacon */
 	IRQ_LOCK(flags);
-	mainboard.flags &= ~(DO_OPP);
+	mainboard.flags &= ~(DO_BEACON);
 	IRQ_UNLOCK(flags);
 	//beacon_cmd_beacon_off();
 

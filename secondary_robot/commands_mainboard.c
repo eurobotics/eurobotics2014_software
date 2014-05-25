@@ -102,7 +102,7 @@ static void cmd_event_parsed(void *parsed_result, void *data)
 	
 	if (!strcmp_P(res->arg1, PSTR("all"))) {
 		bit = DO_ENCODERS | DO_CS | DO_RS | DO_POS |
-			DO_BD | DO_TIMER | DO_POWER | DO_OPP;
+			DO_BD | DO_TIMER | DO_POWER | DO_BEACON;
 		if (!strcmp_P(res->arg2, PSTR("on")))
 			mainboard.flags |= bit;
 		else if (!strcmp_P(res->arg2, PSTR("off")))
@@ -123,7 +123,7 @@ static void cmd_event_parsed(void *parsed_result, void *data)
 			printf_P(PSTR("power is %s\r\n"), 
 				 (DO_POWER & mainboard.flags) ? "on":"off");
 			printf_P(PSTR("opp is %s\r\n"), 
-				 (DO_OPP & mainboard.flags) ? "on":"off");
+				 (DO_BEACON & mainboard.flags) ? "on":"off");
 		}
 		return;
 	}
@@ -147,7 +147,7 @@ static void cmd_event_parsed(void *parsed_result, void *data)
 	else if (!strcmp_P(res->arg1, PSTR("power")))
 		bit = DO_POWER;
 	else if (!strcmp_P(res->arg1, PSTR("opp")))
-		bit = DO_OPP;
+		bit = DO_BEACON;
 
 	if (!strcmp_P(res->arg2, PSTR("on")))
 		mainboard.flags |= bit;
@@ -169,7 +169,7 @@ static void cmd_event_parsed(void *parsed_result, void *data)
 
 prog_char str_event_arg0[] = "event";
 parse_pgm_token_string_t cmd_event_arg0 = TOKEN_STRING_INITIALIZER(struct cmd_event_result, arg0, str_event_arg0);
-prog_char str_event_arg1[] = "all#encoders#cs#rs#pos#bd#timer#power#opp";
+prog_char str_event_arg1[] = "all#encoders#cs#rs#pos#bd#timer#power#beacon";
 parse_pgm_token_string_t cmd_event_arg1 = TOKEN_STRING_INITIALIZER(struct cmd_event_result, arg1, str_event_arg1);
 prog_char str_event_arg2[] = "on#off#show";
 parse_pgm_token_string_t cmd_event_arg2 = TOKEN_STRING_INITIALIZER(struct cmd_event_result, arg2, str_event_arg2);
@@ -1103,6 +1103,47 @@ parse_pgm_inst_t cmd_status = {
 		(prog_void *)&cmd_status_opp2_x, 
 		(prog_void *)&cmd_status_opp2_y, 
 		(prog_void *)&cmd_status_checksum, 
+		NULL,
+	},
+};
+
+/**********************************************************/
+/* Beacon */
+
+/* this structure is filled when cmd_beacon is parsed successfully */
+struct cmd_beacon_result {
+	fixed_string_t arg0;
+	fixed_string_t arg1;
+};
+
+/* function called when cmd_beacon is parsed successfully */
+static void cmd_beacon_parsed(void *parsed_result, void *data)
+{
+	
+	struct cmd_beacon_result *res = (struct cmd_beacon_result *) parsed_result;
+	if (!strcmp_P(res->arg1, PSTR("on"))) {
+		beacon_start();
+	}
+	else if (!strcmp_P(res->arg1, PSTR("off"))) {
+		beacon_stop();
+	}
+
+	printf_P(PSTR("Done\r\n"));
+}
+
+prog_char str_beacon_arg0[] = "beacon";
+parse_pgm_token_string_t cmd_beacon_arg0 = TOKEN_STRING_INITIALIZER(struct cmd_beacon_result, arg0, str_beacon_arg0);
+prog_char str_beacon_arg1[] = "on#off";
+parse_pgm_token_string_t cmd_beacon_arg1 = TOKEN_STRING_INITIALIZER(struct cmd_beacon_result, arg1, str_beacon_arg1);
+
+prog_char help_beacon[] = "Enable/Disable Beacon (on/off)";
+parse_pgm_inst_t cmd_beacon = {
+	.f = cmd_beacon_parsed,  /* function to call */
+	.data = NULL,      /* 2nd arg of func */
+	.help_str = help_beacon,
+	.tokens = {        /* token list, NULL terminated */
+		(prog_void *)&cmd_beacon_arg0, 
+		(prog_void *)&cmd_beacon_arg1, 
 		NULL,
 	},
 };

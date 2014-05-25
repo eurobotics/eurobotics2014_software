@@ -20,9 +20,12 @@
  *  Javier Baliñas Santos <javier@arc-robots.org>
  */
 
+#ifndef __BEACON_H__
+#define __BEACON_H__
+
 /* IR sensor management */
-#define IR_SENSOR_0_DEG		0
-#define IR_SENSOR_180_DEG	1
+#define IR_SENSOR_180_DEG	0
+#define IR_SENSOR_0_DEG		1
 #define IR_SENSOR_MAX		2
 
 struct beacon {
@@ -67,3 +70,10 @@ void beacon_stop(void);
 void beacon_calc(void *dummy);
 
 void beacon_angle_dist_to_x_y(int32_t angle, int32_t dist, int32_t *x, int32_t *y);
+
+void beacon_encoder_manage(void);
+int32_t beacon_encoder_get_value(void);
+void beacon_encoder_set_value(int32_t val);
+
+#endif /* __BEACON_H__ */
+

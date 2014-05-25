@@ -134,6 +134,7 @@
 #define MOTOR_2     	((void *)&gen.pwm_mc_2)
 #define MOTOR_3     	((void *)&gen.pwm_mc_3)
 
+#define BEACON_MOTOR	MOTOR_1
 #define LEFT_MOTOR	MOTOR_2
 #define RIGHT_MOTOR	MOTOR_3
 
@@ -145,7 +146,6 @@
 #define E_USER_CS           197
 #define E_USER_BEACON       198
 #define E_USER_AX12         199
-#define E_USER_BT_WT11      199
 #define E_USER_BT_PROTO     200
 
 /* EVENTS PRIORITIES */
@@ -154,10 +154,13 @@
 #define EVENT_PRIORITY_I2C_POLL     140
 #define EVENT_PRIORITY_SENSORS      120
 #define EVENT_PRIORITY_CS           100
+#define EVENT_PRIO_BEACON	    		80
 #define EVENT_PRIORITY_STRAT        30
 #define EVENT_PRIORITY_BEACON_POLL  20
 #define EVENT_PRIORITY_CMDLINE      15
 #define EVENT_PRIORITY_STRAT_EVENT	10
+
+
 
 
 
@@ -166,6 +169,7 @@
 #define EVENT_PERIOD_CMDLINE 		50000L
 #define EVENT_PERIOD_STRAT		  	25000L
 #define EVENT_PERIOD_STRAT_EVENT  	25000L
+#define EVENT_PERIOD_BEACON 		20000L
 #define EVENT_PERIOD_BEACON_PULL	10000L
 #define EVENT_PERIOD_SENSORS	  	10000L
 #define EVENT_PERIOD_I2C_POLL	  	8000L
@@ -232,11 +236,12 @@ struct mainboard
 #define DO_BD         16
 #define DO_TIMER      32
 #define DO_POWER      64
-#define DO_OPP        128
+#define DO_BEACON     128
 
 	/* control systems */
 	struct cs_block angle;
 	struct cs_block distance;
+	struct cs_block beacon_speed;
 
 	/* x,y positionning and traj*/
 	struct robot_system rs;

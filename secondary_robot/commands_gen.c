@@ -64,6 +64,8 @@
 #include "main.h"
 #include "cmdline.h"
 #include "sensor.h"
+#include "beacon.h"
+
 
 #ifdef HOST_VERSION
 #define COMPILE_COMMANDS_GEN
@@ -151,17 +153,19 @@ static void cmd_encoders_parsed(void *parsed_result, void *data)
 		
 		encoders_dspic_set_value((void *)1, 0);
 		encoders_dspic_set_value((void *)2, 0);
+		beacon_encoder_set_value(0);
 		return;
 	}
 
 	/* show */
 	while(!cmdline_keypressed()) {
 		//printf_P(PSTR("% .8ld % .8ld\r\n"), 
-		printf("% .8ld % .8ld\r\n",
+		printf("% .8ld % .8ld % .8ld\r\n",
 			 encoders_dspic_get_value((void *)1),
-			 encoders_dspic_get_value((void *)2));
+			 encoders_dspic_get_value((void *)2),
+			 beacon_encoder_get_value());
 
-		wait_ms(50);
+		wait_ms(100);
 	}
 #endif
 }

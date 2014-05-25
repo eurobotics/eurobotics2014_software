@@ -28,6 +28,13 @@
 /* used by cs, correct offset and save values */
 void dac_set_and_save(void *dac, int32_t val);
 
+/* beacon speed calculation based on encoder position,
+ * used by cs as feedback. Must be compatible format with cs */
+int32_t encoders_update_beacon_speed(void * number);
+
+/* read actual beacon speed */
+int32_t encoders_get_beacon_speed(void * dummy);
+
 
 #endif
 

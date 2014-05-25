@@ -1,5 +1,5 @@
 /*  
- *  Copyright Robotics Association of Coslada, Eurobotics Engineering (2010)
+ *  Copyright Robotics Association of Coslada, Eurobotics Engineering (2011)
  * 
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -20,5 +20,7 @@
  *  Javier Baliñas Santos <javier@arc-robots.org>
  */
 
-#define PWM_FREQ		50
-#define TIMER_SOURCE 	3
+
+/* get distance (cm) from calib array */
+#define DIST_ERROR 3000
+uint16_t get_dist_array(uint8_t sensor, int32_t size, int32_t period);
