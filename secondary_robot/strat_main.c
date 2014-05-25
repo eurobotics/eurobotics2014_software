@@ -60,7 +60,7 @@
 #include "strat.h"
 #include "strat_base.h"
 #include "../maindspic/strat_avoid.h"
-#include "strat_utils.h"
+#include "../maindspic/strat_utils.h"
 #include "sensor.h"
 #include "actuator.h"
 #include "beacon.h"

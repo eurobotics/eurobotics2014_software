@@ -71,7 +71,7 @@
 #include "sensor.h"
 #include "cmdline.h"
 #include "strat.h"
-#include "strat_utils.h"
+#include "../maindspic/strat_utils.h"
 #include "strat_base.h"
 #include "i2c_protocol.h"
 #include "actuator.h"

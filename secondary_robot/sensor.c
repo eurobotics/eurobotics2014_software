@@ -37,7 +37,8 @@
 #include "main.h"
 #include "sensor.h"
 #include "strat.h"
-#include "strat_utils.h"
+#include "../maindspic/strat_utils.h"
+
 
 #ifndef HOST_VERSION
 

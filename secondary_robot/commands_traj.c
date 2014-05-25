@@ -64,7 +64,7 @@
 #include "main.h"
 #include "cs.h"
 #include "cmdline.h"
-#include "strat_utils.h"
+#include "../maindspic/strat_utils.h"
 #include "strat_base.h"
 #include "../maindspic/strat_avoid.h"
 #include "strat.h"
