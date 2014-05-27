@@ -47,6 +47,8 @@ void dac_set_and_save(void *pwm_mc, int32_t val)
 #endif
 }
 
+
+
 /* actual beacon position and speed */
 static volatile int32_t beacon_pos;
 static volatile int32_t beacon_speed = 0;
@@ -62,10 +64,12 @@ int32_t encoders_update_beacon_speed(void * dummy)
 
 	/* critical section */
 	IRQ_LOCK(flags);
-	
+
+#ifndef HOST_VERSION
+
 	/* get encoder position */
 	ret = (int32_t)beacon_encoder_get_value();
-
+#endif
 	/* calulate speed */
 	beacon_speed = ret - beacon_pos;
 	beacon_pos = ret;

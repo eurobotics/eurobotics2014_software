@@ -1107,6 +1107,8 @@ parse_pgm_inst_t cmd_status = {
 	},
 };
 
+#if 0
+
 /**********************************************************/
 /* Beacon */
 
@@ -1147,6 +1149,8 @@ parse_pgm_inst_t cmd_beacon = {
 		NULL,
 	},
 };
+
+#endif
 
 /* TODO 2014 */
 #if 0

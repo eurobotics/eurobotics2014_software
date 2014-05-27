@@ -362,7 +362,9 @@ int main(void)
    scheduler_add_periodical_event_priority(strat_event, NULL,
     EVENT_PERIOD_STRAT / SCHEDULER_UNIT, EVENT_PRIORITY_STRAT);
 
+#ifndef HOST_VERSION
 	beacon_init();
+#endif
 
    /* log setup */
     gen.logs[0] = E_USER_STRAT;

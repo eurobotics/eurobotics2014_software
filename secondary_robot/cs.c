@@ -48,8 +48,7 @@
 #include <trajectory_manager_utils.h>
 #include <vect_base.h>
 #include <lines.h>
-#include <polygon.h>
-#include <obstacle_avoidance.h>
+//#include <obstacle_avoidance.h>
 #include <blocking_detection_manager.h>
 #include <robot_system.h>
 #include <position_manager.h>
@@ -111,12 +110,12 @@ static void do_cs(void *dummy)
 		if (mainboard.distance.on)
 			cs_manage(&mainboard.distance.cs);
 	}
-
+#ifndef HOST_VERSION
 	if (mainboard.flags & DO_BEACON) {
 		if (mainboard.beacon_speed.on)
 			cs_manage(&mainboard.beacon_speed.cs);
  	}
-
+#endif
 	/* position calculus */
 	if ((cpt & 1) && (mainboard.flags & DO_POS)) {
 
@@ -303,6 +302,7 @@ void maindspic_cs_init(void)
 	//bd_set_current_thresholds(struct blocking_detection *bd, int32_t k1, int32_t k2, uint32_t i_thres, uint16_t cpt_thres);
 	bd_set_current_thresholds(&mainboard.distance.bd, 250, 5000, 1000000, 50);
 
+#ifndef HOST_VERSION
 	/* ---- CS beacon speed */
 	/* PID */
 	pid_init(&mainboard.beacon_speed.pid);
@@ -317,12 +317,13 @@ void maindspic_cs_init(void)
 	cs_set_process_in(&mainboard.beacon_speed.cs, pwm_mc_set, BEACON_MOTOR);
 	cs_set_process_out(&mainboard.beacon_speed.cs, encoders_update_beacon_speed, NULL);
 	cs_set_consign(&mainboard.beacon_speed.cs, 0);
-
+#endif
 	/* set them on !! */
 	mainboard.angle.on = 1;
 	mainboard.distance.on = 1;
+#ifndef HOST_VERSION
 	mainboard.beacon_speed.on = 1;
-
+#endif
 	/* EVENT CS */
 	scheduler_add_periodical_event_priority(do_cs, NULL,
 						EVENT_PERIOD_CS / SCHEDULER_UNIT, EVENT_PRIORITY_CS);
