@@ -20,7 +20,13 @@
  *
  */
 
-/*   *  Copyright Robotics Association of Coslada, Eurobotics Engineering (2011) *  Javier Baliñas Santos <javier@arc-robots.org> * *  Code ported to family of microcontrollers dsPIC from *  sensor.h,v 1.4 2009/04/24 19:30:42 zer0 Exp. */
+/*  
+ *  Copyright Robotics Association of Coslada, Eurobotics Engineering (2011)
+ *  Javier Baliñas Santos <javier@arc-robots.org>
+ *
+ *  Code ported to family of microcontrollers dsPIC from
+ *  sensor.h,v 1.4 2009/04/24 19:30:42 zer0 Exp.
+ */
 
 
 /* synchronize with sensor.c */
@@ -30,8 +36,9 @@
 #define SENSOR4       3
 #define SENSOR5       4
 #define SENSOR6       5
-//#define SENSOR7       6
+//#define SENSOR7     6
 #define SENSOR_MAX    6
+
 
 void sensor_init(void);
 

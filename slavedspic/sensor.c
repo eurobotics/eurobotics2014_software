@@ -20,7 +20,13 @@
  *
  */
 
-/*   *  Copyright Robotics Association of Coslada, Eurobotics Engineering (2011) *  Javier Baliñas Santos <javier@arc-robots.org> * *  Code ported to family of microcontrollers dsPIC from *  sensor.c,v 1.4 2009/04/24 19:30:42 zer0 Exp. */
+/*  
+ *  Copyright Robotics Association of Coslada, Eurobotics Engineering (2011)
+ *  Javier Baliñas Santos <javier@arc-robots.org>
+ *
+ *  Code ported to family of microcontrollers dsPIC from
+ *  sensor.c,v 1.4 2009/04/24 19:30:42 zer0 Exp.
+ */
 
 #include <stdlib.h>
 
@@ -51,10 +57,10 @@ struct sensor_filter {
 static struct sensor_filter sensor_filter[SENSOR_MAX] = {
 	[SENSOR1] 	= { 11, 0, 8, 10, 0, 1 },
 	[SENSOR2] 	= { 11, 0, 8, 10, 0, 1 },
-	[SENSOR3] 	= { 11, 0, 8, 10, 0, 0 },
+	[SENSOR3] 	= { 11, 0, 8, 10, 0, 1 },
 	[SENSOR4] 	= { 11, 0, 8, 10, 0, 1 },
 	[SENSOR5]	= { 11, 0, 8, 10, 0, 1 },
-	[SENSOR6]	= { 11, 0, 8, 10, 0, 0 },
+	[SENSOR6]	= { 11, 0, 8, 10, 0, 1 },
 	//[SENSOR7] 	= { 1, 0, 0, 1, 0, 1 },
 };
 
@@ -84,7 +90,7 @@ static uint16_t sensor_read(void)
 /* sensor mapping : 
  * SENSOR1: RB11
  * SENSOR2: RB10
- * SENSOR3: RB2
+ * SENSOR3: RC8
  * SENSOR4: RA8
  * SENSOR5: RC3
  * SENSOR6: RB4	 XXX servos AX12 in 2011 board
@@ -92,9 +98,9 @@ static uint16_t sensor_read(void)
  */
 
 	uint16_t tmp = 0;
-	tmp |= (uint16_t)((PORTB & (_BV(11)))>> 11)<< 0;
-	tmp |= (uint16_t)((PORTB & (_BV(10)))>> 10)<< 1;
-	tmp |= (uint16_t)((PORTB & (_BV(2)))>> 2)<< 2;
+	//XXX tmp |= (uint16_t)((PORTB & (_BV(11)))>> 11)<< 0;
+	//XXX tmp |= (uint16_t)((PORTB & (_BV(10)))>> 10)<< 1;
+	tmp |= (uint16_t)((PORTC & (_BV(8)))>> 8)<< 2;
 	tmp |= (uint16_t)((PORTA & (_BV(8)))>> 8)<< 3;
 	tmp |= (uint16_t)((PORTC & (_BV(3)))>> 3)<< 4;
 #ifndef EUROBOT_2011_BOARD

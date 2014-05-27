@@ -130,15 +130,18 @@ void io_pins_init(void)
 
 	/* sensors */
 	AD1PCFGL = 0xFF;	// all analog pins are digital
-	_TRISB11 = 1;		// SENSOR1
-	_TRISB10 = 1;		// SENSOR2
-	_TRISB2 	= 1;		// SENSOR3
+
+	/* used as GPO (EV E2040)*/
+	//XXX _TRISB11 = 0;		// SENSOR1
+	//XXX _TRISB10 = 0;		// SENSOR2
+	_TRISC8 	= 1;		// SENSOR3
 	_TRISA8 	= 1;		// SENSOR4
 	_TRISC3 	= 1;		// SENSOR5
 	_TRISB4 	= 1;		// SENSOR6
 #ifndef EUROBOT_2012_BOARD
 	_TRISC2 	= 1;		// SENSOR7
 #endif
+
 
 	/* dc motors */
 	_TRISB12 = 0;	// SLAVE_MOT_2_INA
@@ -167,9 +170,23 @@ void io_pins_init(void)
 	_LATA7   = 0;	// initialy breaked
 	
 	/* servos  */
-	_RP17R = 0b10010; // OC1 -> RP17(RC1) -> SLAVE_SERVO_PWM_1
+
+	/* XXX vacum motors */
+	_TRISC1	= 0;
+	_LATC1 = 0;
+	_TRISB3 = 0;
+	_LATB3 = 0;
+
+	/* XXX electro valvules */
+	_TRISB11 = 0;		// SENSOR1
+	_LATB11 = 0;
+	_TRISB10 = 0;		// SENSOR2
+	_LATB10 = 0;
+
+	/* servos  */
+	// XXX _RP17R = 0b10010; // OC1 -> RP17(RC1) -> SLAVE_SERVO_PWM_1
+	// XXX _RP3R  = 0b10100; // OC3 -> RP3(RB3)  -> SLAVE_SERVO_PWM_3
 	_RP16R = 0b10011; // OC2 -> RP16(RC0) -> SLAVE_SERVO_PWM_2
-	_RP3R  = 0b10100; // OC3 -> RP3(RB3)  -> SLAVE_SERVO_PWM_3
 #ifdef EUROBOT_2012_BOARD
 	_RP18R = 0b10101; // OC4 -> RP18(RC2) -> SLAVE_SENSOR_7
 #endif
@@ -289,9 +306,9 @@ int main(void)
 						CS_PERIOD / SCHEDULER_UNIT, 
 						CS_PRIO);
 
-	scheduler_add_periodical_event_priority(do_i2c_watchdog, NULL, 
-						8000L / SCHEDULER_UNIT, 
-						I2C_POLL_PRIO);
+	//scheduler_add_periodical_event_priority(do_i2c_watchdog, NULL,
+	//					8000L / SCHEDULER_UNIT,
+	//					I2C_POLL_PRIO);
 
 	scheduler_add_periodical_event_priority(do_sensors, NULL, 
 						10000L / SCHEDULER_UNIT, 
