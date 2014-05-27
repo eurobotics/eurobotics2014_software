@@ -371,7 +371,7 @@ while True:
                     robot_a = int(m.groups()[2])
                     set_robot()
                     # XXX HACK, send pos robot mate
-                    fw2.write("r2nd %d %d %d"%(int(robot_x), int(robot_y), int(robot_a)))
+                    #fw2.write("r2nd %d %d %d"%(int(robot_x), int(robot_y), int(robot_a)))
                     
                 m = re.match("pos=%s,%s,%s"%(INT,INT,INT), l2)
                 if m:
@@ -380,7 +380,7 @@ while True:
                     robot2_a = int(m.groups()[2])
                     set_robot2()
                     # XXX HACK, send pos robot mate
-                    fw.write("r2nd %d %d %d"%(int(robot2_x), int(robot2_y), int(robot2_a)))
+                    #fw.write("r2nd %d %d %d"%(int(robot2_x), int(robot2_y), int(robot2_a)))
 
             """
             # TODO parse slavedspic
