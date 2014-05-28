@@ -52,7 +52,13 @@
 /**** lift functions ********************************************************/
 
 /* stop without rampe */
-void lift_hard_stop(void){	cs_set_consign(&slavedspic.lift.cs, encoders_dspic_get_value(LIFT_ENCODER));	slavedspic.lift.qr.previous_var = 0;	slavedspic.lift.qr.previous_out = encoders_dspic_get_value(LIFT_ENCODER);}
+void lift_hard_stop(void)
+{
+	cs_set_consign(&slavedspic.lift.cs, encoders_dspic_get_value(LIFT_ENCODER));
+	slavedspic.lift.qr.previous_var = 0;
+	slavedspic.lift.qr.previous_out = encoders_dspic_get_value(LIFT_ENCODER);
+}
+
 /* calibrate initial position */
 void lift_calibrate(void)
 {
@@ -61,16 +67,20 @@ void lift_calibrate(void)
 #define AUTOPOS_BIG_DIST_mm	50000
 #define AUTOPOS_BD_TIMEOUT_ms	5000
 
-	int8_t ret;	int16_t kp, ki, kd;
+	int8_t ret;
+	int16_t kp, ki, kd;
 
 	/* save and set PID constants */
 	kp = pid_get_gain_P(&slavedspic.lift.pid);
 	ki = pid_get_gain_I(&slavedspic.lift.pid);
-	kd = pid_get_gain_D(&slavedspic.lift.pid);	pid_set_gains(&slavedspic.lift.pid,  5000, 0, 0);
+	kd = pid_get_gain_D(&slavedspic.lift.pid);
+	pid_set_gains(&slavedspic.lift.pid,  5000, 0, 0);
+
 	/* set low speed, and hi acceleration for fast response */
 	quadramp_set_1st_order_vars(&slavedspic.lift.qr, AUTOPOS_SPEED, AUTOPOS_SPEED);
 	quadramp_set_2nd_order_vars(&slavedspic.lift.qr, AUTOPOS_ACCEL, AUTOPOS_ACCEL);
-	ACTUATORS_DEBUG("Down speed and acceleration");
+	ACTUATORS_DEBUG("Down speed and acceleration");
+
 	/* goto zero with cs */
 	slavedspic.flags |= DO_CS;
 	//cs_set_consign(&slavedspic.lift.cs, (int32_t)(AUTOPOS_BIG_DIST_mm * LIFT_K_IMP_mm));
@@ -88,7 +98,9 @@ void lift_calibrate(void)
 	encoders_dspic_set_value(LIFT_ENCODER, LIFT_CALIB_IMP_MAX);
 	lift_hard_stop();
 	pid_reset(&slavedspic.lift.pid);
-	bd_reset(&slavedspic.lift.bd);	ACTUATORS_DEBUG("End blocking, encoder is reset to zero");	
+	bd_reset(&slavedspic.lift.bd);
+	ACTUATORS_DEBUG("End blocking, encoder is reset to zero");	
+
 	/* restore speed, acceleration and PID */
 	quadramp_set_1st_order_vars(&slavedspic.lift.qr, LIFT_SPEED, LIFT_SPEED);
 	quadramp_set_2nd_order_vars(&slavedspic.lift.qr, LIFT_ACCEL, LIFT_ACCEL);
@@ -99,7 +111,8 @@ void lift_calibrate(void)
 
 	/* set calibration flag */
 	slavedspic.lift.calibrated = 1;
-	return;}
+	return;
+}
 
 /* set height in mm */
 void lift_set_height(int32_t height_mm)
@@ -130,11 +143,23 @@ int32_t lift_get_height(void)
 /* return 1 if height reached, -1 if blocking and zero if no ends yet */
 int8_t lift_check_height_reached(void)
 {
-	/* test consign end */	if(cs_get_consign(&slavedspic.lift.cs) == cs_get_filtered_consign(&slavedspic.lift.cs)){		return END_TRAJ;	}
-	/* test blocking */	if(bd_get(&slavedspic.lift.bd)) {		lift_hard_stop();		pid_reset(&slavedspic.lift.pid);		bd_reset(&slavedspic.lift.bd);
-		slavedspic.lift.blocking = 1;		ACTUATORS_ERROR("Lift ENDS BLOCKING");		return END_BLOCKING;	}
+	/* test consign end */
+	if(cs_get_consign(&slavedspic.lift.cs) == cs_get_filtered_consign(&slavedspic.lift.cs)){
+		return END_TRAJ;
+	}
 
-	return 0;}
+	/* test blocking */
+	if(bd_get(&slavedspic.lift.bd)) {
+		lift_hard_stop();
+		pid_reset(&slavedspic.lift.pid);
+		bd_reset(&slavedspic.lift.bd);
+		slavedspic.lift.blocking = 1;
+		ACTUATORS_ERROR("Lift ENDS BLOCKING");
+		return END_BLOCKING;
+	}
+
+	return 0;
+}
 
 /* return END_TRAJ or END_BLOCKING */
 uint8_t lift_wait_end()
@@ -256,7 +281,8 @@ int8_t combs_check_mode_done(combs_t *combs)
 	
 	/* ax12 blocking timeout */
 	if(time_get_us2() - combs->time_us > AX12_BLOCKING_TIMEOUT_us) {
-		ax12_user_write_int(&gen.ax12, ax12_left_id, AA_GOAL_POSITION_L, ax12_pos_l);		ax12_user_write_int(&gen.ax12, ax12_right_id, AA_GOAL_POSITION_L, ax12_pos_r);
+		ax12_user_write_int(&gen.ax12, ax12_left_id, AA_GOAL_POSITION_L, ax12_pos_l);
+		ax12_user_write_int(&gen.ax12, ax12_right_id, AA_GOAL_POSITION_L, ax12_pos_r);
 		combs->blocking = 1;
 		return END_BLOCKING;
 	}
@@ -529,16 +555,51 @@ uint8_t tree_tray_wait_end(tree_tray_t *tree_tray)
 	return ret;
 }
 
+/**** vacuum funcions *********************************************************/
+
+void vacuum_motor_set (uint8_t num, uint8_t on) {
+
+	if (num == 1)
+		_LATC1 = !on;
+	else if (num == 2)
+		_LATB3 = !on;
+}
+
+void vacuum_ev_set (uint8_t num, uint8_t on) 
+{
+	if (num == 1)
+		_LATB10 = on;
+	else if (num == 2)
+		_LATB11 = on;
+}
+
+void vacuum_system_enable (uint8_t num) {
+	vacuum_ev_set (num, 1);
+	time_wait_ms (500);
+	vacuum_motor_set (num, 1);
+}
+
+void vacuum_system_disable (uint8_t num) {
+	vacuum_ev_set (num, 0);
+	vacuum_motor_set (num, 0);
+}
+
+
+
 /* init all actuators */
 void actuator_init(void)
 {
 //#define PROGRAM_AX12
 #ifdef PROGRAM_AX12
-	ax12_user_write_byte(&gen.ax12, AX12_BROADCAST_ID, AA_ALARM_SHUTDOWN, 0x24);	ax12_user_write_byte(&gen.ax12, AX12_BROADCAST_ID, AA_ALARM_LED, 0x24);
+	ax12_user_write_byte(&gen.ax12, AX12_BROADCAST_ID, AA_ALARM_SHUTDOWN, 0x24);
+	ax12_user_write_byte(&gen.ax12, AX12_BROADCAST_ID, AA_ALARM_LED, 0x24);
 
 	/* specific config for mirror ax12, angle is limited */ 
-	ax12_user_write_byte(&gen.ax12, AX12_BROADCAST_ID, AA_TORQUE_ENABLE, 0xFF);	ax12_user_write_int(&gen.ax12, AX12_BROADCAST_ID, AA_CW_ANGLE_LIMIT_L, 0x00);	ax12_user_write_int(&gen.ax12, AX12_BROADCAST_ID, AA_CCW_ANGLE_LIMIT_L, 0x3FF);
-	ax12_user_write_int(&gen.ax12, AX12_BROADCAST_ID, AA_MOVING_SPEED_L, 0x3FF);#endif
+	ax12_user_write_byte(&gen.ax12, AX12_BROADCAST_ID, AA_TORQUE_ENABLE, 0xFF);
+	ax12_user_write_int(&gen.ax12, AX12_BROADCAST_ID, AA_CW_ANGLE_LIMIT_L, 0x00);
+	ax12_user_write_int(&gen.ax12, AX12_BROADCAST_ID, AA_CCW_ANGLE_LIMIT_L, 0x3FF);
+	ax12_user_write_int(&gen.ax12, AX12_BROADCAST_ID, AA_MOVING_SPEED_L, 0x3FF);
+#endif
 
 	/* init structures */
 	slavedspic.stick_l.type = STICK_TYPE_LEFT;

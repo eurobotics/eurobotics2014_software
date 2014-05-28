@@ -24,7 +24,8 @@
 #ifndef _ACTUATOR_H_
 #define _ACTUATOR_H_
 
-#include <aversive.h>#include <aversive/error.h>
+#include <aversive.h>
+#include <aversive/error.h>
 #include <clock_time.h>
 
 
@@ -218,6 +219,16 @@ int8_t tree_tray_check_mode_done(tree_tray_t *tree_tray);
 
 /* return END_TRAJ or END_BLOCKING */
 uint8_t tree_tray_wait_end(tree_tray_t *tree_tray);
+
+
+/**** vacuum funcions *********************************************************/
+
+void vacuum_motor_set (uint8_t num, uint8_t on);
+void vacuum_ev_set (uint8_t num, uint8_t on);
+
+void vacuum_system_enable (uint8_t num);
+void vacuum_system_disable (uint8_t num);
+
 
 #endif /* _ACTUATOR_H_ */
 

@@ -228,6 +228,63 @@ parse_pgm_inst_t cmd_lift = {
 	},
 };
 
+
+/**********************************************************/
+/* vacuum */
+
+/* this structure is filled when cmd_vacuum is parsed successfully */
+struct cmd_vacuum_result {
+	fixed_string_t arg0;
+	uint8_t arg1;
+    fixed_string_t arg2;
+};
+
+/* function called when cmd_vacuum is parsed successfully */
+static void cmd_vacuum_parsed(__attribute__((unused)) void *parsed_result,
+			    __attribute__((unused)) void *data)
+{
+	struct cmd_vacuum_result *res = (struct cmd_vacuum_result *) parsed_result;
+	struct i2c_cmd_slavedspic_set_mode command;
+	uint8_t on = 0;
+
+	if (!strcmp_P(res->arg2, PSTR("on"))) on = 1;
+	else on = 0;
+
+	if (!strcmp_P(res->arg0, PSTR("ev")))
+		vacuum_ev_set (res->arg1, on);
+
+	else if (!strcmp_P(res->arg0, PSTR("motor_vaccum")))
+		vacuum_motor_set (res->arg1, on);
+
+	else if (!strcmp_P(res->arg0, PSTR("vacuum"))) {
+
+		if (!strcmp_P(res->arg2, PSTR("on"))) 
+			vacuum_system_enable (res->arg1);
+		else
+			vacuum_system_disable (res->arg1);
+	}
+}
+
+prog_char str_vacuum_arg0[] = "ev#motor_vaccum#vacuum";
+parse_pgm_token_string_t cmd_vacuum_arg0 = TOKEN_STRING_INITIALIZER(struct cmd_vacuum_result, arg0, str_vacuum_arg0);
+parse_pgm_token_num_t cmd_vacuum_arg1 = TOKEN_NUM_INITIALIZER(struct cmd_vacuum_result, arg1, UINT8);
+prog_char str_vacuum_arg2[] = "on#off";
+parse_pgm_token_string_t cmd_vacuum_arg2 = TOKEN_STRING_INITIALIZER(struct cmd_vacuum_result, arg2, str_vacuum_arg2);
+
+prog_char help_vacuum[] = "manage vaccum system (1 or 2)";
+parse_pgm_inst_t cmd_vacuum = {
+	.f = cmd_vacuum_parsed,  /* function to call */
+	.data = NULL,      /* 2nd arg of func */
+	.help_str = help_vacuum,
+	.tokens = {        /* token list, NULL terminated */
+		(prog_void *)&cmd_vacuum_arg0, 
+		(prog_void *)&cmd_vacuum_arg1,
+        (prog_void *)&cmd_vacuum_arg2,
+		NULL,
+	},
+};
+
+
 /**********************************************************/
 /* boot */
 

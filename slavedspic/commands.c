@@ -92,6 +92,7 @@ extern parse_pgm_inst_t cmd_ax12_dump_stats;
 extern parse_pgm_inst_t cmd_event;
 extern parse_pgm_inst_t cmd_color;
 extern parse_pgm_inst_t cmd_lift;
+extern parse_pgm_inst_t cmd_vacuum;
 extern parse_pgm_inst_t cmd_boot;
 extern parse_pgm_inst_t cmd_combs;
 extern parse_pgm_inst_t cmd_tree_tray;
@@ -164,6 +165,7 @@ parse_pgm_ctx_t main_ctx[]  = {
 	(parse_pgm_inst_t *)&cmd_event,
 	(parse_pgm_inst_t *)&cmd_color,
 	(parse_pgm_inst_t *)&cmd_lift,
+	(parse_pgm_inst_t *)&cmd_vacuum,
 	(parse_pgm_inst_t *)&cmd_boot,
 	(parse_pgm_inst_t *)&cmd_combs,
 	(parse_pgm_inst_t *)&cmd_tree_tray,
