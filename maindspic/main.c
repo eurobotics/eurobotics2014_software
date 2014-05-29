@@ -227,8 +227,8 @@ int main(void)
 	memset(&beaconboard, 0, sizeof(beaconboard));
 
 	/* init flags */
-  	mainboard.flags = DO_ENCODERS | DO_CS | DO_RS |
-		DO_POS | DO_POWER | DO_BD;
+  	mainboard.flags = DO_ENCODERS  | DO_RS |
+		DO_POS | DO_POWER | DO_BD; //| DO_CS
 	
 	/* bt protocol */
 	beaconboard.link_id = 0xFF;

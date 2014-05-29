@@ -64,7 +64,7 @@ void lift_calibrate(void)
 {
 #define AUTOPOS_SPEED			50
 #define AUTOPOS_ACCEL			1
-#define AUTOPOS_BIG_DIST_mm	50000
+#define AUTOPOS_BIG_DIST_mm		60000
 #define AUTOPOS_BD_TIMEOUT_ms	5000
 
 	int8_t ret;
@@ -130,14 +130,14 @@ void lift_set_height(int32_t height_mm)
 		height_mm = LIFT_HEIGHT_MIN_mm;
 
 	/* apply consign */
-	cs_set_consign(&slavedspic.lift.cs, (int32_t)(height_mm * LIFT_K_IMP_mm));
+	cs_set_consign(&slavedspic.lift.cs, (int32_t)(((int32_t)LIFT_HEIGHT_MAX_mm-height_mm) * LIFT_K_IMP_mm));
 	slavedspic.lift.blocking = 0;
 }
 
 /* return heigh in mm */
 int32_t lift_get_height(void)
 {
-	return (int32_t)(encoders_dspic_get_value(LIFT_ENCODER)/LIFT_K_IMP_mm);
+	return (int32_t)((int32_t)LIFT_HEIGHT_MAX_mm - (encoders_dspic_get_value(LIFT_ENCODER)/LIFT_K_IMP_mm));
 }
 
 /* return 1 if height reached, -1 if blocking and zero if no ends yet */
@@ -584,6 +584,96 @@ void vacuum_system_disable (uint8_t num) {
 	vacuum_motor_set (num, 0);
 }
 
+
+/**************** ARM *********************************************************/
+#if 0
+struct arm_ax12 
+{
+	uint8_t id;
+	int16_t offset_pos;
+
+	int16_t goal_angle_deg;
+	int16_t goal_pos;
+	microseconds goal_time_us;
+
+	int16_t angle_deg;
+};
+
+#define SHOULDER_OFFSET_POS		512
+#define WRIST_OFFSET_POS		512
+#define ELBOW_OFFSET_POS		512
+
+#define AX12_K_IMP_DEG			(1024.0/300.0)
+
+
+
+struct arm_ax12 arm_shoulder;
+struct arm_ax12 arm_elbow;
+struct arm_ax12 arm_wrist;
+
+
+arm_ax12_set_a_abs (struct arm_ax12 *ax12, int16_t a)
+{
+	uint16_t pos;
+
+	ax12_user_read_int(&gen.ax12, ax12->id, AA_PRESENT_POSITION_L, &pos);
+
+	ax12->angle_deg = (uint16_t)((pos - ax12->offset_pos) / AX12_K_IMP_DEG);
+	ax12->goal_angle_deg = a;
+	ax12->goal_pos = ax12->offset_pos + (uint16_t)(ax12->goal_angle_deg*AX12_K_IMP_DEG);
+	
+	ax12_user_write_int(&gen.ax12, ax12->id , AA_GOAL_POSITION_L, ax12->goal_pos);
+
+	ax12->goal_time_us = (microseconds)(ABS(ax12->angle_deg - ax12->goal_angle_deg) * AX12_K_MS_DEG * 1000);
+	ax12->time_us = time_get_us2();
+}
+
+arm_ax12_set_a_rel (struct arm_ax12 *ax12, int16_t a)
+{
+	uint16_t pos;
+
+	ax12_user_read_int(&gen.ax12, ax12->id, AA_PRESENT_POSITION_L, &pos);
+
+	ax12->angle_deg = (uint16_t)((pos - ax12->offset_pos) / AX12_K_IMP_DEG);
+	ax12->goal_angle_deg = ax12->angle_deg + a;
+	ax12->goal_pos = ax12->offset_pos + (uint16_t)(ax12->goal_angle_deg*AX12_K_IMP_DEG);
+
+	ax12_user_write_int(&gen.ax12, ax12->id , AA_GOAL_POSITION_L, ax12->goal_pos);
+
+	ax12->goal_time_us = (microseconds)(ABS(ax12->angle_deg - ax12->goal_angle_deg) * AX12_K_MS_DEG * 1000);
+	ax12->time_us = time_get_us2();
+}
+
+
+
+uint8_t arm_ax12_test_traj_end (struct arm_ax12 *ax12)
+{
+	uint16_t pos;
+	ax12_user_read_int(&gen.ax12, ax12->id, AA_PRESENT_POSITION_L, &pos);
+
+	if (ABS(ax12-goal_pos-pos) < AX12_ARM_WINDOW)
+		return ARM_AX12_END_NEAR;
+
+	if (time_get_us2() - ax12->time_us > ax12->goal_time_us)
+		return ARM_AX12_END_TIME;
+}
+
+
+
+shoulder
+elbow
+wrist
+
+arm_shoulder_set_height (int16_t h)
+{
+
+}
+
+arm_shoulder_set_angle (int16_t a)
+{
+
+}
+#endif
 
 
 /* init all actuators */

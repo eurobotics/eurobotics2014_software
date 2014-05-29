@@ -181,15 +181,15 @@ struct cmd_lift_result {
 static void cmd_lift_parsed(__attribute__((unused)) void *parsed_result,
 			    __attribute__((unused)) void *data)
 {
-#if 0
+
 	struct cmd_lift_result *res = (struct cmd_lift_result *) parsed_result;
 	struct i2c_cmd_slavedspic_set_mode command;
-	//microseconds t1, t2;
+	microseconds t1, t2;
 
 
 
 	if (!strcmp_P(res->arg0, PSTR("lift"))) {
-#if 0
+#if 1
 		lift_set_height(res->arg1);
 	
 		t1 = time_get_us2();
@@ -209,7 +209,6 @@ static void cmd_lift_parsed(__attribute__((unused)) void *parsed_result,
 	}
 	else if (!strcmp_P(res->arg0, PSTR("lift_calibrate")))
 		lift_calibrate();
-#endif
 }
 
 prog_char str_lift_arg0[] = "lift#lift_calibrate";

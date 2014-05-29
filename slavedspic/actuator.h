@@ -31,10 +31,12 @@
 
 #define LIFT_SPEED						100
 #define LIFT_ACCEL						1
-#define LIFT_K_IMP_mm					-1.0
+#define LIFT_K_IMP_mm					(-51474.0/250.0)
 #define LIFT_CALIB_IMP_MAX				0
-#define LIFT_HEIGHT_MAX_mm				42000
-#define LIFT_HEIGHT_MIN_mm				500
+#define LIFT_HEIGHT_MAX_mm				250
+#define LIFT_HEIGHT_MIN_mm				1
+
+
 
 #define POS_COMB_R_OPEN				600
 #define POS_COMB_R_HARVEST_OPEN	556
@@ -228,6 +230,8 @@ void vacuum_ev_set (uint8_t num, uint8_t on);
 
 void vacuum_system_enable (uint8_t num);
 void vacuum_system_disable (uint8_t num);
+
+
 
 
 #endif /* _ACTUATOR_H_ */

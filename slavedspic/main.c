@@ -173,9 +173,9 @@ void io_pins_init(void)
 
 	/* XXX vacum motors */
 	_TRISC1	= 0;
-	_LATC1 = 0;
+	_LATC1 = 1;
 	_TRISB3 = 0;
-	_LATB3 = 0;
+	_LATB3 = 1;
 
 	/* XXX electro valvules */
 	_TRISB11 = 0;		// SENSOR1
