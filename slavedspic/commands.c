@@ -97,6 +97,7 @@ extern parse_pgm_inst_t cmd_boot;
 extern parse_pgm_inst_t cmd_combs;
 extern parse_pgm_inst_t cmd_tree_tray;
 extern parse_pgm_inst_t cmd_stick;
+extern parse_pgm_inst_t cmd_arm;
 
 extern parse_pgm_inst_t cmd_harvest_fruits;
 extern parse_pgm_inst_t cmd_dump_fruits;
@@ -170,6 +171,7 @@ parse_pgm_ctx_t main_ctx[]  = {
 	(parse_pgm_inst_t *)&cmd_combs,
 	(parse_pgm_inst_t *)&cmd_tree_tray,
 	(parse_pgm_inst_t *)&cmd_stick,
+	(parse_pgm_inst_t *)&cmd_arm,
 
 	(parse_pgm_inst_t *)&cmd_harvest_fruits,
 	(parse_pgm_inst_t *)&cmd_dump_fruits,

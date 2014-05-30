@@ -74,8 +74,13 @@
 #define POS_TREE_TRAY_HARVEST	530 //506
 #define POS_TREE_TRAY_CLOSE	358
 
-#define END_TRAJ		1
-#define END_BLOCKING	2
+
+/* test end traj */
+#define END_TRAJ   		1
+#define END_NEAR   		2
+#define END_TIME   		4
+#define END_BLOCKING   	5
+
 
 
 /* init actuators */
@@ -230,8 +235,41 @@ void vacuum_ev_set (uint8_t num, uint8_t on);
 void vacuum_system_enable (uint8_t num);
 void vacuum_system_disable (uint8_t num);
 
+/*** arm functions ************************************************************/
 
+/* shoulder angle */
+void arm_shoulder_goto_a_abs (int16_t a);
+uint8_t arm_shoulder_wait_traj_end (uint8_t flags);
 
+/* elbow angle */
+void arm_elbow_goto_a_abs (int16_t a);
+void arm_elbow_goto_a_rel (int16_t a);
+uint8_t arm_elbow_wait_traj_end (uint8_t flags);
+
+/* wrist angle */
+void arm_wrist_goto_a_abs (int16_t a);
+void arm_wrist_goto_a_rel (int16_t a);
+uint8_t arm_wrist_wait_traj_end (uint8_t flags);
+
+/* set height, sucker reference 
+ * XXX elbow angle is taken in account */
+
+/* arm (x,y,h) */
+
+/* set height, relative to sucker  
+ * XXX elbow angle is taken in account */
+void arm_goto_h (int16_t h);
+uint8_t arm_h_wait_traj_end (void);
+
+/* goto x coordinate, relative to robot zero coordinates.
+ * XXX suposes elbow angle of 0 deg (sucker in parallel with ground) */
+void arm_goto_x (int16_t x);
+
+/* goto y coordinate, relative to robot zero coordinates.
+ * XXX suposes elbow angle of 0 deg (sucker in parallel with ground) */
+void arm_goto_y (int16_t y);
+
+uint8_t arm_xy_wait_traj_end (uint8_t flags);
 
 #endif /* _ACTUATOR_H_ */
 

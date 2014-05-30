@@ -428,7 +428,7 @@ prog_char str_tree_tray_arg1[] = "open#close#harvest";
 parse_pgm_token_string_t cmd_tree_tray_arg1 = TOKEN_STRING_INITIALIZER(struct cmd_tree_tray_result, arg1, str_tree_tray_arg1);
 parse_pgm_token_num_t cmd_tree_tray_arg2 = TOKEN_NUM_INITIALIZER(struct cmd_tree_tray_result, arg2, INT8);
 
-prog_char help_tree_tray[] = "set tree_tray mode, offset";
+prog_char help_tree_tray[] = "set arm";
 parse_pgm_inst_t cmd_tree_tray = {
 	.f = cmd_tree_tray_parsed,  /* function to call */
 	.data = NULL,      /* 2nd arg of func */
@@ -498,6 +498,79 @@ parse_pgm_inst_t cmd_stick = {
 		NULL,
 	},
 };
+
+
+/**********************************************************/
+/* arm */
+
+/* this structure is filled when cmd_arm is parsed successfully */
+struct cmd_arm_result {
+	fixed_string_t arg0;
+	fixed_string_t arg1;
+	int16_t arg2;
+};
+
+/* function called when cmd_arm is parsed successfully */
+static void cmd_arm_parsed(__attribute__((unused)) void *parsed_result,
+			    __attribute__((unused)) void *data)
+{
+	struct cmd_arm_result *res = (struct cmd_arm_result *) parsed_result;
+
+	if (!strcmp_P(res->arg1, PSTR("shoulder_a"))) {
+		arm_shoulder_goto_a_abs (res->arg2);
+		arm_shoulder_wait_traj_end (END_TRAJ|END_TIME);
+	}
+	else if (!strcmp_P(res->arg1, PSTR("elbow_a"))) {
+		arm_elbow_goto_a_abs (res->arg2);
+		arm_elbow_wait_traj_end (END_TRAJ|END_TIME);
+	}
+	else if (!strcmp_P(res->arg1, PSTR("elbow_a_rel"))) {
+		arm_elbow_goto_a_rel (res->arg2);
+		arm_elbow_wait_traj_end (END_TRAJ|END_TIME);
+	}
+	else if (!strcmp_P(res->arg1, PSTR("wrist_a"))) {
+		arm_wrist_goto_a_abs (res->arg2);
+		arm_wrist_wait_traj_end (END_TRAJ|END_TIME);
+	}
+	else if (!strcmp_P(res->arg1, PSTR("wrist_a_rel"))) {
+		arm_wrist_goto_a_rel (res->arg2);
+		arm_wrist_wait_traj_end (END_TRAJ|END_TIME);
+	}
+	else if (!strcmp_P(res->arg1, PSTR("goto_x"))) {
+		arm_goto_x (res->arg2);
+		arm_xy_wait_traj_end (END_TRAJ|END_TIME);
+	}
+	else if (!strcmp_P(res->arg1, PSTR("goto_y"))) {
+		arm_goto_y (res->arg2);
+		arm_xy_wait_traj_end (END_TRAJ|END_TIME);
+	}
+	else if (!strcmp_P(res->arg1, PSTR("goto_h"))) {
+		arm_goto_h (res->arg2);
+		arm_h_wait_traj_end ();
+	}
+
+}
+
+prog_char str_arm_arg0[] = "arm";
+parse_pgm_token_string_t cmd_arm_arg0 = TOKEN_STRING_INITIALIZER(struct cmd_arm_result, arg0, str_arm_arg0);
+prog_char str_arm_arg1[] = "shoulder_a#elbow_a#elbow_a_rel#wrist_a#wrist_a_rel#goto_x#goto_y#goto_h";
+parse_pgm_token_string_t cmd_arm_arg1 = TOKEN_STRING_INITIALIZER(struct cmd_arm_result, arg1, str_arm_arg1);
+parse_pgm_token_num_t cmd_arm_arg2 = TOKEN_NUM_INITIALIZER(struct cmd_arm_result, arg2, INT16);
+
+prog_char help_arm[] = "arm";
+parse_pgm_inst_t cmd_arm = {
+	.f = cmd_arm_parsed,  /* function to call */
+	.data = NULL,      /* 2nd arg of func */
+	.help_str = help_arm,
+	.tokens = {        /* token list, NULL terminated */
+		(prog_void *)&cmd_arm_arg0, 
+		(prog_void *)&cmd_arm_arg1,
+		(prog_void *)&cmd_arm_arg2,
+		NULL,
+	},
+};
+
+
 
 /**********************************************************/
 /* harvest fruits */
