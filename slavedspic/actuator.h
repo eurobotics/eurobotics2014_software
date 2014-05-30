@@ -41,31 +41,32 @@
 
 
 #define POS_COMB_R_OPEN				600
-#define POS_COMB_R_HARVEST_OPEN	556
-#define POS_COMB_R_HARVEST_CLOSE 503
+#define POS_COMB_R_HARVEST_OPEN		556
+#define POS_COMB_R_HARVEST_CLOSE 	503
 #define POS_COMB_R_HIDE				224
 
 #define POS_COMB_L_OPEN				420
-#define POS_COMB_L_HARVEST_OPEN	469
-#define POS_COMB_L_HARVEST_CLOSE 524
+#define POS_COMB_L_HARVEST_OPEN		469
+#define POS_COMB_L_HARVEST_CLOSE 	524
 #define POS_COMB_L_HIDE				792
 
+#define POS_STICK_R_OFFSET				(770-542) /* after stick repair */
+#define POS_STICK_R_HIDE				(542 + POS_STICK_R_OFFSET)
+#define POS_STICK_R_PUSH_TORCH_FIRE		(350 + POS_STICK_R_OFFSET)				
+#define POS_STICK_R_PUSH_FIRE			(335 + POS_STICK_R_OFFSET)
+#define POS_STICK_R_CLEAN_HEART			(311 + POS_STICK_R_OFFSET)
+#define POS_STICK_R_CLEAN_FLOOR			(260 + POS_STICK_R_OFFSET)
 
-#define POS_STICK_R_HIDE					542
-#define POS_STICK_R_PUSH_TORCH_FIRE		340				
-#define POS_STICK_R_PUSH_FIRE				330
-#define POS_STICK_R_CLEAN_HEART			301
-#define POS_STICK_R_CLEAN_FLOOR			210
-
-#define POS_STICK_L_HIDE					241
-#define POS_STICK_L_PUSH_TORCH_FIRE		434
-#define POS_STICK_L_PUSH_FIRE				445
-#define POS_STICK_L_CLEAN_HEART			480
-#define POS_STICK_L_CLEAN_FLOOR			575
+#define POS_STICK_L_OFFSET				(246-241) /* after stick repair */
+#define POS_STICK_L_HIDE				(241 + POS_STICK_L_OFFSET)
+#define POS_STICK_L_PUSH_TORCH_FIRE		(439 + POS_STICK_L_OFFSET)
+#define POS_STICK_L_PUSH_FIRE			(455 + POS_STICK_L_OFFSET)
+#define POS_STICK_L_CLEAN_HEART			(480 + POS_STICK_L_OFFSET)
+#define POS_STICK_L_CLEAN_FLOOR			(525 + POS_STICK_L_OFFSET)
 
 
 #define POS_BOOT_DOOR_OPEN		700			
-#define POS_BOOT_DOOR_CLOSE	960
+#define POS_BOOT_DOOR_CLOSE		960
 
 #define BOOT_TRAY_VIBRATE_PWM	(2000)
 
@@ -119,24 +120,15 @@ typedef struct {
 #define COMBS_MODE_L_POS_MAX		0
 #define COMBS_MODE_L_POS_MIN		1
 
-#ifdef old_version
-	microseconds time_us;
-
 	uint16_t ax12_pos_l;
 	uint16_t ax12_pos_r;
-	uint8_t blocking;
-#endif
+
 } combs_t;
 
 /* set combs position depends on mode */
 int8_t combs_set_mode(combs_t *combs, uint8_t mode, int16_t pos_offset);
 
-#ifdef old_version
-/* return END_TRAJ or END_BLOCKING */
-int8_t combs_check_mode_done(combs_t *combs);
-#endif
-
-/* return END_TRAJ or END_BLOCKING */
+/* return END_TRAJ or END_TIMER */
 uint8_t combs_wait_end(combs_t *combs);
 
 
@@ -151,9 +143,9 @@ typedef struct {
 	uint8_t mode;
 #define STICK_MODE_HIDE					0
 #define STICK_MODE_PUSH_FIRE			1
-#define STICK_MODE_PUSH_TORCH_FIRE	2
-#define STICK_MODE_CLEAN_FLOOR		3
-#define STICK_MODE_CLEAN_HEART		4
+#define STICK_MODE_PUSH_TORCH_FIRE		2
+#define STICK_MODE_CLEAN_FLOOR			3
+#define STICK_MODE_CLEAN_HEART			4
 #define STICK_MODE_MAX					5
 
 #define STICK_MODE_L_POS_MAX			3	
@@ -161,22 +153,15 @@ typedef struct {
 #define STICK_MODE_R_POS_MAX			0
 #define STICK_MODE_R_POS_MIN			3
 
-#ifdef old_version
 	uint16_t ax12_pos;
-	microseconds time_us;
-	uint8_t blocking;
-#endif
+
 } stick_t;
 
 /* set stick position depends on mode */
 uint8_t stick_set_mode(stick_t *stick, uint8_t mode, int16_t pos_offset);
 
-#ifdef old_version
-/* return END_TRAJ or END_BLOCKING */
-int8_t stick_check_mode_done(stick_t *stick);
-#endif
 
-/* return END_TRAJ or END_BLOCKING */
+/* return END_TRAJ or END_TIME */
 uint8_t stick_wait_end(stick_t *stick);
 
 
@@ -184,13 +169,13 @@ uint8_t stick_wait_end(stick_t *stick);
 /**** boot funcions *********************************************************/
 typedef struct {
 	uint8_t door_mode;
-#define BOOT_DOOR_MODE_OPEN		0
+#define BOOT_DOOR_MODE_OPEN			0
 #define BOOT_DOOR_MODE_CLOSE		1
 #define BOOT_DOOR_MODE_MAX			2
 
 	uint8_t tray_mode;
-#define BOOT_TRAY_MODE_DOWN		0
-#define BOOT_TRAY_MODE_VIBRATE	1
+#define BOOT_TRAY_MODE_DOWN			0
+#define BOOT_TRAY_MODE_VIBRATE		1
 #define BOOT_TRAY_MODE_MAX			2
 
 	uint16_t door_servo_pos;
@@ -217,18 +202,18 @@ typedef struct {
 #define TREE_TRAY_MODE_POS_MAX	0
 #define TREE_TRAY_MODE_POS_MIN	1
 
-#ifdef old_version
+#if 0
 	microseconds time_us;
-
-	uint16_t ax12_pos;
 	uint8_t blocking;
 #endif
+
+	uint16_t ax12_pos;
 } tree_tray_t;
 
 /* set stick position depends on mode */
 uint8_t tree_tray_set_mode(tree_tray_t *tree_tray, uint8_t mode, int16_t pos_offset);
 
-#ifdef old_version
+#if 0
 /* return END_TRAJ or END_BLOCKING */
 int8_t tree_tray_check_mode_done(tree_tray_t *tree_tray);
 #endif

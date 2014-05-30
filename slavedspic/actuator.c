@@ -48,6 +48,137 @@
 #define AX12_BLOCKING_TIMEOUT_us	600000L
 
 
+/**************************  AX12 MANAGE FUNCTIONS ****************************/
+struct ax12_traj 
+{
+#define AX12_K_IMP_DEG		(1024.0/300.0)  // 3.413 imp/deg
+#define AX12_K_MS_DEG		(200.0/60.0)	// 3.333 ms/deg	
+#define AX12_WINDOW_NO_NEAR	(5*AX12_K_IMP_DEG)  // 5 deg
+#define AX12_WINDOW_NEAR	(20*AX12_K_IMP_DEG) // 20 deg
+
+	uint8_t id;
+	int16_t zero_offset_pos;
+
+	int16_t goal_angle_deg;
+	uint16_t goal_pos;
+
+	microseconds goal_time_us;
+    microseconds time_us;
+    
+    uint16_t pos;
+	int16_t angle_deg;
+};
+
+
+/* set position */
+void ax12_set_pos (struct ax12_traj *ax12, int16_t pos)
+{
+     /* update current position/angle */
+	ax12_user_read_int(&gen.ax12, ax12->id, AA_PRESENT_POSITION_L, &ax12->pos);
+ 	ax12->angle_deg = (uint16_t)((ax12->pos - ax12->zero_offset_pos) / AX12_K_IMP_DEG);
+
+    /* set goal angle */
+    ax12->goal_pos = pos;
+    ax12->goal_angle_deg = (uint16_t)((pos - ax12->zero_offset_pos) / AX12_K_IMP_DEG);
+	ax12_user_write_int(&gen.ax12, ax12->id , AA_GOAL_POSITION_L, ax12->goal_pos);
+
+    /* update goal time */
+	ax12->goal_time_us = (microseconds)(ABS(ax12->angle_deg - ax12->goal_angle_deg) * AX12_K_MS_DEG * 1000);
+	ax12->time_us = time_get_us2();
+}
+
+/* set angle */
+void ax12_set_a (struct ax12_traj *ax12, int16_t a)
+{
+    /* update current position/angle */
+	ax12_user_read_int(&gen.ax12, ax12->id, AA_PRESENT_POSITION_L, &ax12->pos);
+ 	ax12->angle_deg = (uint16_t)((ax12->pos - ax12->zero_offset_pos) / AX12_K_IMP_DEG);
+
+    /* set goal angle */
+    ax12->goal_angle_deg = a;
+    ax12->goal_pos = ax12->zero_offset_pos + (uint16_t)(ax12->goal_angle_deg * AX12_K_IMP_DEG);
+	ax12_user_write_int(&gen.ax12, ax12->id , AA_GOAL_POSITION_L, ax12->goal_pos);
+
+    /* update goal time */
+	ax12->goal_time_us = (microseconds)(ABS(ax12->angle_deg - ax12->goal_angle_deg) * AX12_K_MS_DEG * 1000);
+	ax12->time_us = time_get_us2();
+}
+
+/* get angle */
+int8_t ax12_get_a (struct ax12_traj *ax12)
+{
+    /* update current position/angle */
+	ax12_user_read_int(&gen.ax12, ax12->id, AA_PRESENT_POSITION_L, &ax12->pos);
+	ax12->angle_deg = (uint16_t)((ax12->pos - ax12->zero_offset_pos) / AX12_K_IMP_DEG);
+
+    return ax12->angle_deg;
+}
+
+
+/* test end traj */
+#define END_TRAJ   1
+#define END_NEAR   2
+#define END_TIME   4
+
+const char *err_tab []= {
+	"END_TRAJ",
+	"END_NEAR",
+	"END_TIME",
+	"END_RESERVED",
+};
+
+/* return string from end traj type num */
+const char *get_err (uint8_t err)
+{
+	uint8_t i;
+	if (err == 0)
+		return "SUCCESS";
+	for (i=0 ; i<4; i++) {
+		if (err & (1 <<i))
+			return err_tab[i];
+	}
+	return "END_UNKNOWN";
+}
+
+
+uint8_t ax12_test_traj_end (struct ax12_traj *ax12, uint8_t flags)
+{
+	ax12_user_read_int(&gen.ax12, ax12->id, AA_PRESENT_POSITION_L, &ax12->pos);
+    uint8_t ret = 0;
+
+	if (flags & END_TRAJ)
+		if (ABS(ax12->goal_pos - ax12->pos) < AX12_WINDOW_NO_NEAR)
+			ret |= END_TRAJ;
+
+	if (flags & END_NEAR)
+		if (ABS(ax12->goal_pos - ax12->pos) < AX12_WINDOW_NEAR)
+			ret |=  END_NEAR;
+
+	if (flags & END_TIME)
+		if (time_get_us2() - ax12->time_us > ax12->goal_time_us)
+			ret |=  END_TIME;
+
+    return ret;
+}
+
+/* wait traj end */
+uint8_t ax12_wait_traj_end (struct ax12_traj *ax12, uint8_t flags) 
+{
+    microseconds us = time_get_us2();
+    uint8_t ret = 0;
+
+    while (ret == 0) {
+        /* check end traj periodicaly (T = 5ms) */
+        if (time_get_us2() - us >= 5000L) {
+            ret = ax12_test_traj_end (ax12, flags);
+            us = time_get_us2();
+        }
+    }
+	DEBUG(E_USER_ACTUATORS, "Got %s",  get_err (ret));
+    return ret;
+}
+
+
 
 /**** lift functions ********************************************************/
 
@@ -191,22 +322,12 @@ uint16_t combs_ax12_pos_r [COMBS_MODE_MAX] = {
 	[COMBS_MODE_HARVEST_OPEN] 	= POS_COMB_R_HARVEST_OPEN, 
 };
 
-#ifndef old_version
-struct ax12_traj ax12_comb_l = { .id = AX12_ID_COMB_L; .zero_offset_pos = 0);
-struct ax12_traj ax12_comb_r = { .id = AX12_ID_COMB_R; .zero_offset_pos = 0);
-#endif
+struct ax12_traj ax12_comb_l = { .id = AX12_ID_COMB_L, .zero_offset_pos = 0 };
+struct ax12_traj ax12_comb_r = { .id = AX12_ID_COMB_R, .zero_offset_pos = 0 };
 
 /* set finger position depends on mode */
 int8_t combs_set_mode(combs_t *combs, uint8_t mode, int16_t pos_offset)
 {
-#ifdef old_version
-	uint8_t ax12_left_id, ax12_right_id, err1=0, err2=0;
-
-	/* set ax12 ids */
-	ax12_left_id = AX12_ID_COMB_L;
-	ax12_right_id = AX12_ID_COMB_R;
-#endif
-
 	/* set ax12 possitions depends on mode and type */
 	if(mode >= COMBS_MODE_MAX) {
 		ACTUATORS_ERROR("Unknow COMBS MODE");
@@ -243,123 +364,44 @@ int8_t combs_set_mode(combs_t *combs, uint8_t mode, int16_t pos_offset)
 		combs->ax12_pos_r = combs_ax12_pos_r[COMBS_MODE_R_POS_MIN];
  
 	/* apply to ax12 */
-#ifdef old_version
-	err1 = ax12_user_write_int(&gen.ax12, ax12_left_id, AA_GOAL_POSITION_L, combs->ax12_pos_l);
-    err2 = ax12_user_write_int(&gen.ax12, ax12_right_id, AA_GOAL_POSITION_L, combs->ax12_pos_r);
-
-	/* update time for timeout and reset blocking */
-	combs->blocking = 0;
-	combs->time_us = time_get_us2();
-
-	if(err1) return err1;
-	if(err2) return err2;
-#else
     ax12_set_pos (&ax12_comb_l, combs->ax12_pos_l);
     ax12_set_pos (&ax12_comb_r, combs->ax12_pos_r);
-#endif
+
 	return 0;
 }
 
-#ifdef old_version
 /* return END_TRAJ or END_BLOCKING */
-int8_t combs_check_mode_done(combs_t *combs)
-{
-
-	static microseconds us = 0;
-	uint16_t ax12_pos_l = 0, ax12_pos_r = 0;
-	uint8_t ax12_left_id, ax12_right_id;
-
-	/* ax12 position pulling */
-	if(time_get_us2() - us < AX12_PULLING_TIME_us)
-		return 0;
-
-	/* update time */
-	us = time_get_us2();
-
-	/* set ax12 ids */
-	ax12_left_id = AX12_ID_COMB_L;
-	ax12_right_id = AX12_ID_COMB_R;
-
-	/* read positions */
-	if(ax12_user_read_int(&gen.ax12, ax12_left_id, AA_PRESENT_POSITION_L, &ax12_pos_l))
-		return 0;
-
-	if(ax12_user_read_int(&gen.ax12, ax12_right_id, AA_PRESENT_POSITION_L, &ax12_pos_r))
-		return 0;
-
-	/* check if positions are inside window */
-	if(ABS(combs->ax12_pos_l - ax12_pos_l) < AX12_WINDOW_POSITION 
-		&& ABS(combs->ax12_pos_r - ax12_pos_r) < AX12_WINDOW_POSITION)	
-		return END_TRAJ;
-	
-	/* ax12 blocking timeout */
-	if(time_get_us2() - combs->time_us > AX12_BLOCKING_TIMEOUT_us) {
-		ax12_user_write_int(&gen.ax12, ax12_left_id, AA_GOAL_POSITION_L, ax12_pos_l);
-		ax12_user_write_int(&gen.ax12, ax12_right_id, AA_GOAL_POSITION_L, ax12_pos_r);
-		combs->blocking = 1;
-		return END_BLOCKING;
-	}
-
-	return 0;
-
-}
-#endif
-
-/* return END_TRAJ or END_BLOCKING */
-
 uint8_t combs_wait_end(combs_t *combs)
 {
-#ifdef old_version
-	uint8_t ret = 0;
-
-	/* wait end */
-	while(!ret)
-		ret = combs_check_mode_done(combs);
-
-	return ret;
-#else
-    uint8_t ret_l, ret_l; 
+    uint8_t ret_l, ret_r;
    
-    ret_l = ax12_wait_traj_end (&ax12_comb_l, AX12_END_TRAJ);
-    ret_r = ax12_wait_traj_end (&ax12_comb_r, AX12_END_TRAJ);
+    ret_l = ax12_wait_traj_end (&ax12_comb_l, END_TRAJ|END_TIME);
+    ret_r = ax12_wait_traj_end (&ax12_comb_r, END_TRAJ|END_TIME);
 
     return (ret_l | ret_r);
-#endif
 }
 
 /**** sticks funcions *********************************************************/
 uint16_t stick_ax12_pos[STICK_TYPE_MAX][STICK_MODE_MAX] = {
 	[STICK_TYPE_RIGHT][STICK_MODE_HIDE] 				= POS_STICK_R_HIDE,
 	[STICK_TYPE_RIGHT][STICK_MODE_PUSH_FIRE] 			= POS_STICK_R_PUSH_FIRE,
-	[STICK_TYPE_RIGHT][STICK_MODE_PUSH_TORCH_FIRE]	= POS_STICK_R_PUSH_TORCH_FIRE,
-	[STICK_TYPE_RIGHT][STICK_MODE_CLEAN_FLOOR] 		= POS_STICK_R_CLEAN_FLOOR,
-	[STICK_TYPE_RIGHT][STICK_MODE_CLEAN_HEART] 		= POS_STICK_R_CLEAN_HEART,
+	[STICK_TYPE_RIGHT][STICK_MODE_PUSH_TORCH_FIRE]		= POS_STICK_R_PUSH_TORCH_FIRE,
+	[STICK_TYPE_RIGHT][STICK_MODE_CLEAN_FLOOR] 			= POS_STICK_R_CLEAN_FLOOR,
+	[STICK_TYPE_RIGHT][STICK_MODE_CLEAN_HEART] 			= POS_STICK_R_CLEAN_HEART,
 
 	[STICK_TYPE_LEFT][STICK_MODE_HIDE] 					= POS_STICK_L_HIDE,
 	[STICK_TYPE_LEFT][STICK_MODE_PUSH_FIRE] 			= POS_STICK_L_PUSH_FIRE,
-	[STICK_TYPE_LEFT][STICK_MODE_PUSH_TORCH_FIRE]	= POS_STICK_L_PUSH_TORCH_FIRE,
-	[STICK_TYPE_LEFT][STICK_MODE_CLEAN_FLOOR] 		= POS_STICK_L_CLEAN_FLOOR,
-	[STICK_TYPE_LEFT][STICK_MODE_CLEAN_HEART] 		= POS_STICK_L_CLEAN_HEART,
+	[STICK_TYPE_LEFT][STICK_MODE_PUSH_TORCH_FIRE]		= POS_STICK_L_PUSH_TORCH_FIRE,
+	[STICK_TYPE_LEFT][STICK_MODE_CLEAN_FLOOR] 			= POS_STICK_L_CLEAN_FLOOR,
+	[STICK_TYPE_LEFT][STICK_MODE_CLEAN_HEART] 			= POS_STICK_L_CLEAN_HEART,
 };
 
-#ifndef old_version
-struct ax12_traj ax12_stick_l = { .id = AX12_ID_STICK_L; .zero_offset_pos = 0);
-struct ax12_traj ax12_stick_r = { .id = AX12_ID_STICK_R; .zero_offset_pos = 0);
-#endif
+struct ax12_traj ax12_stick_l = { .id = AX12_ID_STICK_L, .zero_offset_pos = 0 };
+struct ax12_traj ax12_stick_r = { .id = AX12_ID_STICK_R, .zero_offset_pos = 0 };
 
 /* set finger position depends on mode */
 uint8_t stick_set_mode(stick_t *stick, uint8_t mode, int16_t pos_offset)
-{
-#ifdef old_version
-	uint8_t ax12_id, err;
-
-	/* set ax12 ids */
-	if(stick->type == STICK_TYPE_RIGHT)
-		ax12_id = AX12_ID_STICK_R;
-	else
-		ax12_id = AX12_ID_STICK_L;
-#endif
-		
+{	
 	/* set ax12 possitions depends on mode and type */
 	if(mode >= STICK_MODE_MAX) {
 		ACTUATORS_ERROR("Unknow %s STICK MODE", stick->type == STICK_TYPE_RIGHT? "RIGHT":"LEFT");
@@ -370,7 +412,7 @@ uint8_t stick_set_mode(stick_t *stick, uint8_t mode, int16_t pos_offset)
 	if(stick->type == STICK_TYPE_RIGHT)
 		stick->ax12_pos = stick_ax12_pos[stick->type][stick->mode] + pos_offset;
 	else
-		stick->ax12_pos = stick_ax12_pos[stick->type][stick->mode] - pos_offset;
+		stick->ax12_pos = stick_ax12_pos[stick->type][stick->mode] + pos_offset;
 	
 	/* saturate to position range */
 	if(stick->type == STICK_TYPE_LEFT) {
@@ -386,83 +428,22 @@ uint8_t stick_set_mode(stick_t *stick, uint8_t mode, int16_t pos_offset)
 			stick->ax12_pos = stick_ax12_pos[STICK_TYPE_RIGHT][STICK_MODE_R_POS_MIN];
 	}
 
-#ifdef old_version
-	/* apply to ax12 */
-	err = ax12_user_write_int(&gen.ax12, ax12_id, AA_GOAL_POSITION_L, stick->ax12_pos);
-
-	/* update time for timeout and reset blocking */
-	stick->time_us = time_get_us2();
-	stick->blocking = 0;
-
-	if(err) 	return err;
-#else
-
     if(stick->type == STICK_TYPE_LEFT)
         ax12_set_pos (&ax12_stick_l, stick->ax12_pos);
     else
         ax12_set_pos (&ax12_stick_r, stick->ax12_pos);
-#endif
-	return 0;
-}
-
-#ifdef old_version
-/* return END_TRAJ or END_BLOCKING */
-int8_t stick_check_mode_done(stick_t *stick)
-{
-	static microseconds us = 0;
-	uint16_t ax12_pos;
-	uint8_t ax12_id;
-
-	/* ax12 position pulling */
-	if(time_get_us2() - us < AX12_PULLING_TIME_us)
-		return 0;
-
-	/* update time */
-	us = time_get_us2();
-
-	/* set ax12 ids */
-	if(stick->type == STICK_TYPE_RIGHT) 
-		ax12_id = AX12_ID_STICK_R;
-	else
-		ax12_id = AX12_ID_STICK_L;
-
-	/* read positions */
-	if(ax12_user_read_int(&gen.ax12, ax12_id, AA_PRESENT_POSITION_L, &ax12_pos))
-		return 0;
-
-	/* check if position is inside window */
-	if(ABS(stick->ax12_pos - ax12_pos) < AX12_WINDOW_POSITION)	
-		return END_TRAJ;
-	
-	/* ax12 blocking timeout */
-	if(time_get_us2() - stick->time_us > AX12_BLOCKING_TIMEOUT_us) {
-		//XXX ax12_user_write_int(&gen.ax12, ax12_id, AA_GOAL_POSITION_L, ax12_pos);
-		stick->blocking = 1;
-		return END_BLOCKING;
-	}
 
 	return 0;
 }
-#endif
 
 
 /* return END_TRAJ or END_BLOCKING */
 uint8_t stick_wait_end(stick_t *stick)
 {
-#ifdef old_version
-	uint8_t ret = 0;
-
-	/* wait end */
-	while(!ret)
-		ret = stick_check_mode_done(stick);
-
-	return ret;
-#else
     if(stick->type == STICK_TYPE_LEFT)
-        return ax12_wait_traj_end (&ax12_stick_l, AX12_END_TRAJ);
+        return ax12_wait_traj_end (&ax12_stick_l, END_TRAJ|END_TIME);
     else
-        return ax12_wait_traj_end (&ax12_stick_r, AX12_END_TRAJ);
-#endif
+        return ax12_wait_traj_end (&ax12_stick_r, END_TRAJ|END_TIME);
 }
 
 
@@ -520,19 +501,13 @@ uint16_t tree_tray_ax12_pos [TREE_TRAY_MODE_MAX] = {
 	[TREE_TRAY_MODE_HARVEST]	= POS_TREE_TRAY_HARVEST,
 };
 
-#ifndef old_version
-struct ax12_traj ax12_tree_tray = { .id = AX12_ID_TREE_TRAY; .zero_offset_pos = 0);
-#endif
+
+struct ax12_traj ax12_tree_tray = { .id = AX12_ID_TREE_TRAY, .zero_offset_pos = 0 };
+
 
 /* set tree_tray position depends on mode */
 uint8_t tree_tray_set_mode(tree_tray_t *tree_tray, uint8_t mode, int16_t pos_offset)
 {
-#ifdef old_version
-	uint8_t ax12_id, err;
-
-	/* set ax12 ids */
-	ax12_id = AX12_ID_TREE_TRAY;
-#endif
 	/* set ax12 possitions depends on mode and type */
 	if(mode >= TREE_TRAY_MODE_MAX) {
 		ACTUATORS_ERROR("Unknow TREE TRAY MODE");
@@ -549,73 +524,16 @@ uint8_t tree_tray_set_mode(tree_tray_t *tree_tray, uint8_t mode, int16_t pos_off
 	if(tree_tray->ax12_pos < tree_tray_ax12_pos[TREE_TRAY_MODE_POS_MIN])
 		tree_tray->ax12_pos = tree_tray_ax12_pos[TREE_TRAY_MODE_POS_MIN];
 
-#ifdef old_version
 	/* apply to ax12 */
-	err = ax12_user_write_int(&gen.ax12, ax12_id, AA_GOAL_POSITION_L, tree_tray->ax12_pos);
-
-	/* update time for timeout and reset blocking */
-	tree_tray->time_us = time_get_us2();
-	tree_tray->blocking = 0;
-
-	if(err) 	return err;
-#else
     ax12_set_pos (&ax12_tree_tray, tree_tray->ax12_pos);
-#endif
-	return 0;
-}
-
-#ifdef old_version
-/* return END_TRAJ or END_BLOCKING */
-int8_t tree_tray_check_mode_done(tree_tray_t *tree_tray)
-{
-	static microseconds us = 0;
-	uint16_t ax12_pos;
-	uint8_t ax12_id;
-
-	/* ax12 position pulling */
-	if(time_get_us2() - us < AX12_PULLING_TIME_us)
-		return 0;
-
-	/* update time */
-	us = time_get_us2();
-
-	/* set ax12 ids */
-	ax12_id = AX12_ID_TREE_TRAY;
-
-
-	/* read positions */
-	if(ax12_user_read_int(&gen.ax12, ax12_id, AA_PRESENT_POSITION_L, &ax12_pos))
-		return 0;
-
-	/* check if position is inside window */
-	if(ABS(tree_tray->ax12_pos - ax12_pos) < AX12_WINDOW_POSITION)	
-		return END_TRAJ;
-	
-	/* ax12 blocking timeout */
-	if(time_get_us2() - tree_tray->time_us > AX12_BLOCKING_TIMEOUT_us) {
-		ax12_user_write_int(&gen.ax12, ax12_id, AA_GOAL_POSITION_L, ax12_pos);
-		tree_tray->blocking = 1;
-		return END_BLOCKING;
-	}
 
 	return 0;
 }
-#endif
 
-/* return END_TRAJ or END_BLOCKING */
+/* return END_TRAJ or END_TIME */
 uint8_t tree_tray_wait_end(tree_tray_t *tree_tray)
 {
-#ifdef old_version
-	uint8_t ret = 0;
-
-	/* wait end */
-	while(!ret)
-		ret = tree_tray_check_mode_done(tree_tray);
-
-	return ret;
-#else
-    return ax12_wait_traj_end (&ax12_tree_tray, AX12_END_TRAJ);
-#endif
+    return ax12_wait_traj_end (&ax12_tree_tray, END_TRAJ|END_TIME);
 }
 
 /**** vacuum funcions *********************************************************/
@@ -649,119 +567,8 @@ void vacuum_system_disable (uint8_t num) {
 
 
 
-#if 1
+#if 0
 
-/**************************  AX12 MANAGE FUNCTIONS ****************************/
-struct ax12_traj 
-{
-#define AX12_K_IMP_DEG			(1024.0/300.0)
-#define AX12_K_MS_DEG           (200.0/60.0)
-
-	uint8_t id;
-	int16_t zero_offset_pos;
-
-	int16_t goal_angle_deg;
-	int16_t goal_pos;
-	microseconds goal_time_us;
-
-    int16_t pos;
-	int16_t angle_deg;
-};
-
-
-/* set position */
-void ax12_set_pos (struct ax12_traj *ax12, int16_t pos)
-{
-     /* update current position/angle */
-	ax12_user_read_int(&gen.ax12, ax12->id, AA_PRESENT_POSITION_L, &ax12->pos);
- 	ax12->angle_deg = (uint16_t)((ax12->pos - ax12->zero_offset_pos) / AX12_K_IMP_DEG);
-
-    /* set goal angle */
-    ax12->goal_pos = pos;
-    ax12->goal_angle_deg = (uint16_t)((pos - ax12->zero_offset_pos) / AX12_K_IMP_DEG);
-	ax12_user_write_int(&gen.ax12, ax12->id , AA_GOAL_POSITION_L, ax12->goal_pos);
-
-    /* update goal time */
-	ax12->goal_time_us = (microseconds)(ABS(ax12->angle_deg - ax12->goal_angle_deg) * AX12_K_MS_DEG * 1000);
-	ax12->time_us = time_get_us2();
-}
-
-/* set angle */
-void ax12_set_a (struct ax12_traj *ax12, int16_t a)
-{
-    /* update current position/angle */
-	ax12_user_read_int(&gen.ax12, ax12->id, AA_PRESENT_POSITION_L, &ax12->pos);
- 	ax12->angle_deg = (uint16_t)((ax12->pos - ax12->zero_offset_pos) / AX12_K_IMP_DEG);
-
-    /* set goal angle */
-    ax12->goal_angle_deg = a;
-    ax12->goal_pos = ax12->zero_offset_pos + (uint16_t)(ax12->goal_angle_deg * AX12_K_IMP_DEG);
-	ax12_user_write_int(&gen.ax12, ax12->id , AA_GOAL_POSITION_L, ax12->goal_pos);
-
-    /* update goal time */
-	ax12->goal_time_us = (microseconds)(ABS(ax12->angle_deg - ax12->goal_angle_deg) * AX12_K_MS_DEG * 1000);
-	ax12->time_us = time_get_us2();
-}
-
-/* get angle */
-int8_t ax12_get_a (struct ax12_traj *ax12)
-{
-	uint16_t pos;
-
-    /* update current position/angle */
-	ax12_user_read_int(&gen.ax12, ax12->id, AA_PRESENT_POSITION_L, &pos);
-	ax12->angle_deg = (uint16_t)((pos - ax12->zero_offset_pos) / AX12_K_IMP_DEG);
-
-    return ax12->angle_deg;
-}
-
-
-/* test end traj */
-#define AX12_END_TRAJ   1
-#define AX12_END_NEAR   2
-#define AX12_END_TIME   3
-uint8_t ax12_test_traj_end (struct ax12_traj *ax12)
-{
-	uint16_t pos;
-	ax12_user_read_int(&gen.ax12, ax12->id, AA_PRESENT_POSITION_L, &ax12->pos);
-    uint8_t ret = 0;
-
-	if (ABS(ax12->goal_pos - ax12->pos) < AX12_WINDOW_NO_NEAR)
-		ret |= AX12_END_TRAJ;
-
-	if (ABS(ax12->goal_pos - ax12->pos) < AX12_WINDOW_NEAR)
-		ret |=  AX12_END_NEAR;
-
-	if (time_get_us2() - ax12->time_us > ax12->goal_time_us)
-		ret |=  AX12_END_TIME;
-
-    return ret;
-}
-
-/* wait traj end */
-uint8_t ax12_wait_traj_end (struct ax12_traj *ax12, uint8_t flags) 
-{
-    microseconds us = time_get_us2();
-    uint8_t ret = 0, __ret = 0;
-
-    while (ret == 0) {
-        /* check end traj periodicaly (T = 5ms) */
-        if (time_get_us2() - us >= 5000L) {
-            __ret = ax12_test_traj_end (ax12);
-            us = time_get_us2();
-
-
-            if ((flags & AX12_END_TRAJ) & __ret)
-                ret = __ret;
-
-            if ((flags & AX12_END_NEAR) & __ret)
-                ret = __ret;
-
-            if ((flags & AX12_END_TIME) & __ret)
-                ret = __ret;
-        }
-    }
-}
 
 
 /****************************  ARM  *******************************************/

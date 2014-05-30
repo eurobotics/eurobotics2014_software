@@ -213,7 +213,7 @@ void state_do_combs_mode(void)
    state_set_status(I2C_SLAVEDSPIC_STATUS_READY);
 }
 
-/* set stick mode */
+/* set tree tray mode */
 void state_do_tree_tray_mode(void)
 {
 	/* return if no update */
@@ -235,9 +235,9 @@ void state_do_tree_tray_mode(void)
 /* set stick mode */
 void state_do_stick_mode(void)
 {
-#define STICK_MODES_NB_TRIES 3
+//#define STICK_MODES_NB_TRIES 3
 	uint8_t err = 0;
-	uint8_t nb_tries = 0;
+//	uint8_t nb_tries = 0;
 
 	/* return if no update */
 	if (!state_check_update(STICK))
@@ -248,68 +248,71 @@ void state_do_stick_mode(void)
 	slavedspic.stick_mode = mainboard_command.stick.mode;
 	slavedspic.stick_offset = mainboard_command.stick.offset;
 
-	/* set stick mode */
+	/*** RIGHT STICK */
 	if(mainboard_command.stick.type == I2C_STICK_TYPE_RIGHT) {
 		/* hide the other */
-retry_hide_left:
+//retry_hide_left:
 		if(stick_set_mode(&slavedspic.stick_l, STICK_MODE_HIDE, 0))
 			STMCH_ERROR("ERROR %s mode=%d", __FUNCTION__, state_get_mode());
 
 		err = stick_wait_end(&slavedspic.stick_l);
-
+#if 0
 		if((err & END_BLOCKING) && (nb_tries < STICK_MODES_NB_TRIES)) {
 			nb_tries ++;
-			time_wait_ms (200);
 			goto retry_hide_left;
 		}
+
 		/* set right */
 		nb_tries = 0;
-
-retry_right:
+#endif
+//retry_right:
 		if(stick_set_mode(&slavedspic.stick_r, slavedspic.stick_mode, 
 								slavedspic.stick_offset))
 			STMCH_ERROR("ERROR %s mode=%d", __FUNCTION__, state_get_mode());
 
 		err = stick_wait_end(&slavedspic.stick_r);
-
+#if 0
 		if((err & END_BLOCKING) && (nb_tries < STICK_MODES_NB_TRIES)) {
 			nb_tries ++;
-			time_wait_ms (200);
 			goto retry_right;
 		}
+#endif
+
 	}	
+
+	/*** LEFT_STICK */
 	else if(mainboard_command.stick.type == I2C_STICK_TYPE_LEFT) {
+
 		/* hide the other */
-retry_hide_right:
+//retry_hide_right:
 		if(stick_set_mode(&slavedspic.stick_r, STICK_MODE_HIDE, 0))
 			STMCH_ERROR("ERROR %s mode=%d", __FUNCTION__, state_get_mode());
 
 		err = stick_wait_end(&slavedspic.stick_r);
-
+#if 0
 		if((err & END_BLOCKING) && (nb_tries < STICK_MODES_NB_TRIES)) {
 			nb_tries ++;
-			time_wait_ms (200);
 			goto retry_hide_right;
 		}
 		/* set right */
 		nb_tries = 0;
-
-retry_left:
+#endif
+//retry_left:
 		if(stick_set_mode(&slavedspic.stick_l, slavedspic.stick_mode, 
 								slavedspic.stick_offset))
 			STMCH_ERROR("ERROR %s mode=%d", __FUNCTION__, state_get_mode());
 
 		err = stick_wait_end(&slavedspic.stick_l);
-
+#if 0
 		if((err & END_BLOCKING) && (nb_tries < STICK_MODES_NB_TRIES)) {
 			nb_tries ++;
-			time_wait_ms (200);
 			goto retry_left;
 		}
+#endif
 	}	
 
-	if(err & END_BLOCKING)
-		STMCH_DEBUG("HARVEST TREE mode ends with BLOCKING");
+//	if(err & END_BLOCKING)
+//		STMCH_DEBUG("HARVEST TREE mode ends with BLOCKING");
 
 	/* notice status and update mode*/
 	state_set_status(I2C_SLAVEDSPIC_STATUS_READY);

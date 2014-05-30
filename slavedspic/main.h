@@ -78,20 +78,17 @@
 
 #define PWM_SERVO_BOOT_DOOR			&gen.pwm_servo_oc2	
 
-#define AX12_ID_FINGERS_TOTEM_R		4
-#define AX12_ID_FINGERS_TOTEM_L		7
-#define AX12_ID_FINGERS_FLOOR_R		2
-#define AX12_ID_FINGERS_FLOOR_L		8
-#define AX12_ID_ARM_R					3
-#define AX12_ID_ARM_L					1
-#define AX12_ID_BOOT						5
-#define AX12_ID_HOOK						6
 
 #define AX12_ID_STICK_L		1
 #define AX12_ID_STICK_R		3
 #define AX12_ID_COMB_L		5
 #define AX12_ID_COMB_R		4
 #define AX12_ID_TREE_TRAY	2
+
+#define AX12_ID_SHOULDER	7
+#define AX12_ID_ELBOW		8	
+#define AX12_ID_WRIST		6
+
 
 #if 0
 #define S_TURBINE_LINE_A1	SENSOR5
@@ -181,7 +178,7 @@ struct slavedspic {
 	/* infos */
 	uint8_t status;
 	uint8_t stick_mode;
-	uint8_t stick_offset;
+	int8_t stick_offset;
 	uint8_t harvest_fruits_mode;
 	uint8_t dump_fruits_mode;
 
