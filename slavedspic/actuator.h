@@ -29,6 +29,8 @@
 #include <clock_time.h>
 
 
+#define old_version
+
 #define LIFT_SPEED						100
 #define LIFT_ACCEL						1
 #define LIFT_K_IMP_mm					(-51474.0/250.0)
@@ -109,7 +111,7 @@ typedef struct {
 #define COMBS_MODE_HIDE				0
 #define COMBS_MODE_OPEN				1
 #define COMBS_MODE_HARVEST_CLOSE	2
-#define COMBS_MODE_HARVEST_OPEN	3
+#define COMBS_MODE_HARVEST_OPEN	    3
 #define COMBS_MODE_MAX				4
 
 #define COMBS_MODE_R_POS_MAX		1	
@@ -117,18 +119,22 @@ typedef struct {
 #define COMBS_MODE_L_POS_MAX		0
 #define COMBS_MODE_L_POS_MIN		1
 
+#ifdef old_version
 	microseconds time_us;
 
 	uint16_t ax12_pos_l;
 	uint16_t ax12_pos_r;
 	uint8_t blocking;
+#endif
 } combs_t;
 
 /* set combs position depends on mode */
 int8_t combs_set_mode(combs_t *combs, uint8_t mode, int16_t pos_offset);
 
+#ifdef old_version
 /* return END_TRAJ or END_BLOCKING */
 int8_t combs_check_mode_done(combs_t *combs);
+#endif
 
 /* return END_TRAJ or END_BLOCKING */
 uint8_t combs_wait_end(combs_t *combs);
@@ -155,16 +161,20 @@ typedef struct {
 #define STICK_MODE_R_POS_MAX			0
 #define STICK_MODE_R_POS_MIN			3
 
+#ifdef old_version
 	uint16_t ax12_pos;
 	microseconds time_us;
 	uint8_t blocking;
+#endif
 } stick_t;
 
 /* set stick position depends on mode */
 uint8_t stick_set_mode(stick_t *stick, uint8_t mode, int16_t pos_offset);
 
+#ifdef old_version
 /* return END_TRAJ or END_BLOCKING */
 int8_t stick_check_mode_done(stick_t *stick);
+#endif
 
 /* return END_TRAJ or END_BLOCKING */
 uint8_t stick_wait_end(stick_t *stick);
@@ -207,17 +217,21 @@ typedef struct {
 #define TREE_TRAY_MODE_POS_MAX	0
 #define TREE_TRAY_MODE_POS_MIN	1
 
+#ifdef old_version
 	microseconds time_us;
 
 	uint16_t ax12_pos;
 	uint8_t blocking;
+#endif
 } tree_tray_t;
 
 /* set stick position depends on mode */
 uint8_t tree_tray_set_mode(tree_tray_t *tree_tray, uint8_t mode, int16_t pos_offset);
 
+#ifdef old_version
 /* return END_TRAJ or END_BLOCKING */
 int8_t tree_tray_check_mode_done(tree_tray_t *tree_tray);
+#endif
 
 /* return END_TRAJ or END_BLOCKING */
 uint8_t tree_tray_wait_end(tree_tray_t *tree_tray);
