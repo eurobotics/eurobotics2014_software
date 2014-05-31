@@ -508,6 +508,9 @@ struct cmd_arm_result {
 	fixed_string_t arg0;
 	fixed_string_t arg1;
 	int16_t arg2;
+	int16_t arg3;
+	int16_t arg4;
+	int16_t arg5;
 };
 
 /* function called when cmd_arm is parsed successfully */
@@ -548,7 +551,9 @@ static void cmd_arm_parsed(__attribute__((unused)) void *parsed_result,
 		arm_goto_h (res->arg2);
 		arm_h_wait_traj_end ();
 	}
-
+	else if (!strcmp_P(res->arg1, PSTR("goto_hxaa"))) {
+		arm_goto_hx (res->arg2, res->arg3, res->arg4, res->arg5);
+	}
 }
 
 prog_char str_arm_arg0[] = "arm";
@@ -557,7 +562,7 @@ prog_char str_arm_arg1[] = "shoulder_a#elbow_a#elbow_a_rel#wrist_a#wrist_a_rel#g
 parse_pgm_token_string_t cmd_arm_arg1 = TOKEN_STRING_INITIALIZER(struct cmd_arm_result, arg1, str_arm_arg1);
 parse_pgm_token_num_t cmd_arm_arg2 = TOKEN_NUM_INITIALIZER(struct cmd_arm_result, arg2, INT16);
 
-prog_char help_arm[] = "arm";
+prog_char help_arm[] = "arm joins";
 parse_pgm_inst_t cmd_arm = {
 	.f = cmd_arm_parsed,  /* function to call */
 	.data = NULL,      /* 2nd arg of func */
@@ -570,7 +575,29 @@ parse_pgm_inst_t cmd_arm = {
 	},
 };
 
+prog_char str_arm_goto_arg1[] = "goto_hxaa";
+parse_pgm_token_string_t cmd_arm_goto_arg1 = TOKEN_STRING_INITIALIZER(struct cmd_arm_result, arg1, str_arm_goto_arg1);
 
+
+parse_pgm_token_num_t cmd_arm_arg3 = TOKEN_NUM_INITIALIZER(struct cmd_arm_result, arg3, INT16);
+parse_pgm_token_num_t cmd_arm_arg4 = TOKEN_NUM_INITIALIZER(struct cmd_arm_result, arg4, INT16);
+parse_pgm_token_num_t cmd_arm_arg5 = TOKEN_NUM_INITIALIZER(struct cmd_arm_result, arg5, INT16);
+
+prog_char help_arm_goto[] = "arm high level goto";
+parse_pgm_inst_t cmd_arm_goto = {
+	.f = cmd_arm_parsed,  /* function to call */
+	.data = NULL,      /* 2nd arg of func */
+	.help_str = help_arm,
+	.tokens = {        /* token list, NULL terminated */
+		(prog_void *)&cmd_arm_arg0, 
+		(prog_void *)&cmd_arm_goto_arg1,
+		(prog_void *)&cmd_arm_arg2,
+		(prog_void *)&cmd_arm_arg3,
+		(prog_void *)&cmd_arm_arg4,
+		(prog_void *)&cmd_arm_arg5,
+		NULL,
+	},
+};
 
 /**********************************************************/
 /* harvest fruits */

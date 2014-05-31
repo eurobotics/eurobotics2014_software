@@ -51,10 +51,10 @@
 /**************************  AX12 MANAGE FUNCTIONS ****************************/
 struct ax12_traj 
 {
-#define AX12_K_IMP_DEG		(1024.0/300.0)  // 3.413 imp/deg
-#define AX12_K_MS_DEG		(200.0/60.0)	// 3.333 ms/deg	
-#define AX12_WINDOW_NO_NEAR	(5*AX12_K_IMP_DEG)  // 5 deg
-#define AX12_WINDOW_NEAR	(20*AX12_K_IMP_DEG) // 20 deg
+#define AX12_K_IMP_DEG		(3.413) //(1024.0/300.0)  // 3.413 imp/deg
+#define AX12_K_MS_DEG		(3.333) //(200.0/60.0)	// 3.333 ms/deg	
+#define AX12_WINDOW_NO_NEAR	(5.0*AX12_K_IMP_DEG)  // 5 deg
+#define AX12_WINDOW_NEAR	(10.0*AX12_K_IMP_DEG) // 20 deg
 
 	uint8_t id;
 	int16_t zero_offset_pos;
@@ -75,7 +75,8 @@ void ax12_set_pos (struct ax12_traj *ax12, int16_t pos)
 {
      /* update current position/angle */
 	ax12_user_read_int(&gen.ax12, ax12->id, AA_PRESENT_POSITION_L, &ax12->pos);
- 	ax12->angle_deg = (int16_t)((ax12->pos - ax12->zero_offset_pos) / AX12_K_IMP_DEG);
+ 	ax12->angle_deg = (int16_t)(ax12->pos - ax12->zero_offset_pos);
+ 	ax12->angle_deg = (int16_t)(ax12->angle_deg / AX12_K_IMP_DEG);
 
     /* set goal angle */
     ax12->goal_pos = pos;
@@ -94,22 +95,26 @@ void ax12_set_a (struct ax12_traj *ax12, int16_t a)
 
     /* update current position/angle */
 	ax12_user_read_int(&gen.ax12, ax12->id, AA_PRESENT_POSITION_L, &ax12->pos);
- 	ax12->angle_deg = (uint16_t)((ax12->pos - ax12->zero_offset_pos) / AX12_K_IMP_DEG);
+ 	ax12->angle_deg = (int16_t)(ax12->pos - ax12->zero_offset_pos);
+ 	ax12->angle_deg = (int16_t)(ax12->angle_deg / AX12_K_IMP_DEG);
 
     /* set goal angle */
     ax12->goal_angle_deg = a;
     ax12->goal_pos = ax12->zero_offset_pos + (int16_t)(ax12->goal_angle_deg * AX12_K_IMP_DEG);
 
-	printf ("%s, goal pos = %d\n\r", __FUNCTION__, ax12->goal_pos);
+	//printf ("%s, goal pos = %d\n\r", __FUNCTION__, ax12->goal_pos);
 	ax12_user_write_int(&gen.ax12, ax12->id , AA_GOAL_POSITION_L, ax12->goal_pos);
 
     /* update goal time */
 	ax12->goal_time_us = (microseconds)(ABS(ax12->angle_deg - ax12->goal_angle_deg) * AX12_K_MS_DEG * 1000);
 	ax12->time_us = time_get_us2();
+
+	//printf ("da %d, goal_us %d\n\r", (int16_t)ABS(ax12->angle_deg - ax12->goal_angle_deg), ax12->goal_time_us);
+	//printf ("a=%d, goal_a =%d\n\r", ax12->angle_deg, ax12->goal_angle_deg);
 }
 
 /* get angle */
-int8_t ax12_get_a (struct ax12_traj *ax12)
+int16_t ax12_get_a (struct ax12_traj *ax12)
 {
     /* update current position/angle */
 	ax12_user_read_int(&gen.ax12, ax12->id, AA_PRESENT_POSITION_L, &ax12->pos);
@@ -573,20 +578,21 @@ void vacuum_system_disable (uint8_t num) {
 
 #define SHOULDER_JOIN_X   (165-21) // 144
 #define SHOULDER_JOIN_Y   (130)
-#define ARM_LENGTH        (220.0)
-#define SUCKER_LENGTH	  (51.0)
+#define ARM_LENGTH        (219.0)
+#define SUCKER_LENGTH_0	  (46.5)
+#define SUCKER_LENGTH_180 (55.5)
 
 #define ARM_X_MAX   (SHOULDER_JOIN_X + ARM_LENGTH)
 #define ARM_X_MIN   (SHOULDER_JOIN_X - ARM_LENGTH)
 
-#define ARM_Y_MAX   (SHOULDER_JOIN_Y + ARM_LENGTH)
-#define ARM_Y_MIN   (SHOULDER_JOIN_Y)
+#define ARM_Y_MAX   (SHOULDER_JOIN_Y + ARM_LENGTH) //363
+#define ARM_Y_MIN   (SHOULDER_JOIN_Y)			   //144
 
 #define ARM_H_MAX   (LIFT_HEIGHT_MAX_mm)
 #define ARM_H_MIN   (LIFT_HEIGHT_MAX_mm)
 
-#define ARM_SHOULDER_A_MAX   (+90)
-#define ARM_SHOULDER_A_MIN   (-90)
+#define ARM_SHOULDER_A_MAX   (180)
+#define ARM_SHOULDER_A_MIN   (0)
 
 #define ARM_ELBOW_A_MAX (180)
 #define ARM_ELBOW_A_MIN (0)
@@ -599,7 +605,7 @@ void vacuum_system_disable (uint8_t num) {
 #define RAD(x) (((double)(x)) * (M_PI / 180.0))
 #define M_2PI (2*M_PI)
 
-struct ax12_traj ax12_shoulder = { .id = AX12_ID_SHOULDER, .zero_offset_pos = 503 };
+struct ax12_traj ax12_shoulder = { .id = AX12_ID_SHOULDER, .zero_offset_pos = 805 };
 struct ax12_traj ax12_elbow    = { .id = AX12_ID_ELBOW,    .zero_offset_pos = 822 };
 struct ax12_traj ax12_wrist    = { .id = AX12_ID_WRIST,    .zero_offset_pos = 650 };
 
@@ -630,11 +636,11 @@ void arm_x_to_ay (int16_t x, int16_t *a, int16_t *y)
 {
     double a1, x1, y1;
 
-	x1 = x - SHOULDER_JOIN_X;
+	x1 = (double) (x - SHOULDER_JOIN_X);
     a1 = acos (x1 / ARM_LENGTH);
     y1 = ARM_LENGTH * sin(a1);
 
-	printf ("a1 = %f, x1 = %d, y1 = %f\n\r", DEG(a1), x1, y1);
+	printf ("a1 = %f, x1 = %f, y1 = %f\n\r", DEG(a1), x1, y1);
 
     *a = (int16_t)DEG(a1);
     *y = (int16_t)y1 + SHOULDER_JOIN_Y; 
@@ -646,12 +652,16 @@ void arm_y_to_ax (int16_t y, int16_t *a, int16_t *x)
 {
     double a1, x1, y1;
 
-	y1 = y - SHOULDER_JOIN_Y;
-    a1 = asin (y / ARM_LENGTH);
+	y1 = (double) (y - SHOULDER_JOIN_Y);
+    a1 = M_PI - asin (y1 / ARM_LENGTH);
     x1 = ARM_LENGTH * cos(a1);
+
+	printf ("a1 = %f, x1 = %f, y1 = %f\n\r", DEG(a1), x1, y1);
 
     *a = (int16_t)DEG(a1);
     *x = (int16_t)x1 + SHOULDER_JOIN_X;   
+
+	printf ("a = %d, x = %d\n\r", *a, *x);  
 }
 
 /*** Joins functions *********************************************************/
@@ -669,6 +679,11 @@ void arm_shoulder_goto_a_abs (int16_t a)
 
 uint8_t arm_shoulder_wait_traj_end (uint8_t flags) {
     return ax12_wait_traj_end(&ax12_shoulder, flags);
+}
+
+int16_t arm_shoulder_get_a (void) {
+	/* XXX get invert angle */
+	return (-ax12_get_a(&ax12_shoulder));
 }
 
 /* elbow angle */
@@ -695,6 +710,14 @@ void arm_elbow_goto_a_rel (int16_t a)
     /* set pos, XXX set angle inverted */
     ax12_set_a (&ax12_elbow, -a);
 }
+
+int16_t arm_elbow_get_a (void)
+{
+    /* calculate a abs */
+	/* XXX get invert angle */
+    return (-ax12_get_a(&ax12_elbow));
+}
+
 
 uint8_t arm_elbow_wait_traj_end (uint8_t flags) {
     return ax12_wait_traj_end(&ax12_elbow, flags);
@@ -728,26 +751,67 @@ uint8_t arm_wrist_wait_traj_end (uint8_t flags) {
     return ax12_wait_traj_end(&ax12_wrist, flags);
 }
 
+int16_t arm_wrist_get_a (void) {
+    return ax12_get_a (&ax12_wrist);
+}
 
-/* set height, relative to sucker  
+/* set height, relative to current sucker angle 
  * XXX elbow angle is taken in account */
 void arm_goto_h (int16_t h)
 {
     int16_t elbow_a;
-    int16_t sucker_offset;
-    int16_t h_sucker;
-    
+    float sucker_offset = 0.0;
+    int16_t h_sucker=0;
+   
     /* calculate sucker height */
-    elbow_a = ABS(ax12_get_a(&ax12_elbow));
-    sucker_offset = SUCKER_LENGTH - ABS(SUCKER_LENGTH * cos(RAD(elbow_a)));
-    h_sucker = h-sucker_offset;
+    elbow_a = arm_elbow_get_a();
 
-    /* check limints */
-    if (h_sucker > ARM_H_MAX)   h_sucker = ARM_H_MAX;
-    if (h_sucker < ARM_H_MIN)   h_sucker = ARM_H_MIN;   
+	printf ("h_sucker (%d) = %d - %d = %d\n\r", elbow_a, h, (int16_t)sucker_offset, (int16_t)h_sucker);
+ 
+	if (elbow_a <= 90)
+    	sucker_offset = SUCKER_LENGTH_180 - (SUCKER_LENGTH_0 * cos(RAD(elbow_a)));
+	else 
+    	sucker_offset = SUCKER_LENGTH_180 + (SUCKER_LENGTH_180 * cos(RAD(elbow_a)));
 
+    h_sucker = h;
+	h_sucker -= (int16_t)sucker_offset;
+
+	//printf ("h_sucker (%d) = %d - %d = %d\n\r", elbow_a, h, (int16_t)sucker_offset, (int16_t)h_sucker);
+ 
     lift_set_height (h_sucker);
 }
+
+/* set height, relative to elbow goal angle given as parameter 
+ * XXX elbow angle is taken in account */
+void arm_goto_h_elbow_a (int16_t h, int16_t elbow_a)
+{
+    float sucker_offset = 0.0;
+    int16_t h_sucker;
+   
+    /* calculate sucker height */
+	if (elbow_a <= 90)
+    	sucker_offset = SUCKER_LENGTH_180 - (SUCKER_LENGTH_0 * cos(RAD(elbow_a)));
+	else 
+    	sucker_offset = SUCKER_LENGTH_180 + (SUCKER_LENGTH_180 * cos(RAD(elbow_a)));
+
+    h_sucker = h;
+	h_sucker -= (int16_t)sucker_offset;
+
+	printf ("h_sucker (%d) = %d - %d = %d\n\r", elbow_a, h, (int16_t)sucker_offset, (int16_t)h_sucker);
+ 
+    lift_set_height (h_sucker);
+}
+
+int16_t arm_get_h (void) 
+{
+	int16_t elbow_a = arm_elbow_get_a();
+
+	if (elbow_a <= 90)
+		return lift_get_height();
+	else
+		return (lift_get_height() + (SUCKER_LENGTH_180-SUCKER_LENGTH_0));
+}
+
 
 uint8_t arm_h_wait_traj_end (void)
 {
@@ -768,12 +832,8 @@ void arm_goto_x (int16_t x)
     /* calculate angle pos */
     arm_x_to_ay (x, &a, &y); 
 
-    /* check limints */
-    if (a > ARM_SHOULDER_A_MAX)   a = ARM_SHOULDER_A_MAX;
-    if (a < ARM_SHOULDER_A_MIN)   a = ARM_SHOULDER_A_MIN;
-
     /* set pos */
-    ax12_set_a (&ax12_shoulder, a);  
+	arm_shoulder_goto_a_abs (a);
 }
 
 /* goto y coordinate, relative to robot zero coordinates.
@@ -787,19 +847,78 @@ void arm_goto_y (int16_t y)
 	if (x < ARM_Y_MIN) x = ARM_Y_MIN;
 
     /* calculate angle pos */
-    arm_y_to_ax (x, &a, &x); 
-
-    /* check limints */
-    if (a > ARM_SHOULDER_A_MAX)   a = ARM_SHOULDER_A_MAX;
-    if (a < ARM_SHOULDER_A_MIN)   a = ARM_SHOULDER_A_MIN;
+    arm_y_to_ax (y, &a, &x); 
 
     /* set pos */
-    ax12_set_a (&ax12_shoulder, a); 
+	arm_shoulder_goto_a_abs (a);
 }
 
 uint8_t arm_xy_wait_traj_end (uint8_t flags) {
-    return ax12_wait_traj_end(&ax12_shoulder, flags);
+    return arm_shoulder_wait_traj_end (flags);
 }
+
+
+void arm_goto_hx (int16_t h, int16_t x, int16_t elbow_a, int16_t wrist_a)
+{
+#define SHOULDER_A_SAFE (145)
+
+	int16_t shoulder_h, shoulder_a, shoulder_a_final, y_final;
+
+	shoulder_a = arm_shoulder_get_a ();
+	shoulder_h = arm_get_h ();
+	arm_x_to_ay (x, &shoulder_a_final, &y_final);
+
+	/* depending on direction of movement */
+	if (shoulder_a_final > SHOULDER_A_SAFE)
+	{
+		/* form inside to outside */
+		ax12_user_write_int(&gen.ax12, AX12_ID_SHOULDER, AA_MOVING_SPEED_L, 0x3FF);
+
+		/* goto safe position */
+		if (shoulder_a > SHOULDER_A_SAFE) {
+			arm_shoulder_goto_a_abs (SHOULDER_A_SAFE);
+
+			/* wait for safe angle reached */
+			arm_shoulder_wait_traj_end (END_TRAJ|END_NEAR|END_TIME);
+		}
+
+		/* goto final position */
+		arm_goto_x (x);
+		arm_goto_h_elbow_a (h, elbow_a);	
+		arm_elbow_goto_a_abs (elbow_a);
+		arm_wrist_goto_a_abs (wrist_a);
+
+		/* wait end positions reached */
+		arm_xy_wait_traj_end (END_TRAJ|END_TIME);
+		arm_h_wait_traj_end ();
+		arm_elbow_wait_traj_end (END_TRAJ|END_TIME);
+		arm_wrist_wait_traj_end (END_TRAJ|END_TIME);
+	}
+	else {
+		/* form outside to inside */
+		ax12_user_write_int(&gen.ax12, AX12_ID_SHOULDER, AA_MOVING_SPEED_L, 125);
+
+		/* goto safe position */
+		arm_goto_h_elbow_a (h, elbow_a);
+		arm_shoulder_goto_a_abs (SHOULDER_A_SAFE);
+		arm_elbow_goto_a_abs (elbow_a);
+		arm_wrist_goto_a_abs (wrist_a);
+
+		/* wait for h reached */
+		arm_h_wait_traj_end();
+		arm_shoulder_wait_traj_end (END_TRAJ|END_TIME);
+		arm_elbow_wait_traj_end (END_TRAJ|END_TIME);
+		arm_wrist_wait_traj_end (END_TRAJ|END_TIME);
+	
+		/* goto final position */
+		arm_goto_x (x);
+		
+		/* wait final positino reached */
+		arm_xy_wait_traj_end(END_TRAJ|END_TIME);
+	}
+}
+
+
 
 
 /* init all actuators */

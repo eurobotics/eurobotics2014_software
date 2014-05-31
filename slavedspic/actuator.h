@@ -35,8 +35,8 @@
 #define LIFT_ACCEL						1
 #define LIFT_K_IMP_mm					(-51474.0/250.0)
 #define LIFT_CALIB_IMP_MAX				0
-#define LIFT_HEIGHT_MAX_mm				250
-#define LIFT_HEIGHT_MIN_mm				1
+#define LIFT_HEIGHT_MAX_mm				250L
+#define LIFT_HEIGHT_MIN_mm				1L
 
 
 
@@ -270,6 +270,9 @@ void arm_goto_x (int16_t x);
 void arm_goto_y (int16_t y);
 
 uint8_t arm_xy_wait_traj_end (uint8_t flags);
+
+/* ARM goto high level */
+void arm_goto_hx (int16_t h, int16_t x, int16_t elbow_a, int16_t wrist_a);
 
 #endif /* _ACTUATOR_H_ */
 
