@@ -868,22 +868,25 @@ void arm_goto_hx (int16_t h, int16_t x, int16_t elbow_a, int16_t wrist_a)
 	shoulder_h = arm_get_h ();
 	arm_x_to_ay (x, &shoulder_a_final, &y_final);
 
+	/* goto safe position */
+	/*if ((shoulder_a > SHOULDER_A_SAFE) && 
+		(shoulder_a_final > SHOULDER_A_SAFE)) {
+		arm_shoulder_goto_a_abs (SHOULDER_A_SAFE);
+		arm_shoulder_wait_traj_end (END_TRAJ);
+	}*/
+
+
 	/* depending on direction of movement */
-	if (shoulder_a_final > SHOULDER_A_SAFE)
+	if (shoulder_a_final <= shoulder_a)
 	{
 		/* form inside to outside */
-		ax12_user_write_int(&gen.ax12, AX12_ID_SHOULDER, AA_MOVING_SPEED_L, 0x3FF);
-
-		/* goto safe position */
-		if (shoulder_a > SHOULDER_A_SAFE) {
-			arm_shoulder_goto_a_abs (SHOULDER_A_SAFE);
-
-			/* wait for safe angle reached */
-			arm_shoulder_wait_traj_end (END_TRAJ|END_NEAR|END_TIME);
-		}
+		//ax12_user_write_int(&gen.ax12, AX12_ID_SHOULDER, AA_MOVING_SPEED_L, 0x3FF);
 
 		/* goto final position */
 		arm_goto_x (x);
+		/* TODO detect safe shoulder angle for next movement */
+		arm_xy_wait_traj_end (END_TRAJ|END_NEAR|END_TIME);
+
 		arm_goto_h_elbow_a (h, elbow_a);	
 		arm_elbow_goto_a_abs (elbow_a);
 		arm_wrist_goto_a_abs (wrist_a);
@@ -896,17 +899,15 @@ void arm_goto_hx (int16_t h, int16_t x, int16_t elbow_a, int16_t wrist_a)
 	}
 	else {
 		/* form outside to inside */
-		ax12_user_write_int(&gen.ax12, AX12_ID_SHOULDER, AA_MOVING_SPEED_L, 125);
+		//ax12_user_write_int(&gen.ax12, AX12_ID_SHOULDER, AA_MOVING_SPEED_L, 125);
 
-		/* goto safe position */
+		/* set all except shoulder angle */
 		arm_goto_h_elbow_a (h, elbow_a);
-		arm_shoulder_goto_a_abs (SHOULDER_A_SAFE);
 		arm_elbow_goto_a_abs (elbow_a);
 		arm_wrist_goto_a_abs (wrist_a);
 
 		/* wait for h reached */
 		arm_h_wait_traj_end();
-		arm_shoulder_wait_traj_end (END_TRAJ|END_TIME);
 		arm_elbow_wait_traj_end (END_TRAJ|END_TIME);
 		arm_wrist_wait_traj_end (END_TRAJ|END_TIME);
 	
