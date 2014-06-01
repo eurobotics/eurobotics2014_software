@@ -249,6 +249,8 @@ void lift_calibrate(void)
 
 	/* set calibration flag */
 	slavedspic.lift.calibrated = 1;
+	lift_set_height(200);
+
 	return;
 }
 
@@ -582,8 +584,8 @@ void vacuum_system_disable (uint8_t num) {
 #define SUCKER_LENGTH_0	  (46.5)
 #define SUCKER_LENGTH_180 (55.5)
 
-#define ARM_X_MAX   (SHOULDER_JOIN_X + ARM_LENGTH)
-#define ARM_X_MIN   (SHOULDER_JOIN_X - ARM_LENGTH)
+#define ARM_X_MAX   (SHOULDER_JOIN_X + ARM_LENGTH) //363
+#define ARM_X_MIN   (SHOULDER_JOIN_X - ARM_LENGTH) //75
 
 #define ARM_Y_MAX   (SHOULDER_JOIN_Y + ARM_LENGTH) //363
 #define ARM_Y_MIN   (SHOULDER_JOIN_Y)			   //144
@@ -864,8 +866,12 @@ void arm_goto_hx (int16_t h, int16_t x, int16_t elbow_a, int16_t wrist_a)
 
 	int16_t shoulder_h, shoulder_a, shoulder_a_final, y_final;
 
-	shoulder_a = arm_shoulder_get_a ();
-	shoulder_h = arm_get_h ();
+	/* saturate range */
+	if (x > ARM_X_MAX) x = ARM_X_MAX;
+	if (x < ARM_X_MIN) x = ARM_X_MIN;
+
+	shoulder_a = arm_shoulder_get_a();
+	shoulder_h = arm_get_h();
 	arm_x_to_ay (x, &shoulder_a_final, &y_final);
 
 	/* goto safe position */
@@ -875,6 +881,7 @@ void arm_goto_hx (int16_t h, int16_t x, int16_t elbow_a, int16_t wrist_a)
 		arm_shoulder_wait_traj_end (END_TRAJ);
 	}*/
 
+	ACTUATORS_DEBUG ("shoulder a = %d --> a=%d", shoulder_a, shoulder_a_final);
 
 	/* depending on direction of movement */
 	if (shoulder_a_final <= shoulder_a)
