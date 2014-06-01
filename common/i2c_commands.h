@@ -45,23 +45,6 @@
 #define I2C_SIDE_RIGHT  2
 #define I2C_SIDE_ALL    3
 
-#define I2C_LEVEL_GROUND_FIRE_0     0
-#define I2C_LEVEL_GROUND_FIRE_1     0
-#define I2C_LEVEL_GROUND_FIRE_2     0
-#define I2C_LEVEL_UP_FIRE_TOP       1
-#define I2C_LEVEL_UP_FIRE_CENTER    2
-#define I2C_LEVEL_TORCH_FIRE_0
-#define I2C_LEVEL_TORCH_FIRE_1
-#define I2C_LEVEL_TORCH_FIRE_2
-#define I2C_LEVEL_TORCH_FIRE_3
-#define I2C_LEVEL_HEART_FIRE_0
-#define I2C_LEVEL_HEART_FIRE_1
-#define I2C_LEVEL_HEART_FIRE_2
-#define I2C_LEVEL_FRUIT_BASKET_0
-#define I2C_LEVEL_FRUIT_BASKET_1
-#define I2C_LEVEL_FRUIT_BASKET_2
-#define I2C_LEVEL_FRUIT_BASKET_3
-#define I2C_LEVEL_FRUIT_BASKET_4
 
 
 struct i2c_cmd_hdr {
@@ -89,26 +72,19 @@ struct i2c_slavedspic_status{
 	struct i2c_cmd_hdr hdr;
 
 
-  /* TODO */
+  	/* TODO */
 	
-  /* actuators */
+  	/* actuators */
 
-   /* rd sensors */
+   	/* rd sensors */
 
-  /* wr sensors */
+  	/* wr sensors */
 
 	/* infos */
 	uint8_t status;
 #define I2C_SLAVEDSPIC_STATUS_BUSY		1
 #define I2C_SLAVEDSPIC_STATUS_READY		0
 
-	//uint8_t fire_mode;
-	//uint8_t fruit_mode;
-	//uint8_t stick_mode;
-
-  /* statistics */
-	//int8_t nb_fires_l;
-	//int8_t nb_fires_r;
 };
 
 
@@ -139,12 +115,12 @@ struct i2c_cmd_slavedspic_set_mode {
 #define I2C_SLAVEDSPIC_MODE_TREE_TRAY				0x06
 #define I2C_SLAVEDSPIC_MODE_STICK					0x07
 
+
 /* multiple actuator modes */
 #define I2C_SLAVEDSPIC_MODE_HARVEST_FRUITS   	0x08
-#define I2C_SLAVEDSPIC_MODE_DUMP_FRUITS			0x0B
-
-
-
+#define I2C_SLAVEDSPIC_MODE_DUMP_FRUITS			0x09
+#define I2C_SLAVEDSPIC_MODE_ARM_GOTO			0x0A
+#define I2C_SLAVEDSPIC_MODE_ARM					0x0B
 
 
 
@@ -223,11 +199,60 @@ struct i2c_cmd_slavedspic_set_mode {
 #define I2C_SLAVEDSPIC_MODE_HARVEST_FRUITS_END		3
 		} harvest_fruits;
 
+
 		struct {
 			uint8_t mode;
 #define I2C_SLAVEDSPIC_MODE_DUMP_FRUITS_DO		1	
 #define I2C_SLAVEDSPIC_MODE_DUMP_FRUITS_END		3
 		} dump_fruits;
+
+		struct {
+			uint8_t h_msb;
+			uint8_t h_lsb;
+
+			uint8_t x_msb;
+			uint8_t x_lsb;
+
+			uint8_t elbow_a_msb;
+			uint8_t elbow_a_lsb;
+
+			uint8_t wrist_a_msb;
+			uint8_t wrist_a_lsb;
+		} arm_goto;
+
+		struct {
+			uint8_t mode;
+#define I2C_SLAVEDSPIC_MODE_ARM_PICKUP_TORCH_READY	1
+#define I2C_SLAVEDSPIC_MODE_ARM_PICKUP_TORCH_DO		2
+#define I2C_SLAVEDSPIC_MODE_ARM_STORE_TORCH			3
+
+#define I2C_SLAVEDSPIC_MODE_ARM_PICKUP_FIRE_READY	4
+#define I2C_SLAVEDSPIC_MODE_ARM_PICKUP_FIRE_DO		5
+#define I2C_SLAVEDSPIC_MODE_ARM_STORE_FIRE			6
+
+#define I2C_SLAVEDSPIC_MODE_ARM_LOAD_FIRE			7
+#define I2C_SLAVEDSPIC_MODE_ARM_FLIP_FIRE			8
+#define I2C_SLAVEDSPIC_MODE_ARM_PUTDOWN_FIRE		9
+
+			uint8_t x_lsb;
+			uint8_t x_msb;
+	
+			uint8_t level;
+#define I2C_SLAVEDSPIC_LEVEL_FIRE_GROUND		0
+#define I2C_SLAVEDSPIC_LEVEL_FIRE_HEART			1
+#define I2C_SLAVEDSPIC_LEVEL_FIRE_TORCH_DOWN	2
+#define I2C_SLAVEDSPIC_LEVEL_FIRE_TORCH_MIDDLE	3
+#define I2C_SLAVEDSPIC_LEVEL_FIRE_TORCH_TOP		4
+#define I2C_SLAVEDSPIC_LEVEL_MOBILE_TORCH		5
+#define I2C_SLAVEDSPIC_LEVEL_MAX				6
+
+			uint8_t sucker_type;
+#define I2C_SLAVEDSPIC_SUCKER_TYPE_SHORT	0
+#define I2C_SLAVEDSPIC_SUCKER_TYPE_LONG		1
+#define I2C_SLAVEDSPIC_SUCKER_TYPE_MAX		2
+
+			int8_t sucker_angle;
+		} arm;
 
 		/* add more here */
 	};

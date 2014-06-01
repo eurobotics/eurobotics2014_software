@@ -67,8 +67,12 @@
 #define TREE_TRAY			I2C_SLAVEDSPIC_MODE_TREE_TRAY
 #define STICK				I2C_SLAVEDSPIC_MODE_STICK
 
-#define HARVEST_FRUITS 	I2C_SLAVEDSPIC_MODE_HARVEST_FRUITS
-#define DUMP_FRUITS		I2C_SLAVEDSPIC_MODE_DUMP_FRUITS
+#define HARVEST_FRUITS 		I2C_SLAVEDSPIC_MODE_HARVEST_FRUITS
+#define DUMP_FRUITS			I2C_SLAVEDSPIC_MODE_DUMP_FRUITS
+#define ARM_GOTO			I2C_SLAVEDSPIC_MODE_ARM_GOTO
+#define ARM					I2C_SLAVEDSPIC_MODE_ARM
+
+
 
 static struct i2c_cmd_slavedspic_set_mode mainboard_command;
 static volatile uint8_t prev_state;
@@ -437,6 +441,184 @@ void state_do_dump_fruits_mode(void)
 }
 
 
+uint16_t get_shoulder_h [I2C_SLAVEDSPIC_LEVEL_MAX] = {
+	[I2C_SLAVEDSPIC_LEVEL_FIRE_GROUND] = 30,
+	[I2C_SLAVEDSPIC_LEVEL_FIRE_HEART] = 60,
+	[I2C_SLAVEDSPIC_LEVEL_FIRE_TORCH_DOWN] = 66,
+	[I2C_SLAVEDSPIC_LEVEL_FIRE_TORCH_MIDDLE] = 96,
+	[I2C_SLAVEDSPIC_LEVEL_FIRE_TORCH_TOP] = 126,
+	[I2C_SLAVEDSPIC_LEVEL_MOBILE_TORCH] = 36
+};
+
+int16_t get_elbow_a [I2C_SLAVEDSPIC_SUCKER_TYPE_MAX] = {
+	[I2C_SLAVEDSPIC_SUCKER_TYPE_SHORT] = 0,
+	[I2C_SLAVEDSPIC_SUCKER_TYPE_LONG] = 180
+};
+
+uint8_t get_vacuum_system [2] = {
+	[I2C_SLAVEDSPIC_SUCKER_TYPE_SHORT] = 1,
+	[I2C_SLAVEDSPIC_SUCKER_TYPE_LONG] = 2
+};
+
+uint8_t get_sucker_sensor [2] = {
+	[I2C_SLAVEDSPIC_SUCKER_TYPE_SHORT] = 3,
+	[I2C_SLAVEDSPIC_SUCKER_TYPE_LONG] = 2
+};
+
+/* do arm mode */
+void state_do_arm_mode(void)
+{
+	if (!state_check_update(ARM))
+		return;
+
+	STMCH_DEBUG("%s mode=%d", __FUNCTION__, state_get_mode());
+
+	/* notice status and update mode*/
+	state_set_status(I2C_SLAVEDSPIC_STATUS_BUSY);
+	slavedspic.arm_mode = mainboard_command.arm.mode;
+	slavedspic.arm_x =  ((uint16_t)mainboard_command.arm.x_msb << 8) & 0xFF00;
+	slavedspic.arm_x |= ((uint16_t)mainboard_command.arm.x_msb) & 0x00FF;
+	slavedspic.arm_level = mainboard_command.arm.level;
+	slavedspic.arm_sucker_type = mainboard_command.arm.sucker_type;
+	slavedspic.arm_sucker_angle = mainboard_command.arm.sucker_angle;
+
+
+	switch(slavedspic.arm_mode)
+	{
+		case I2C_SLAVEDSPIC_MODE_ARM_PICKUP_TORCH_READY:
+			
+			/* goto position and turn on the vaccum */
+			slavedspic.arm_h = 95;
+			slavedspic.arm_x = 5;
+			slavedspic.arm_elbow_a = get_elbow_a[I2C_SLAVEDSPIC_SUCKER_TYPE_LONG];
+			slavedspic.arm_wrist_a = 0;
+
+			arm_goto_hxaa (slavedspic.arm_h, slavedspic.arm_x, 
+						   slavedspic.arm_elbow_a, slavedspic.arm_wrist_a);
+			vacuum_system_enable (get_vacuum_system[I2C_SLAVEDSPIC_SUCKER_TYPE_LONG]);
+			break;
+
+		case I2C_SLAVEDSPIC_MODE_ARM_PICKUP_TORCH_DO:
+
+			/* go up a bit */
+			slavedspic.arm_h = 125;
+			slavedspic.arm_x = 0;
+			slavedspic.arm_elbow_a = get_elbow_a[I2C_SLAVEDSPIC_SUCKER_TYPE_LONG];
+			slavedspic.arm_wrist_a = 0;
+
+			arm_goto_hxaa (slavedspic.arm_h, slavedspic.arm_x, 
+						   slavedspic.arm_elbow_a, slavedspic.arm_wrist_a);
+			vacuum_system_enable (get_vacuum_system[I2C_SLAVEDSPIC_SUCKER_TYPE_LONG]);
+			break;
+
+		case I2C_SLAVEDSPIC_MODE_ARM_STORE_TORCH:
+
+			/* goto above storage */
+			ax12_user_write_int(&gen.ax12, AX12_ID_SHOULDER, AA_MOVING_SPEED_L, 125);
+
+			slavedspic.arm_h = 225;
+			slavedspic.arm_x = -75;
+			slavedspic.arm_elbow_a = get_elbow_a[I2C_SLAVEDSPIC_SUCKER_TYPE_LONG];
+			slavedspic.arm_wrist_a = -30;
+
+			arm_goto_hxaa (slavedspic.arm_h, slavedspic.arm_x, 
+						   slavedspic.arm_elbow_a, slavedspic.arm_wrist_a);
+			vacuum_system_enable (get_vacuum_system[I2C_SLAVEDSPIC_SUCKER_TYPE_LONG]);
+
+			ax12_user_write_int(&gen.ax12, AX12_ID_SHOULDER, AA_MOVING_SPEED_L, 0x3ff);
+
+
+
+			/* update statistis */
+			if (sensor_get (get_sucker_sensor[I2C_SLAVEDSPIC_SUCKER_TYPE_LONG])) {
+				slavedspic.nb_stored_fires ++;
+				STMCH_DEBUG("%d fires stored", slavedspic.nb_stored_fires);
+			}			
+			else {
+				/* find lost fire */
+				STMCH_DEBUG("finding fire 1");
+				arm_wrist_goto_a_rel (15);
+				arm_wrist_wait_traj_end (END_TRAJ|END_TIME);
+				time_wait_ms(200);
+
+				if (sensor_get (get_sucker_sensor[I2C_SLAVEDSPIC_SUCKER_TYPE_LONG])) {
+					slavedspic.nb_stored_fires ++;
+					STMCH_DEBUG("%d fires stored", slavedspic.nb_stored_fires);
+				}
+				else {
+					STMCH_DEBUG("finding fire 2");
+					arm_wrist_goto_a_rel (15);
+					arm_wrist_wait_traj_end (END_TRAJ|END_TIME);
+					time_wait_ms(200);
+					
+					if (sensor_get (get_sucker_sensor[I2C_SLAVEDSPIC_SUCKER_TYPE_LONG])) {
+						slavedspic.nb_stored_fires ++;
+						STMCH_DEBUG("%d fires stored", slavedspic.nb_stored_fires);
+					}
+					else 
+						STMCH_DEBUG("lost fire");
+				}
+			}
+
+			/* goto inside storage */
+			slavedspic.arm_h = 200;
+			slavedspic.arm_x = -75;
+			slavedspic.arm_elbow_a = get_elbow_a[I2C_SLAVEDSPIC_SUCKER_TYPE_LONG];
+			slavedspic.arm_wrist_a = -30;
+
+			arm_goto_hxaa (slavedspic.arm_h, slavedspic.arm_x, 
+						   slavedspic.arm_elbow_a, slavedspic.arm_wrist_a);
+
+			/* turn off vaccum */
+			vacuum_system_disable (get_vacuum_system[I2C_SLAVEDSPIC_SUCKER_TYPE_LONG]);
+			
+
+			/* goto avove storage */
+			slavedspic.arm_h = 225;
+			slavedspic.arm_x = -75;
+			slavedspic.arm_elbow_a = get_elbow_a[I2C_SLAVEDSPIC_SUCKER_TYPE_LONG];
+			slavedspic.arm_wrist_a = -30;
+
+			arm_goto_hxaa (slavedspic.arm_h, slavedspic.arm_x, 
+						   slavedspic.arm_elbow_a, slavedspic.arm_wrist_a);
+			break;
+
+		case I2C_SLAVEDSPIC_MODE_ARM_PICKUP_FIRE_READY:
+
+			break;
+
+
+		case I2C_SLAVEDSPIC_MODE_ARM_PICKUP_FIRE_DO:
+
+			break;
+
+		case I2C_SLAVEDSPIC_MODE_ARM_STORE_FIRE:
+
+			break;
+
+
+		case I2C_SLAVEDSPIC_MODE_ARM_LOAD_FIRE:
+
+			break;
+
+		case I2C_SLAVEDSPIC_MODE_ARM_FLIP_FIRE:
+
+			break;
+
+		case I2C_SLAVEDSPIC_MODE_ARM_PUTDOWN_FIRE:
+
+			break;
+
+		default:
+			break;
+	}
+
+	/* notice status and update mode*/
+	state_set_status(I2C_SLAVEDSPIC_STATUS_READY);
+}
+
+
+
 #if 0
 
 /* set infos */
@@ -483,6 +665,7 @@ void state_machines(void)
 	/* multiple actuators modes */
 	state_do_harvest_fruits_mode();
 	state_do_dump_fruits_mode();
+	state_do_arm_mode();
 
 
 #if 0

@@ -102,6 +102,7 @@ extern parse_pgm_inst_t cmd_arm_goto;
 
 extern parse_pgm_inst_t cmd_harvest_fruits;
 extern parse_pgm_inst_t cmd_dump_fruits;
+extern parse_pgm_inst_t cmd_arm_mode;
 extern parse_pgm_inst_t cmd_state2;
 
 
@@ -177,6 +178,7 @@ parse_pgm_ctx_t main_ctx[]  = {
 
 	(parse_pgm_inst_t *)&cmd_harvest_fruits,
 	(parse_pgm_inst_t *)&cmd_dump_fruits,
+	(parse_pgm_inst_t *)&cmd_arm_mode,
 	(parse_pgm_inst_t *)&cmd_state2,
 
 #if 0

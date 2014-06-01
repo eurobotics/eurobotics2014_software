@@ -181,6 +181,19 @@ struct slavedspic {
 	int8_t stick_offset;
 	uint8_t harvest_fruits_mode;
 	uint8_t dump_fruits_mode;
+	uint8_t arm_mode;
+
+	int16_t arm_x;
+	int16_t arm_y;
+	int16_t arm_h;
+	int16_t arm_elbow_a;
+	int16_t arm_wrist_a;
+
+	uint8_t arm_level;
+	uint8_t arm_sucker_type;
+	uint8_t arm_sucker_angle;
+
+	uint8_t nb_stored_fires;
 
 	/* infos */
 	uint8_t our_color;

@@ -235,6 +235,8 @@ void vacuum_ev_set (uint8_t num, uint8_t on);
 void vacuum_system_enable (uint8_t num);
 void vacuum_system_disable (uint8_t num);
 
+
+
 /*** arm functions ************************************************************/
 
 /* shoulder angle */
@@ -272,7 +274,7 @@ void arm_goto_y (int16_t y);
 uint8_t arm_xy_wait_traj_end (uint8_t flags);
 
 /* ARM goto high level */
-void arm_goto_hx (int16_t h, int16_t x, int16_t elbow_a, int16_t wrist_a);
+void arm_goto_hxaa (int16_t h, int16_t x, int16_t elbow_a, int16_t wrist_a);
 
 #endif /* _ACTUATOR_H_ */
 

@@ -552,7 +552,7 @@ static void cmd_arm_parsed(__attribute__((unused)) void *parsed_result,
 		arm_h_wait_traj_end ();
 	}
 	else if (!strcmp_P(res->arg1, PSTR("goto_hxaa"))) {
-		arm_goto_hx (res->arg2, res->arg3, res->arg4, res->arg5);
+		arm_goto_hxaa (res->arg2, res->arg3, res->arg4, res->arg5);
 	}
 }
 
@@ -685,6 +685,50 @@ parse_pgm_inst_t cmd_dump_fruits = {
 	},
 };
 
+
+/**********************************************************/
+/* arm mode */
+
+/* this structure is filled when cmd_arm_mode is parsed successfully */
+struct cmd_arm_mode_result {
+	fixed_string_t arg0;
+	fixed_string_t arg1;
+};
+
+/* function called when cmd_arm_mode is parsed successfully */
+static void cmd_arm_mode_parsed(__attribute__((unused)) void *parsed_result,
+			    __attribute__((unused)) void *data)
+{
+	struct cmd_arm_mode_result *res = (struct cmd_arm_mode_result *) parsed_result;
+	struct i2c_cmd_slavedspic_set_mode command;
+
+	if (!strcmp_P(res->arg1, PSTR("pickup_torch_ready")))
+		command.arm.mode = I2C_SLAVEDSPIC_MODE_ARM_PICKUP_TORCH_READY;
+	else if (!strcmp_P(res->arg1, PSTR("pickup_torch_do")))
+		command.arm.mode = I2C_SLAVEDSPIC_MODE_ARM_PICKUP_TORCH_DO;	
+	else if (!strcmp_P(res->arg1, PSTR("store_torch")))
+		command.arm.mode = I2C_SLAVEDSPIC_MODE_ARM_STORE_TORCH;	
+
+	command.mode = I2C_SLAVEDSPIC_MODE_ARM;
+	state_set_mode(&command);
+}
+
+prog_char str_arm_mode_arg0[] = "arm";
+parse_pgm_token_string_t cmd_arm_mode_arg0 = TOKEN_STRING_INITIALIZER(struct cmd_arm_mode_result, arg0, str_arm_mode_arg0);
+prog_char str_arm_mode_arg1[] = "pickup_torch_ready#pickup_torch_do#store_torch";
+parse_pgm_token_string_t cmd_arm_mode_arg1 = TOKEN_STRING_INITIALIZER(struct cmd_arm_mode_result, arg1, str_arm_mode_arg1);
+
+prog_char help_arm_mode[] = "set arm mode";
+parse_pgm_inst_t cmd_arm_mode = {
+	.f = cmd_arm_mode_parsed,  /* function to call */
+	.data = NULL,      /* 2nd arg of func */
+	.help_str = help_arm_mode,
+	.tokens = {        /* token list, NULL terminated */
+		(prog_void *)&cmd_arm_mode_arg0, 
+		(prog_void *)&cmd_arm_mode_arg1,
+		NULL,
+	},
+};
 
 
 /**********************************************************/
