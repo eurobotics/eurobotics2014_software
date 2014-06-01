@@ -252,6 +252,7 @@ uint8_t arm_elbow_wait_traj_end (uint8_t flags);
 void arm_wrist_goto_a_abs (int16_t a);
 void arm_wrist_goto_a_rel (int16_t a);
 uint8_t arm_wrist_wait_traj_end (uint8_t flags);
+int16_t arm_wrist_get_a (void);
 
 /* set height, sucker reference 
  * XXX elbow angle is taken in account */

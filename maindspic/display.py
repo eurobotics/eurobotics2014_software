@@ -19,7 +19,7 @@ ROBOT2_LENGTH = 150.0
 
 area = [ (0.0, 0.0, -0.2), (3000.0, 2000.0, 0.2) ]
 areasize = reduce(lambda x,y:tuple([abs(x[i])+abs(y[i]) for i in range(len(x))]) , area)
-area_box = box(size=areasize, color=(0.0, 1.0, 0.0))
+area_box = box(size=areasize, color=(0.0, 0.54, 0.0))
 
 scene.autoscale = 1
 
@@ -29,12 +29,15 @@ save_pos2 = []
 
 robot = box(color=(0.4, 0.4, 0.4))
 robot2 = box(color=(0.4, 0.4, 0.4))
-#lspickle = box(color=(0.4, 0.4, 0.4))
-#rspickle = box(color=(0.4, 0.4, 0.4))
+
+lstick = box(color=(0.4, 0.4, 0.4))
+rstick = box(color=(0.4, 0.4, 0.4))
+arm = box(color=(0.06,0.3,0.54))
 
 opp = box(color=(0.7, 0.2, 0.2))
+opp.opacity = 0.7
 opp2 = box(color=(0.2, 0.2, 0.7))
-
+opp2.opacity = 0.7
 last_pos = (0.,0.,0.)
 last_pos2 = (0.,0.,0.)
 
@@ -84,10 +87,17 @@ robot_a = 0.
 robot2_x = 0.
 robot2_y = 0.
 robot2_a = 0.
-#robot_lspickle_deployed = 0
-#robot_rspickle_deployed = 0
-#robot_lspickle_autoharvest = 0
-#robot_rspickle_autoharvest = 0 
+robot_lstick_deployed = 0
+robot_rstick_deployed = 0
+
+lstick_offset = 0
+lstick_deployed = 0
+rstick_offset = 0
+rstick_deployed = 0
+
+arm_offset = -4
+arm_deployed = 0
+
 robot_trail = curve()
 robot_trail_list = []
 robot2_trail = curve()
@@ -197,22 +207,22 @@ def toggle_obj_disp():
 
         # tree top
         c = cylinder(axis=(0,0,1), length=TREETOP_HEIGHT,
-                     radius=150, color=(0.0, 1.0, 0.0),
+                     radius=150, color=(0.0, 0.8, 0.0),
                      pos=(-AREA_X/2,-AREA_Y/2+1300, TREETRUNK_HEIGHT))
         area_objects.append(c)
 
         c = cylinder(axis=(0,0,1), length=TREETOP_HEIGHT,
-                     radius=150, color=(0.0, 1.0, 0.0),
+                     radius=150, color=(0.0, 0.8, 0.0),
                      pos=(AREA_X/2,-AREA_Y/2+1300, TREETRUNK_HEIGHT))
         area_objects.append(c)
 
         c = cylinder(axis=(0,0,1), length=TREETOP_HEIGHT,
-                     radius=150, color=(0.0, 1.0, 0.0),
+                     radius=150, color=(0.0, 0.8, 0.0),
                      pos=(-AREA_X/2+700, AREA_Y/2, TREETRUNK_HEIGHT))
         area_objects.append(c)
 
         c = cylinder(axis=(0,0,1), length=TREETOP_HEIGHT,
-                     radius=150, color=(0.0, 1.0, 0.0),
+                     radius=150, color=(0.0, 0.8, 0.0),
                      pos=(AREA_X/2-700, AREA_Y/2, TREETRUNK_HEIGHT))
         area_objects.append(c)
 
@@ -240,9 +250,72 @@ def set_opp2(x, y):
     opp2.size = (300, 300, ROBOT_HEIGHT)
     opp2.pos = (x, y, ROBOT_HEIGHT/2)
 
+def set_lstick():
+    global arm_offset
+    global arm_deployed 
+    global rstick_offset
+    global rstick_deployed 
+    global lstick_offset
+    global lstick_deployed   
+
+    if lstick_deployed == 20:
+	lstick_deployed = 0
+	lstick_offset = 0
+    else:
+    	lstick_deployed = 20
+    	lstick_offset = 3 
+	rstick_deployed = 0
+    	rstick_offset = 0
+	arm_deployed = 0
+	arm_offset = -4
+
+
+def set_rstick():
+    global arm_offset
+    global arm_deployed 
+    global rstick_offset
+    global rstick_deployed 
+    global lstick_offset
+    global lstick_deployed
+ 
+    if rstick_deployed == 20:
+	rstick_deployed = 0
+	rstick_offset = 0
+    else:
+    	rstick_deployed = 20
+    	rstick_offset = 3
+    	lstick_deployed = 0
+    	lstick_offset = 0
+	arm_deployed = 0
+	arm_offset = -4
+
+
+def set_arm():
+    global arm_offset
+    global arm_deployed 
+    global rstick_offset
+    global rstick_deployed 
+    global lstick_offset
+    global lstick_deployed 
+
+    if arm_deployed == 30:
+	arm_deployed = 0
+	arm_offset = -4
+    else:
+    	arm_deployed = 30
+    	arm_offset = 10
+    	lstick_deployed = 0
+    	lstick_offset = 0
+	rstick_deployed = 0
+    	rstick_offset = 0
+
+
 def set_robot():
     global robot, last_pos, robot_trail, robot_trail_list
     global save_pos, robot_x, robot_y, robot_a
+    global lstick_offset, lstick_deployed
+    global rstick_offset, rstick_deployed
+    global arm_offset, arm_deployed 
 
     if color == YELLOW:
         tmp_x = robot_x - AREA_X/2
@@ -260,27 +333,35 @@ def set_robot():
 
     robot.axis = axis
     robot.size = (ROBOT_LENGTH, ROBOT_WIDTH, ROBOT_HEIGHT)
-    """
-    lspickle.pos = (tmp_x + (robot_lspickle_deployed*60) * math.cos((tmp_a+90)*math.pi/180),
-                    tmp_y + (robot_lspickle_deployed*60) * math.sin((tmp_a+90)*math.pi/180),
-                    ROBOT_HEIGHT/2)
-    lspickle.axis = axis
-    lspickle.size = (20, ROBOT_WIDTH, 5)
-    if robot_lspickle_autoharvest:
-        lspickle.color = (0.2, 0.2, 1)
-    else:
-        lspickle.color = (0.4, 0.4, 0.4)
+    
 
-    rspickle.pos = (tmp_x + (robot_rspickle_deployed*60) * math.cos((tmp_a-90)*math.pi/180),
-                    tmp_y + (robot_rspickle_deployed*60) * math.sin((tmp_a-90)*math.pi/180),
-                    ROBOT_HEIGHT/2)
-    rspickle.axis = axis
-    rspickle.size = (20, ROBOT_WIDTH, 5)
-    if robot_rspickle_autoharvest:
-        rspickle.color = (0.2, 0.2, 1)
-    else:
-        rspickle.color = (0.4, 0.4, 0.4)
-    """
+	# Left stick
+    lstick.pos = (tmp_x + ROBOT_X_OFFSET + (lstick_offset * 60 ) * math.cos((tmp_a-90)*math.pi/180),
+                    tmp_y + (lstick_offset * 60) * math.sin((tmp_a-90)*math.pi/180),
+                    ROBOT_HEIGHT/5)
+    lstick.axis = axis
+    lstick.size = (40,ROBOT_WIDTH-10+lstick_deployed, 20)
+    lstick.color = (0.9, 0.2, 0.2)
+
+	# Right stick
+    rstick.pos = (tmp_x + ROBOT_X_OFFSET + (rstick_offset * 60 ) * math.cos((tmp_a+90)*math.pi/180),
+                    tmp_y + (rstick_offset * 60) * math.sin((tmp_a+90)*math.pi/180),
+                    ROBOT_HEIGHT/5)
+    rstick.axis = axis
+    rstick.size = (40,ROBOT_WIDTH-10+rstick_deployed, 20)
+    rstick.color = (0.9, 0.2, 0.2)
+
+	# Arm
+    arm.pos = (tmp_x + ROBOT_X_OFFSET + (arm_offset * 15) * math.cos((tmp_a)*math.pi/180) + ((ROBOT_LENGTH/3 -20) * math.sin((tmp_a)*math.pi/180)),
+		    tmp_y + (arm_offset * 15) * math.sin((tmp_a)*math.pi/180) - ((ROBOT_LENGTH/3 - 20) * math.cos((tmp_a)*math.pi/180)),
+		    ROBOT_HEIGHT/2)
+    arm.axis = (math.cos(tmp_a*math.pi/180+40*math.pi/180),
+            math.sin(tmp_a*math.pi/180+40*math.pi/180),
+            0)
+
+    arm.size = (220, 40, 20)
+
+
     # save position
     save_pos.append((robot.pos.x, robot.pos.y, tmp_a))
 
@@ -397,11 +478,11 @@ while True:
                     side = int(m.groups()[0])
                     flags = int(m.groups()[1])
                     if (side == 0 and color == YELLOW) or (side == 1 and color == RED):
-                        robot_lspickle_deployed = ((flags & 1) * 2)
-                        robot_lspickle_autoharvest = ((flags & 2) != 0)
+                        robot_lstick_deployed = ((flags & 1) * 2)
+                        robot_lstick_autoharvest = ((flags & 2) != 0)
                     else:
-                        robot_rspickle_deployed = ((flags & 1) * 2)
-                        robot_rspickle_autoharvest = ((flags & 2) != 0)
+                        robot_rstick_deployed = ((flags & 1) * 2)
+                        robot_rstick_autoharvest = ((flags & 2) != 0)
             """
             # DISPLAY EVENTS
             if scene.mouse.events != 0:
@@ -461,6 +542,12 @@ while True:
                 toggle_obj_disp()
             elif k == "i":
                 toggle_color()
+	    elif k == "a":
+		set_arm()
+	    elif k == "l":
+		set_lstick()
+	    elif k == "r":
+		set_rstick()
             elif k == "1":
                 set_opp_nb = 1;
             elif k == "2":

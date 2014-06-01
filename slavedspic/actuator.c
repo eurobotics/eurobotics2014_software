@@ -53,7 +53,7 @@ struct ax12_traj
 {
 #define AX12_K_IMP_DEG		(3.413) //(1024.0/300.0)  // 3.413 imp/deg
 #define AX12_K_MS_DEG		(3.333) //(200.0/60.0)	// 3.333 ms/deg	
-#define AX12_WINDOW_NO_NEAR	(5.0*AX12_K_IMP_DEG)  // 5 deg
+#define AX12_WINDOW_NO_NEAR	(6.0*AX12_K_IMP_DEG)  // 6 deg
 #define AX12_WINDOW_NEAR	(10.0*AX12_K_IMP_DEG) // 20 deg
 
 	uint8_t id;
@@ -250,6 +250,7 @@ void lift_calibrate(void)
 	/* set calibration flag */
 	slavedspic.lift.calibrated = 1;
 	lift_set_height(200);
+	lift_wait_end();
 
 	return;
 }
@@ -609,7 +610,7 @@ void vacuum_system_disable (uint8_t num) {
 
 struct ax12_traj ax12_shoulder = { .id = AX12_ID_SHOULDER, .zero_offset_pos = 805 };
 struct ax12_traj ax12_elbow    = { .id = AX12_ID_ELBOW,    .zero_offset_pos = 822 };
-struct ax12_traj ax12_wrist    = { .id = AX12_ID_WRIST,    .zero_offset_pos = 650 };
+struct ax12_traj ax12_wrist    = { .id = AX12_ID_WRIST,    .zero_offset_pos = 450 }; //650
 
 struct arm 
 {
@@ -896,10 +897,10 @@ void arm_goto_hxaa (int16_t h, int16_t x, int16_t elbow_a, int16_t wrist_a)
 		arm_wrist_goto_a_abs (wrist_a);
 
 		/* wait end positions reached */
-		arm_xy_wait_traj_end (END_TRAJ|END_TIME);
+		arm_xy_wait_traj_end (END_TRAJ);
 		arm_h_wait_traj_end ();
-		arm_elbow_wait_traj_end (END_TRAJ|END_TIME);
-		arm_wrist_wait_traj_end (END_TRAJ|END_TIME);
+		arm_elbow_wait_traj_end (END_TRAJ|END_TIME); /* FIXME */
+		arm_wrist_wait_traj_end (END_TRAJ);
 	}
 	else {
 		/* set all except shoulder angle */
@@ -909,14 +910,14 @@ void arm_goto_hxaa (int16_t h, int16_t x, int16_t elbow_a, int16_t wrist_a)
 
 		/* wait for h reached */
 		arm_h_wait_traj_end();
-		arm_elbow_wait_traj_end (END_TRAJ|END_TIME);
-		arm_wrist_wait_traj_end (END_TRAJ|END_TIME);
+		arm_elbow_wait_traj_end (END_TRAJ|END_TIME); /* FIXME */
+		arm_wrist_wait_traj_end (END_TRAJ);
 	
 		/* goto final position */
 		arm_goto_x (x);
 		
 		/* wait final positino reached */
-		arm_xy_wait_traj_end(END_TRAJ|END_TIME);
+		arm_xy_wait_traj_end(END_TRAJ);
 	}
 }
 
