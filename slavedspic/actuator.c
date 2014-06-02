@@ -62,7 +62,7 @@ struct ax12_traj
 	int16_t goal_angle_deg;
 	uint16_t goal_pos;
 
-	microseconds goal_time_us;
+	uint16_t goal_time_ms;
     microseconds time_us;
     
     uint16_t pos;
@@ -88,17 +88,18 @@ void ax12_set_pos (struct ax12_traj *ax12, int16_t pos)
 
     /* update goal time */
     ax12_user_read_int(&gen.ax12, ax12->id, AA_MOVING_SPEED_L, &ax12->speed);
-    k_ms_deg = AX12_K_MS_DEG * ax12->speed;
-    k_ms_deg /= 0x3ff;
+    k_ms_deg = AX12_K_MS_DEG * 0x3ff;
+    k_ms_deg /= (ax12->speed==0? 0x3ff:ax12->speed);
 
 	//ax12->goal_time_us = (microseconds)(ABS(ax12->angle_deg - ax12->goal_angle_deg) * AX12_K_MS_DEG * 1000);
-	ax12->goal_time_us = (microseconds)(ABS(ax12->angle_deg - ax12->goal_angle_deg) * k_ms_deg * 1000);
+	ax12->goal_time_ms = (ABS(ax12->angle_deg - ax12->goal_angle_deg) * k_ms_deg);
 	ax12->time_us = time_get_us2();
 }
 
 /* set angle */
 void ax12_set_a (struct ax12_traj *ax12, int16_t a)
 {
+    double k_ms_deg = 0.0;
 	//printf ("%s, a = %d\n\r", __FUNCTION__, a);
 
     /* update current position/angle */
@@ -114,10 +115,17 @@ void ax12_set_a (struct ax12_traj *ax12, int16_t a)
 	ax12_user_write_int(&gen.ax12, ax12->id , AA_GOAL_POSITION_L, ax12->goal_pos);
 
     /* update goal time */
-	ax12->goal_time_us = (microseconds)(ABS(ax12->angle_deg - ax12->goal_angle_deg) * AX12_K_MS_DEG * 1000);
+    ax12_user_read_int(&gen.ax12, ax12->id, AA_MOVING_SPEED_L, &ax12->speed);
+    k_ms_deg = AX12_K_MS_DEG * 0x3ff;
+    k_ms_deg /= (ax12->speed==0? 0x3ff:ax12->speed);
+
+	//printf("k_ms_deg = %f\n\r", k_ms_deg);
+
+	//ax12->goal_time_us = (ABS(ax12->angle_deg - ax12wri	->goal_angle_deg) * AX12_K_MS_DEG * 1000);
+	ax12->goal_time_ms = (ABS(ax12->angle_deg - ax12->goal_angle_deg) * k_ms_deg);
 	ax12->time_us = time_get_us2();
 
-	//printf ("da %d, goal_us %d\n\r", (int16_t)ABS(ax12->angle_deg - ax12->goal_angle_deg), ax12->goal_time_us);
+	//printf ("da %d, goal_us %ld\n\r", (int16_t)ABS(ax12->angle_deg - ax12->goal_angle_deg), (int32_t)ax12->goal_time_ms);
 	//printf ("a=%d, goal_a =%d\n\r", ax12->angle_deg, ax12->goal_angle_deg);
 }
 
@@ -170,11 +178,11 @@ uint8_t ax12_test_traj_end (struct ax12_traj *ax12, uint8_t flags)
 			ret |=  END_NEAR;
 
 	if (flags & END_TIME)
-		if (time_get_us2() - ax12->time_us > ax12->goal_time_us)
+		if ((time_get_us2() - ax12->time_us)/1000 > ax12->goal_time_ms)
 			ret |=  END_TIME;
 
 	//if (flags & END_BLOCKING)
-        if (time_get_us2() - ax12->time_us > (3*ax12->goal_time_us)) {
+        if ((time_get_us2() - ax12->time_us)/1000 > (2*ax12->goal_time_ms)) {
             ax12_user_write_int(&gen.ax12, ax12->id , AA_GOAL_POSITION_L, ax12->pos);                       
 		    ret |=  END_BLOCKING;
         }
@@ -941,7 +949,7 @@ void arm_goto_hxaa (int16_t h, int16_t x, int16_t elbow_a, int16_t wrist_a)
 /* init all actuators */
 void actuator_init(void)
 {
-//#define PROGRAM_AX12
+#define PROGRAM_AX12
 #ifdef PROGRAM_AX12
 	ax12_user_write_byte(&gen.ax12, AX12_BROADCAST_ID, AA_ALARM_SHUTDOWN, 0x24);
 	ax12_user_write_byte(&gen.ax12, AX12_BROADCAST_ID, AA_ALARM_LED, 0x24);

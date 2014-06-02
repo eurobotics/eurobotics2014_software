@@ -726,10 +726,12 @@ static void cmd_arm_mode_parsed(__attribute__((unused)) void *parsed_result,
 		command.arm.x_lsb = (uint8_t)((uint16_t)res->arg4 & 0x00FF);
 		command.arm.x_msb = (uint8_t)((uint16_t)(res->arg4 >> 8) & 0x00FF);
 
-		command.arm.sucker_angle_rel = (int8_t)res->arg4;
+		command.arm.sucker_angle = (int8_t)res->arg4;
 
-		if (!strcmp_P(res->arg5, PSTR("ground")))
-			command.arm.level = I2C_SLAVEDSPIC_LEVEL_FIRE_GROUND;
+		if (!strcmp_P(res->arg5, PSTR("ground_push")))
+			command.arm.level = I2C_SLAVEDSPIC_LEVEL_FIRE_GROUND_PUSH;
+		else if (!strcmp_P(res->arg5, PSTR("ground_pull")))
+			command.arm.level = I2C_SLAVEDSPIC_LEVEL_FIRE_GROUND_PULL;
 		else if (!strcmp_P(res->arg5, PSTR("heart")))
 			command.arm.level = I2C_SLAVEDSPIC_LEVEL_FIRE_HEART;
 		else if (!strcmp_P(res->arg5, PSTR("down_fire")))
@@ -745,7 +747,7 @@ static void cmd_arm_mode_parsed(__attribute__((unused)) void *parsed_result,
 
 	else if (!strcmp_P(res->arg1, PSTR("pickup_fire_ready"))) {
 
-		command.arm.mode = I2C_SLAVEDSPIC_MODE_ARM_PICKUP_PUSH_FIRE_READY;
+		command.arm.mode = I2C_SLAVEDSPIC_MODE_ARM_PICKUP_FIRE_READY;
 		
 		if (!strcmp_P(res->arg5, PSTR("ground_push")))
 			command.arm.level = I2C_SLAVEDSPIC_LEVEL_FIRE_GROUND_PUSH;
@@ -764,10 +766,12 @@ static void cmd_arm_mode_parsed(__attribute__((unused)) void *parsed_result,
 
 	}
 	else if (!strcmp_P(res->arg1, PSTR("pickup_fire_do"))) {
-		command.arm.mode = I2C_SLAVEDSPIC_MODE_ARM_PICKUP_PUSH_FIRE_DO;	
+		command.arm.mode = I2C_SLAVEDSPIC_MODE_ARM_PICKUP_FIRE_DO;	
 
-		if (!strcmp_P(res->arg5, PSTR("ground")))
-			command.arm.level = I2C_SLAVEDSPIC_LEVEL_FIRE_GROUND;
+		if (!strcmp_P(res->arg5, PSTR("ground_push")))
+			command.arm.level = I2C_SLAVEDSPIC_LEVEL_FIRE_GROUND_PUSH;
+		else if (!strcmp_P(res->arg5, PSTR("ground_pull")))
+			command.arm.level = I2C_SLAVEDSPIC_LEVEL_FIRE_GROUND_PULL;
 		else if (!strcmp_P(res->arg5, PSTR("heart")))
 			command.arm.level = I2C_SLAVEDSPIC_LEVEL_FIRE_HEART;
 		else if (!strcmp_P(res->arg5, PSTR("down_fire")))

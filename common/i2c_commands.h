@@ -252,7 +252,7 @@ struct i2c_cmd_slavedspic_set_mode {
 #define I2C_SLAVEDSPIC_SUCKER_TYPE_LONG		1
 #define I2C_SLAVEDSPIC_SUCKER_TYPE_MAX		2
 
-			int8_t sucker_angle_rel; /* XXX +/- 90 deg */
+			int8_t sucker_angle; /* XXX +/- 90 deg */
 		} arm;
 
 		/* add more here */
