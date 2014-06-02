@@ -191,7 +191,7 @@ struct slavedspic {
 
 	uint8_t arm_level;
 	uint8_t arm_sucker_type;
-	uint8_t arm_sucker_angle;
+	uint8_t arm_sucker_angle_rel;
 
 	uint8_t nb_stored_fires;
 

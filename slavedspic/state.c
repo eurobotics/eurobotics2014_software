@@ -522,18 +522,6 @@ void state_do_arm_mode(void)
 			/* refresh vacuum */
 			vacuum_system_enable (get_vacuum_system[slavedspic.arm_sucker_type]);
 
-			/* decrease shoulder angle speed */
-			ax12_user_write_int(&gen.ax12, AX12_ID_SHOULDER, AA_MOVING_SPEED_L, 125);
-
-			/* goto above storage */
-			slavedspic.arm_h = 240; //225
-			slavedspic.arm_x = -75;
-			slavedspic.arm_elbow_a = get_elbow_a[slavedspic.arm_sucker_type];
-			slavedspic.arm_wrist_a = arm_wrist_get_a();
-	
-			arm_goto_hxaa (slavedspic.arm_h, slavedspic.arm_x, 
-						   slavedspic.arm_elbow_a, slavedspic.arm_wrist_a);
-
 			/* XXX check if fire is there, update statistis */
 			if (sensor_get (get_sucker_sensor[slavedspic.arm_sucker_type])) {
 				slavedspic.nb_stored_fires ++;
@@ -549,7 +537,7 @@ void state_do_arm_mode(void)
 				slavedspic.arm_wrist_a += SUCKER_A_REL(15);
 				arm_wrist_goto_a_rel (SUCKER_A_REL(15));
 				arm_wrist_wait_traj_end (END_TRAJ);
-				time_wait_ms(200);
+				time_wait_ms(100);
 
 				if (sensor_get (get_sucker_sensor[slavedspic.arm_sucker_type])) {
 					slavedspic.nb_stored_fires ++;
@@ -560,7 +548,7 @@ void state_do_arm_mode(void)
 					slavedspic.arm_wrist_a += SUCKER_A_REL(15);
 					arm_wrist_goto_a_rel (SUCKER_A_REL(15));
 					arm_wrist_wait_traj_end (END_TRAJ);
-					time_wait_ms(200);
+					time_wait_ms(100);
 					
 					if (sensor_get (get_sucker_sensor[slavedspic.arm_sucker_type])) {
 						slavedspic.nb_stored_fires ++;
@@ -570,6 +558,18 @@ void state_do_arm_mode(void)
 						STMCH_DEBUG("lost fire");
 				}
 			}
+
+			/* decrease shoulder angle speed */
+			ax12_user_write_int(&gen.ax12, AX12_ID_SHOULDER, AA_MOVING_SPEED_L, 125);
+
+			/* goto above storage */
+			slavedspic.arm_h = 240; //225
+			slavedspic.arm_x = -75;
+			slavedspic.arm_elbow_a = get_elbow_a[slavedspic.arm_sucker_type];
+			slavedspic.arm_wrist_a = arm_wrist_get_a();
+	
+			arm_goto_hxaa (slavedspic.arm_h, slavedspic.arm_x, 
+						   slavedspic.arm_elbow_a, slavedspic.arm_wrist_a);
 
 
 			/* goto inside storage */
@@ -655,7 +655,7 @@ void state_do_arm_mode(void)
 
 			/* turn on vacuum */
 			vacuum_system_enable (get_vacuum_system[slavedspic.arm_sucker_type]);
-
+pickup:
 			/* goto above storage */
 			slavedspic.arm_h = 225;
 			slavedspic.arm_x = -75;
@@ -665,16 +665,16 @@ void state_do_arm_mode(void)
 			arm_goto_hxaa (slavedspic.arm_h, slavedspic.arm_x, 
 						   slavedspic.arm_elbow_a, slavedspic.arm_wrist_a);
 
-			/* decrease shoulder angle speed */
-			ax12_user_write_int(&gen.ax12, AX12_ID_SHOULDER, AA_MOVING_SPEED_L, 300);
 
-load:
-			/* while there are stored fires */
-			if (slavedspic.nb_stored_fires == 0) {
-				/* turn off vacuum */
-				vacuum_system_disable (get_vacuum_system[slavedspic.arm_sucker_type]);
-				break;
-			}
+            /* check if there are fires storaged */
+            if (slavedspic.nb_stored_fires == 0) {
+
+                STMCH_DEBUG("%d fires stored", slavedspic.nb_stored_fires);
+
+			    /* turn off vacuum */
+			    vacuum_system_disable (get_vacuum_system[slavedspic.arm_sucker_type]);
+			    break;
+            }
 
 			/* pickup fire */
 			slavedspic.arm_h = 23 + (slavedspic.nb_stored_fires * 30);
@@ -683,17 +683,50 @@ load:
 						   slavedspic.arm_elbow_a, slavedspic.arm_wrist_a);
 
 			/* goto avove storage */
-			slavedspic.arm_h = 225;
+			slavedspic.arm_h = 240;
 			arm_goto_hxaa (slavedspic.arm_h, slavedspic.arm_x, 
 						   slavedspic.arm_elbow_a, slavedspic.arm_wrist_a);
 
-			/* check fire */
-			if (!sensor_get (get_sucker_sensor[slavedspic.arm_sucker_type])) {
-					slavedspic.nb_stored_fires --;
-					STMCH_DEBUG("fire not found");
-					STMCH_DEBUG("%d fires stored", slavedspic.nb_stored_fires);
-					goto load;			
-			}
+
+
+
+			/* decrease shoulder angle speed */
+			ax12_user_write_int(&gen.ax12, AX12_ID_SHOULDER, AA_MOVING_SPEED_L, 300);
+
+			/* goto a bit out and reset wrist angle */
+			slavedspic.arm_h = 240;
+			slavedspic.arm_x = -20;
+			slavedspic.arm_wrist_a = 0;
+			arm_goto_hxaa (slavedspic.arm_h, slavedspic.arm_x, 
+						   slavedspic.arm_elbow_a, slavedspic.arm_wrist_a);
+
+            /* check fire is catched */
+            if (!sensor_get (get_sucker_sensor[slavedspic.arm_sucker_type])) {
+                STMCH_DEBUG("finding fire 1st try");
+	            slavedspic.arm_wrist_a += SUCKER_A_REL(15);
+			    arm_wrist_goto_a_rel (SUCKER_A_REL(15));
+			    arm_wrist_wait_traj_end (END_TRAJ);
+                time_wait_ms (100);
+
+			    if (!sensor_get (get_sucker_sensor[slavedspic.arm_sucker_type])) {
+                    STMCH_DEBUG("finding fire 2nd try");
+	                slavedspic.arm_wrist_a += SUCKER_A_REL(15);
+			        arm_wrist_goto_a_rel (SUCKER_A_REL(15));
+			        arm_wrist_wait_traj_end (END_TRAJ);
+                    time_wait_ms (100);
+
+			        if (!sensor_get (get_sucker_sensor[slavedspic.arm_sucker_type])) {
+					        slavedspic.nb_stored_fires --;
+					        STMCH_DEBUG("fire not found");
+					        STMCH_DEBUG("%d fires stored", slavedspic.nb_stored_fires);
+					        goto pickup;			
+			        }
+			    }
+            }
+
+
+			/* restore shoulder angle speed */
+			ax12_user_write_int(&gen.ax12, AX12_ID_SHOULDER, AA_MOVING_SPEED_L, 0x3ff);
 
 			break;
 
@@ -717,17 +750,23 @@ load:
 			
 			slavedspic.arm_elbow_a = get_elbow_a[slavedspic.arm_sucker_type];
 
+            /* set fire angle */
 			slavedspic.arm_sucker_angle = mainboard_command.arm.sucker_angle;
-			slavedspic.arm_wrist_a = slavedspic.arm_sucker_angle;
+            slavedspic.arm_wrist_a = 0;
+			slavedspic.arm_wrist_a += slavedspic.arm_sucker_angle_rel;
+            arm_wrist_get_a (slavedspic.arm_wrist_a);
+            arm_wrist_wait_traj_end(END_TRAJ);
 
+            /* putdown fire */
 			arm_goto_hxaa (slavedspic.arm_h, slavedspic.arm_x, 
 						   slavedspic.arm_elbow_a, slavedspic.arm_wrist_a);
 
 			/* turn off vacuum */
 			vacuum_system_disable (get_vacuum_system[slavedspic.arm_sucker_type]);
+            time_wait_ms (100);
 
 			/* go up */
-			arm_goto_hxaa (slavedspic.arm_h+30, slavedspic.arm_x, 
+			arm_goto_hxaa (slavedspic.arm_h+40, slavedspic.arm_x, 
 						   slavedspic.arm_elbow_a, slavedspic.arm_wrist_a);
 
 			break;
