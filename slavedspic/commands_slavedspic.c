@@ -728,8 +728,10 @@ static void cmd_arm_mode_parsed(__attribute__((unused)) void *parsed_result,
 
 		command.arm.sucker_angle = (int8_t)res->arg4;
 
-		if (!strcmp_P(res->arg5, PSTR("ground")))
-			command.arm.level = I2C_SLAVEDSPIC_LEVEL_FIRE_GROUND;
+		if (!strcmp_P(res->arg5, PSTR("ground_push")))
+			command.arm.level = I2C_SLAVEDSPIC_LEVEL_FIRE_GROUND_PUSH;
+		else if (!strcmp_P(res->arg5, PSTR("ground_pull")))
+			command.arm.level = I2C_SLAVEDSPIC_LEVEL_FIRE_GROUND_PULL;
 		else if (!strcmp_P(res->arg5, PSTR("heart")))
 			command.arm.level = I2C_SLAVEDSPIC_LEVEL_FIRE_HEART;
 		else if (!strcmp_P(res->arg5, PSTR("down_fire")))
@@ -743,12 +745,14 @@ static void cmd_arm_mode_parsed(__attribute__((unused)) void *parsed_result,
 
 	}
 
-	else if (!strcmp_P(res->arg1, PSTR("pickup_push_fire_ready"))) {
+	else if (!strcmp_P(res->arg1, PSTR("pickup_fire_ready"))) {
 
-		command.arm.mode = I2C_SLAVEDSPIC_MODE_ARM_PICKUP_PUSH_FIRE_READY;
+		command.arm.mode = I2C_SLAVEDSPIC_MODE_ARM_PICKUP_FIRE_READY;
 		
-		if (!strcmp_P(res->arg5, PSTR("ground")))
-			command.arm.level = I2C_SLAVEDSPIC_LEVEL_FIRE_GROUND;
+		if (!strcmp_P(res->arg5, PSTR("ground_push")))
+			command.arm.level = I2C_SLAVEDSPIC_LEVEL_FIRE_GROUND_PUSH;
+		else if (!strcmp_P(res->arg5, PSTR("ground_pull")))
+			command.arm.level = I2C_SLAVEDSPIC_LEVEL_FIRE_GROUND_PULL;
 		else if (!strcmp_P(res->arg5, PSTR("heart")))
 			command.arm.level = I2C_SLAVEDSPIC_LEVEL_FIRE_HEART;
 		else if (!strcmp_P(res->arg5, PSTR("down_fire")))
@@ -761,46 +765,13 @@ static void cmd_arm_mode_parsed(__attribute__((unused)) void *parsed_result,
 			command.arm.level = I2C_SLAVEDSPIC_LEVEL_MOBILE_TORCH;
 
 	}
-	else if (!strcmp_P(res->arg1, PSTR("pickup_push_fire_do"))) {
-		command.arm.mode = I2C_SLAVEDSPIC_MODE_ARM_PICKUP_PUSH_FIRE_DO;	
+	else if (!strcmp_P(res->arg1, PSTR("pickup_fire_do"))) {
+		command.arm.mode = I2C_SLAVEDSPIC_MODE_ARM_PICKUP_FIRE_DO;	
 
-		if (!strcmp_P(res->arg5, PSTR("ground")))
-			command.arm.level = I2C_SLAVEDSPIC_LEVEL_FIRE_GROUND;
-		else if (!strcmp_P(res->arg5, PSTR("heart")))
-			command.arm.level = I2C_SLAVEDSPIC_LEVEL_FIRE_HEART;
-		else if (!strcmp_P(res->arg5, PSTR("down_fire")))
-			command.arm.level = I2C_SLAVEDSPIC_LEVEL_FIRE_TORCH_DOWN;
-		else if (!strcmp_P(res->arg5, PSTR("mid_fire")))
-			command.arm.level = I2C_SLAVEDSPIC_LEVEL_FIRE_TORCH_MIDDLE;
-		else if (!strcmp_P(res->arg5, PSTR("top_fire")))
-			command.arm.level = I2C_SLAVEDSPIC_LEVEL_FIRE_TORCH_TOP;
-		else if (!strcmp_P(res->arg5, PSTR("mobile_torch")))
-			command.arm.level = I2C_SLAVEDSPIC_LEVEL_MOBILE_TORCH;
-	}
-
-	else if (!strcmp_P(res->arg1, PSTR("pickup_pull_fire_ready"))) {
-
-		command.arm.mode = I2C_SLAVEDSPIC_MODE_ARM_PICKUP_PULL_FIRE_READY;
-		
-		if (!strcmp_P(res->arg5, PSTR("ground")))
-			command.arm.level = I2C_SLAVEDSPIC_LEVEL_FIRE_GROUND;
-		else if (!strcmp_P(res->arg5, PSTR("heart")))
-			command.arm.level = I2C_SLAVEDSPIC_LEVEL_FIRE_HEART;
-		else if (!strcmp_P(res->arg5, PSTR("down_fire")))
-			command.arm.level = I2C_SLAVEDSPIC_LEVEL_FIRE_TORCH_DOWN;
-		else if (!strcmp_P(res->arg5, PSTR("mid_fire")))
-			command.arm.level = I2C_SLAVEDSPIC_LEVEL_FIRE_TORCH_MIDDLE;
-		else if (!strcmp_P(res->arg5, PSTR("top_fire")))
-			command.arm.level = I2C_SLAVEDSPIC_LEVEL_FIRE_TORCH_TOP;
-		else if (!strcmp_P(res->arg5, PSTR("mobile_torch")))
-			command.arm.level = I2C_SLAVEDSPIC_LEVEL_MOBILE_TORCH;
-
-	}
-	else if (!strcmp_P(res->arg1, PSTR("pickup_pull_fire_do"))) {
-		command.arm.mode = I2C_SLAVEDSPIC_MODE_ARM_PICKUP_PULL_FIRE_DO;	
-
-		if (!strcmp_P(res->arg5, PSTR("ground")))
-			command.arm.level = I2C_SLAVEDSPIC_LEVEL_FIRE_GROUND;
+		if (!strcmp_P(res->arg5, PSTR("ground_push")))
+			command.arm.level = I2C_SLAVEDSPIC_LEVEL_FIRE_GROUND_PUSH;
+		else if (!strcmp_P(res->arg5, PSTR("ground_pull")))
+			command.arm.level = I2C_SLAVEDSPIC_LEVEL_FIRE_GROUND_PULL;
 		else if (!strcmp_P(res->arg5, PSTR("heart")))
 			command.arm.level = I2C_SLAVEDSPIC_LEVEL_FIRE_HEART;
 		else if (!strcmp_P(res->arg5, PSTR("down_fire")))
@@ -846,10 +817,10 @@ parse_pgm_inst_t cmd_arm_mode = {
 };
 
 
-prog_char str_arm_mode2_arg1[] = "pickup_push_fire_ready#pickup_push_fire_do#pickup_pull_fire_ready#pickup_pull_fire_do";
+prog_char str_arm_mode2_arg1[] = "pickup_fire_ready#pickup_fire_do";
 parse_pgm_token_string_t cmd_arm_mode2_arg1 = TOKEN_STRING_INITIALIZER(struct cmd_arm_mode_result, arg1, str_arm_mode2_arg1);
 
-prog_char str_arm_mode_arg5[] = "ground#down_fire#mid_fire#top_fire#heart#mobile_torch";
+prog_char str_arm_mode_arg5[] = "ground_push#ground_pull#down_fire#mid_fire#top_fire#heart#mobile_torch";
 parse_pgm_token_string_t cmd_arm_mode_arg5 = TOKEN_STRING_INITIALIZER(struct cmd_arm_mode_result, arg5, str_arm_mode_arg5);
 
 

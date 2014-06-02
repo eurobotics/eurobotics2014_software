@@ -79,7 +79,7 @@
 #define END_TRAJ   		1
 #define END_NEAR   		2
 #define END_TIME   		4
-#define END_BLOCKING   	5
+#define END_BLOCKING   	8
 
 
 
