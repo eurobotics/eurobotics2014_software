@@ -67,13 +67,16 @@ struct ax12_traj
     
     uint16_t pos;
 	int16_t angle_deg;
+    uint16_t speed;
 };
 
 
 /* set position */
 void ax12_set_pos (struct ax12_traj *ax12, int16_t pos)
 {
-     /* update current position/angle */
+    float k_ms_deg = 0.0;
+
+    /* update current position/angle */
 	ax12_user_read_int(&gen.ax12, ax12->id, AA_PRESENT_POSITION_L, &ax12->pos);
  	ax12->angle_deg = (int16_t)(ax12->pos - ax12->zero_offset_pos);
  	ax12->angle_deg = (int16_t)(ax12->angle_deg / AX12_K_IMP_DEG);
@@ -84,7 +87,12 @@ void ax12_set_pos (struct ax12_traj *ax12, int16_t pos)
 	ax12_user_write_int(&gen.ax12, ax12->id , AA_GOAL_POSITION_L, ax12->goal_pos);
 
     /* update goal time */
-	ax12->goal_time_us = (microseconds)(ABS(ax12->angle_deg - ax12->goal_angle_deg) * AX12_K_MS_DEG * 1000);
+    ax12_user_read_int(&gen.ax12, ax12->id, AA_MOVING_SPEED_L, &ax12->speed);
+    k_ms_deg = AX12_K_MS_DEG * ax12->speed;
+    k_ms_deg /= 0x3ff;
+
+	//ax12->goal_time_us = (microseconds)(ABS(ax12->angle_deg - ax12->goal_angle_deg) * AX12_K_MS_DEG * 1000);
+	ax12->goal_time_us = (microseconds)(ABS(ax12->angle_deg - ax12->goal_angle_deg) * k_ms_deg * 1000);
 	ax12->time_us = time_get_us2();
 }
 
@@ -164,6 +172,12 @@ uint8_t ax12_test_traj_end (struct ax12_traj *ax12, uint8_t flags)
 	if (flags & END_TIME)
 		if (time_get_us2() - ax12->time_us > ax12->goal_time_us)
 			ret |=  END_TIME;
+
+	//if (flags & END_BLOCKING)
+        if (time_get_us2() - ax12->time_us > (3*ax12->goal_time_us)) {
+            ax12_user_write_int(&gen.ax12, ax12->id , AA_GOAL_POSITION_L, ax12->pos);                       
+		    ret |=  END_BLOCKING;
+        }
 
     return ret;
 }

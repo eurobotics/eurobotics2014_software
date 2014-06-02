@@ -442,7 +442,8 @@ void state_do_dump_fruits_mode(void)
 
 
 uint16_t get_shoulder_h [I2C_SLAVEDSPIC_LEVEL_MAX] = {
-	[I2C_SLAVEDSPIC_LEVEL_FIRE_GROUND] = 30,
+	[I2C_SLAVEDSPIC_LEVEL_FIRE_PUSH_GROUND] = 30,
+	[I2C_SLAVEDSPIC_LEVEL_FIRE_PULL_GROUND] = 30,
 	[I2C_SLAVEDSPIC_LEVEL_FIRE_HEART] = 60,
 	[I2C_SLAVEDSPIC_LEVEL_FIRE_TORCH_DOWN] = 66,
 	[I2C_SLAVEDSPIC_LEVEL_FIRE_TORCH_MIDDLE] = 96,
@@ -472,11 +473,6 @@ uint8_t get_sucker_sensor [2] = {
 /* do arm mode */
 void state_do_arm_mode(void)
 {
-#define FIRE_TYPE_PUSH 0
-#define FIRE_TYPE_PULL 1
-	uint8_t fire_type = FIRE_TYPE_PUSH;
-
-
 	if (!state_check_update(ARM))
 		return;
 
@@ -538,17 +534,21 @@ void state_do_arm_mode(void)
 			arm_goto_hxaa (slavedspic.arm_h, slavedspic.arm_x, 
 						   slavedspic.arm_elbow_a, slavedspic.arm_wrist_a);
 
-			/* check if fire is there, update statistis */
+			/* XXX check if fire is there, update statistis */
 			if (sensor_get (get_sucker_sensor[slavedspic.arm_sucker_type])) {
 				slavedspic.nb_stored_fires ++;
 				STMCH_DEBUG("%d fires stored", slavedspic.nb_stored_fires);
 			}			
 			else {
+
+                /* decrease shoulder angle speed */
+			    ax12_user_write_int(&gen.ax12, AX12_ID_WRIST, AA_MOVING_SPEED_L, 100);
+
 				/* find lost fire */
 				STMCH_DEBUG("finding fire 1");
 				slavedspic.arm_wrist_a += SUCKER_A_REL(15);
 				arm_wrist_goto_a_rel (SUCKER_A_REL(15));
-				arm_wrist_wait_traj_end (END_TRAJ|END_TIME);
+				arm_wrist_wait_traj_end (END_TRAJ);
 				time_wait_ms(200);
 
 				if (sensor_get (get_sucker_sensor[slavedspic.arm_sucker_type])) {
@@ -559,7 +559,7 @@ void state_do_arm_mode(void)
 					STMCH_DEBUG("finding fire 2");
 					slavedspic.arm_wrist_a += SUCKER_A_REL(15);
 					arm_wrist_goto_a_rel (SUCKER_A_REL(15));
-					arm_wrist_wait_traj_end (END_TRAJ|END_TIME);
+					arm_wrist_wait_traj_end (END_TRAJ);
 					time_wait_ms(200);
 					
 					if (sensor_get (get_sucker_sensor[slavedspic.arm_sucker_type])) {
@@ -573,7 +573,7 @@ void state_do_arm_mode(void)
 
 
 			/* goto inside storage */
-			slavedspic.arm_h = 200;
+			slavedspic.arm_h = 23 + (slavedspic.nb_stored_fires * 30); //200;
 			slavedspic.arm_x = -75;
 			slavedspic.arm_elbow_a = get_elbow_a[slavedspic.arm_sucker_type];
 
@@ -594,16 +594,16 @@ void state_do_arm_mode(void)
 
 			/* restore shoulder angle speed */
 			ax12_user_write_int(&gen.ax12, AX12_ID_SHOULDER, AA_MOVING_SPEED_L, 0x3ff);
+            ax12_user_write_int(&gen.ax12, AX12_ID_WRIST, AA_MOVING_SPEED_L, 0x3ff);
 
 
 			break;
 
-		case I2C_SLAVEDSPIC_MODE_ARM_PICKUP_PULL_FIRE_READY:
-			fire_type = FIRE_TYPE_PULL;
-		case I2C_SLAVEDSPIC_MODE_ARM_PICKUP_PUSH_FIRE_READY:
+		case I2C_SLAVEDSPIC_MODE_ARM_PICKUP_FIRE_READY:
 
 			/* goto position and turn on the vaccum */
-			slavedspic.arm_h = (fire_type==FIRE_TYPE_PUSH? 95:130);
+            slavedspic.arm_level = mainboard_command.arm.level;
+			slavedspic.arm_h = (slavedspic.arm_level==I2C_SLAVEDSPIC_LEVEL_FIRE_GROUND_PUSH? 95:130);
 			slavedspic.arm_x = 0;
 			slavedspic.arm_elbow_a = get_elbow_a[slavedspic.arm_sucker_type];
 			slavedspic.arm_wrist_a = 0;
@@ -617,9 +617,7 @@ void state_do_arm_mode(void)
 			break;
 
 
-		case I2C_SLAVEDSPIC_MODE_ARM_PICKUP_PULL_FIRE_DO:
-			fire_type = FIRE_TYPE_PULL;
-		case I2C_SLAVEDSPIC_MODE_ARM_PICKUP_PUSH_FIRE_DO:
+		case I2C_SLAVEDSPIC_MODE_ARM_PICKUP_FIRE_DO:
 
 			/* refresh vacuum */
 			vacuum_system_enable (get_vacuum_system[slavedspic.arm_sucker_type]);
@@ -640,7 +638,7 @@ void state_do_arm_mode(void)
 						   slavedspic.arm_elbow_a, slavedspic.arm_wrist_a);
 
 			/* XXX dependint on fire orientation, turn wrist */
-			if (fire_type == FIRE_TYPE_PUSH) {
+			if (slavedspic.arm_level==I2C_SLAVEDSPIC_LEVEL_FIRE_GROUND_PUSH) {
 				slavedspic.arm_wrist_a += SUCKER_A_REL(-15);
 				arm_wrist_goto_a_rel (SUCKER_A_REL(-15));
 			}
