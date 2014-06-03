@@ -421,6 +421,7 @@ void strat_homologation(void);
 uint8_t position_exchange_main_down(void);
 uint8_t position_exchange_main_up(void);
 uint8_t robots_position_exchange(uint8_t protect_zone_num);
+uint8_t strat_wipe_out(void);
 
 
 #else /* HOST_VERSION_OA_TEST */
