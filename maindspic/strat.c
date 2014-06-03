@@ -408,10 +408,8 @@ uint8_t strat_main(void)
     strat_infos.zones[ZONE_HEART_3].flags |= ZONE_AVOID;
 
 	
-				
-	strat_wipe_out();
 	
-   /* do{
+    do{
         //err = strat_begin_alcabot();
         err = strat_begin();
     }while((err & END_RESERVED) == 0);
@@ -427,8 +425,6 @@ uint8_t strat_main(void)
    strat_exit();
    return 0;
    
-   end:
-   return err;
 }
 
 
