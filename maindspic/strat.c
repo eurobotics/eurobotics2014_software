@@ -406,9 +406,8 @@ uint8_t strat_main(void)
     strat_infos.zones[ZONE_BASKET_1].flags |= ZONE_AVOID;
     strat_infos.zones[ZONE_FIRE_4].flags |= ZONE_AVOID;
     strat_infos.zones[ZONE_HEART_3].flags |= ZONE_AVOID;
+
 	
-	robots_position_exchange(0);
-	while(1);
 	
     do{
         //err = strat_begin_alcabot();
@@ -417,14 +416,15 @@ uint8_t strat_main(void)
 
     strat_limit_speed_enable ();
 	
-    /* auto-play */
+    /* auto-play 
     printf_P(PSTR("\r\n\r\nStrat smart\r\n"));
     do{
         err = strat_smart();
     }while((err & END_TIMER) == 0);
-
+	*/
    strat_exit();
    return 0;
+   
 }
 
 

@@ -736,3 +736,161 @@ uint8_t position_exchange_main_down(void)
 end:
 	return err;
 }
+
+uint8_t strat_wipe_out(void){
+	int16_t x,y,x_final,y_final;
+	int8_t err,first_point=0, direction=0;
+	
+	#define H1_RADIUS 150
+	#define MARGIN 10
+
+	
+	printf_P("WIPE_OUT\n");
+		if(x_is_more_than(COLOR_X(CENTER_X)))
+		{
+			if(y_is_more_than(CENTER_Y+50)){
+				//RIGHT-UP 4
+				if(opponents_are_in_area(COLOR_X(CENTER_X+H1_RADIUS+ROBOT_WIDTH+MARGIN), CENTER_Y+50+H1_RADIUS+ROBOT_WIDTH+MARGIN,COLOR_X(CENTER_X),CENTER_Y+50)){
+					if(!x_is_more_than(COLOR_X(2100))&&y_is_more_than(1600))
+					{
+						first_point=1;
+					}else{
+						first_point=3;
+						}
+				}else{
+					first_point=4;
+					
+				}
+				
+			}else{
+				//RIGHT-DOWN 3
+				if(opponents_are_in_area(COLOR_X(CENTER_X+H1_RADIUS+ROBOT_WIDTH-MARGIN),CENTER_Y+50 ,COLOR_X(CENTER_X),CENTER_Y+50-H1_RADIUS-ROBOT_WIDTH-MARGIN)){
+					first_point=4;
+				}else{
+					first_point=3;
+				}
+				
+	
+			}
+		}
+		else {
+			if(y_is_more_than(CENTER_Y+50)){
+				//LEFT-UP 1
+				if(opponents_are_in_area(COLOR_X(CENTER_X),CENTER_Y+50+H1_RADIUS+ROBOT_WIDTH+MARGIN ,COLOR_X(CENTER_X-H1_RADIUS-ROBOT_WIDTH-MARGIN),CENTER_Y+50)){
+					if(x_is_more_than(COLOR_X(900))&&y_is_more_than(1600))
+					{
+						first_point=4;
+					}else{
+						first_point=2;
+					}
+				}else{
+					first_point=1;
+				}
+				
+			
+			}else{
+				//LEFT-DOWN 2
+				if(opponents_are_in_area(COLOR_X(CENTER_X),CENTER_Y+50 ,COLOR_X(CENTER_X-H1_RADIUS-ROBOT_WIDTH-MARGIN),CENTER_Y+50-H1_RADIUS-ROBOT_WIDTH-MARGIN)){
+					first_point=1;
+				}else{
+					first_point=2;
+				}
+			}
+		}
+		switch(first_point){
+			
+			case 1:
+				x=CENTER_X-H1_RADIUS-ROBOT_WIDTH/2-MARGIN;
+				y=CENTER_Y+50+H1_RADIUS+ROBOT_WIDTH/2+MARGIN;
+				
+				if(opponents_are_in_area(COLOR_X(CENTER_X),CENTER_Y+50 ,COLOR_X(CENTER_X-H1_RADIUS-ROBOT_WIDTH-MARGIN),CENTER_Y+50-H1_RADIUS-ROBOT_WIDTH-MARGIN)){
+					x_final=CENTER_X+H1_RADIUS+ROBOT_WIDTH/2+MARGIN;
+					y_final=CENTER_Y+50+H1_RADIUS+ROBOT_WIDTH/2+MARGIN;
+					printf_P("LEFT-UP OPP\n");
+					direction=0;
+				}else{
+					x_final=CENTER_X-H1_RADIUS-ROBOT_WIDTH/2-MARGIN;
+					y_final=CENTER_Y+50-H1_RADIUS-ROBOT_WIDTH/2-MARGIN;
+					printf_P("LEFT-UP NO OPP\n");
+					direction=1;
+				}
+			break;
+			case 2:
+				x=CENTER_X-H1_RADIUS-ROBOT_WIDTH/2-MARGIN;
+				y=CENTER_Y+50-H1_RADIUS-ROBOT_WIDTH/2-MARGIN;
+				if(opponents_are_in_area(COLOR_X(CENTER_X+H1_RADIUS+ROBOT_WIDTH-MARGIN),CENTER_Y+50 ,COLOR_X(CENTER_X),CENTER_Y+50-H1_RADIUS-ROBOT_WIDTH-MARGIN)){
+					x_final=CENTER_X-H1_RADIUS-ROBOT_WIDTH/2-MARGIN;
+					y_final=CENTER_Y+50+H1_RADIUS+ROBOT_WIDTH/2+MARGIN;
+					printf_P("LEFT-DOWN OPP\n");
+					direction=0;
+				}else{
+					x_final=CENTER_X+H1_RADIUS+ROBOT_WIDTH/2+MARGIN;
+					y_final=CENTER_Y+50-H1_RADIUS-ROBOT_WIDTH/2-MARGIN;
+					printf_P("LEFT-DOWN NO OPP\n");
+					direction=1;
+				}
+			break;
+			case 3:
+				x=CENTER_X+H1_RADIUS+ROBOT_WIDTH/2+MARGIN;
+				y=CENTER_Y+50-H1_RADIUS-ROBOT_WIDTH/2-MARGIN;
+				if(opponents_are_in_area(COLOR_X(CENTER_X+H1_RADIUS+ROBOT_WIDTH+MARGIN), CENTER_Y+50+H1_RADIUS+ROBOT_WIDTH+MARGIN,COLOR_X(CENTER_X),CENTER_Y+50)){
+					x_final=CENTER_X-H1_RADIUS-ROBOT_WIDTH/2-MARGIN;
+					y_final=CENTER_Y+50-H1_RADIUS-ROBOT_WIDTH/2-MARGIN;
+					printf_P("RIGHT-DOWN OPP\n");
+					direction=0;
+				}else{
+					x_final=CENTER_X+H1_RADIUS+ROBOT_WIDTH/2+MARGIN;
+					y_final=CENTER_Y+50+H1_RADIUS+ROBOT_WIDTH/2+MARGIN;
+					printf_P("RIGHT-DOWN NO OPP\n");
+					direction=1;
+				}
+			break;
+			case 4:
+				x=CENTER_X+H1_RADIUS+ROBOT_WIDTH/2+MARGIN;
+				y=CENTER_Y+50+H1_RADIUS+ROBOT_WIDTH/2+MARGIN;
+				if(opponents_are_in_area(COLOR_X(CENTER_X),CENTER_Y+50+H1_RADIUS+ROBOT_WIDTH+MARGIN ,COLOR_X(CENTER_X-H1_RADIUS-ROBOT_WIDTH-MARGIN),CENTER_Y+50)){
+					x_final=CENTER_X+H1_RADIUS+ROBOT_WIDTH/2+MARGIN;
+					y_final=CENTER_Y+50-H1_RADIUS-ROBOT_WIDTH/2-MARGIN;
+					printf_P("RIGHT-UP OPP\n");
+					direction=0;
+				}else{
+					x_final=CENTER_X-H1_RADIUS-ROBOT_WIDTH/2-MARGIN;
+					y_final=CENTER_Y+50+H1_RADIUS+ROBOT_WIDTH/2+MARGIN;
+					printf_P("RIGHT-UP NO OPP\n");
+					direction=1;
+				}
+	
+				printf_P("RIGHT-UP\n");
+			break;
+		}
+		goto_and_avoid (x,y,TRAJ_FLAGS_STD,TRAJ_FLAGS_SMALL_DIST);
+		err = wait_traj_end(TRAJ_FLAGS_NO_NEAR);
+		if (!TRAJ_SUCCESS(err))
+			ERROUT(err);
+		i2c_slavedspic_mode_stick ( COLOR_INVERT(I2C_STICK_TYPE_LEFT),
+										 I2C_STICK_MODE_PUSH_FIRE, 0);
+		i2c_slavedspic_wait_ready();
+		printf_P("Stick \n");
+		
+		
+		if (direction==1){
+			trajectory_goto_forward_xy_abs (&mainboard.traj, x_final,y_final);
+			
+		printf_P("forward \n");
+			}
+		else{
+			trajectory_goto_backward_xy_abs (&mainboard.traj, x_final,y_final);
+			printf_P("backward \n");
+			}
+		err = wait_traj_end(TRAJ_FLAGS_NO_NEAR);
+		if (!TRAJ_SUCCESS(err))
+			ERROUT(err);
+	
+	end:
+	return err;	
+	
+	
+
+
+}
+
