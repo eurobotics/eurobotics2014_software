@@ -365,7 +365,12 @@ void strat_auto_position_event (void *data);
 
 /* trajectory functions */
 void strat_goto_xy_abs_event (void *data);
+void strat_goto_forward_xy_abs_event (void *data);
+void strat_goto_backward_xy_abs_event (void *data);
 
+void strat_goto_avoid_event (void *data);
+void strat_goto_avoid_forward_event (void *data);
+void strat_goto_avoid_backward_event (void *data);
 /* match tasks */
 void strat_patrol_and_paint_fresco_event (void *data);
 void strat_fresco_event (void *data);

@@ -699,155 +699,325 @@ void strat_homologation(void)
 }
 
 
-uint8_t robots_position_exchange(uint8_t protect_zone_num)
+uint8_t goto_basket_best_path(uint8_t protect_zone_num)
 {
-	int8_t err = 0;
+
+	/*bt_robot_2nd_goto_xy_abs(COLOR_X(FIRE_1_X),FIRE_1_Y);
+	bt_robot_2nd_wait_end();
+	bt_robot_2nd_goto_xy_abs(COLOR_X(PROTECT_H1_X),PROTECT_H1_Y);
+	bt_robot_2nd_wait_end();
+	bt_robot_2nd_bt_protect_h1();
+	bt_robot_2nd_wait_end();*/
+	
+	#define PROTECT_H1_X 400
+	#define PROTECT_H1_Y 1600
+	int8_t err;	
+	int8_t opp1_there, opp2_there;
+	int16_t opp_x, opp_y;
+	int16_t opp2_x, opp2_y;
+
+	/* get robot coordenates */
+	opp1_there = get_opponent1_xy(&opp_x, &opp_y);
+	opp2_there = get_opponent2_xy(&opp2_x, &opp2_y);
 	
 	/* Divide field in 2 parts (Y) and see where are the opponents: */
-	/* Both opponents upper part */
-	if(opp1_y_is_more_than(1500) && opp2_y_is_more_than(1500))
-	{
-		/* down */
-		err=position_exchange_main_down();
-	}
-	
 	/* Both opponents lower part */
-	else if(!opp1_y_is_more_than(1500) && !opp2_y_is_more_than(1500))
+	if(!opp1_y_is_more_than(CENTER_Y+50) && !opp2_y_is_more_than(CENTER_Y+50))
 	{
 		/* up */
-		err=position_exchange_main_up();
+		err=goto_basket_path_up();
 	}
-	
+	/* Both opponents upper part */
+	else if(opp1_y_is_more_than(CENTER_Y+50) && opp2_y_is_more_than(CENTER_Y+50))
+	{
+		/* down */
+		err=goto_basket_path_down();
+	}
+	else if(opp1_there == -1 && opp2_there == -1){
+		err=goto_basket_path_up();
+	}
+
 	/* One opponents upper part and one lower part */
 	else
 	{
 		/* Check if there is a robot blocking the way up */
-		if(opponents_are_in_area(2100,1850,900,1300))
+		if(opponents_are_in_area(COLOR_X(2100),2000,COLOR_X(900),1700))
 		{
-			/* down */ 
-			err=position_exchange_main_down();
+			/* up */
+			err=goto_basket_path_up();
 		}
 		
 		/* Check if there is a robot blocking the way down */
-		else if(opponents_are_in_area(2100,300,900,800))
+		else if(opponents_are_in_area(COLOR_X(1900),400,COLOR_X(1100),0))
 		{
-			/* Alternative strategy */
-			printf_P("Oh no, both robots are blocking me :(.\n");
+			/*down*/
+			err=goto_basket_path_down();
 		}
-		
 		else
-		{
-			/* up */
-			err=position_exchange_main_up();
+		{/* Alternative strategy */
+			printf_P("Oh no, both robots are blocking me :(.\n");
+			err=goto_basket_path_up();
+			
 		}
+	}
+end:
+	return err;
+}
+uint8_t goto_basket_path_up(void)
+{
+	int8_t opp1_there, opp2_there;
+	int16_t opp_x, opp_y;
+	int16_t opp2_x, opp2_y;
+
+	/* get robot coordenates */
+	opp1_there = get_opponent1_xy(&opp_x, &opp_y);
+	opp2_there = get_opponent2_xy(&opp2_x, &opp2_y);
+	
+	printf_P("UP\n");
+	int8_t err;
+	
+	err=goto_and_avoid (COLOR_X(FIRE_3_X),FIRE_3_Y,TRAJ_FLAGS_STD,TRAJ_FLAGS_STD);	
+	//if (!TRAJ_SUCCESS(err))
+	//	ERROUT(err);
+
+	err=goto_and_avoid (COLOR_X(FIRE_5_X),FIRE_5_Y,TRAJ_FLAGS_STD,TRAJ_FLAGS_STD);
+	//if (!TRAJ_SUCCESS(err))
+	//	ERROUT(err);
+	
+	err=goto_and_avoid (COLOR_X(FIRE_6_X),FIRE_6_Y,TRAJ_FLAGS_STD,TRAJ_FLAGS_STD);	
+	//if (!TRAJ_SUCCESS(err))
+	//	ERROUT(err);
+	if(opponents_are_in_area(COLOR_X(3000),800,COLOR_X(2250),0)){
+		strat_leave_fruits_from_fresco();
+	}else{
+		strat_leave_fruits_from_home_red();
+	}
+	
+	
+	end:
+		return err;
+}
+uint8_t strat_leave_fruits_from_home_red(){
+	//printf_P("Home red\n");
+	#define BASKET_INIT_X 	 2700
+	#define BASKET_INIT_Y 	 543
+	
+	int8_t err;
+	int16_t x;
+	
+	err=goto_and_avoid (COLOR_X(BASKET_INIT_X),BASKET_INIT_Y,TRAJ_FLAGS_STD,TRAJ_FLAGS_SMALL_DIST);	
+	//if (!TRAJ_SUCCESS(err))
+	//	ERROUT(err);
+	err=goto_and_avoid (COLOR_X(BASKET_INIT_X-300),BASKET_INIT_Y,TRAJ_FLAGS_STD,TRAJ_FLAGS_SMALL_DIST);
+	//if (!TRAJ_SUCCESS(err))
+	//	ERROUT(err); 
+		
+	x = 2600 - ROBOT_WIDTH/2;
+	err=goto_and_avoid (COLOR_X(x),position_get_y_s16(&mainboard.pos),TRAJ_FLAGS_STD,TRAJ_FLAGS_SMALL_DIST);
+	//if (!TRAJ_SUCCESS(err))
+	//	ERROUT(err);
+	
+	err=strat_leave_fruits();
+end:
+	return err;
+}
+uint8_t strat_leave_fruits_from_fresco(){
+	//printf_P("Fresco\n");
+	#define BASKET_INIT_X 	 1650
+	#define BASKET_INIT_Y 	 543
+	int8_t err;
+	int16_t x;
+	
+	err=goto_and_avoid (COLOR_X(BASKET_INIT_X),BASKET_INIT_Y,TRAJ_FLAGS_STD,TRAJ_FLAGS_SMALL_DIST);
+	//if (!TRAJ_SUCCESS(err))
+	//	ERROUT(err);
+	err=goto_and_avoid (COLOR_X(BASKET_INIT_X+300),BASKET_INIT_Y,TRAJ_FLAGS_STD,TRAJ_FLAGS_SMALL_DIST);
+	//if (!TRAJ_SUCCESS(err))
+	//		ERROUT(err);
+	x = 1900 + ROBOT_WIDTH/2;
+	err=goto_and_avoid (COLOR_X(x),position_get_y_s16(&mainboard.pos),TRAJ_FLAGS_STD,TRAJ_FLAGS_SMALL_DIST);
+	
+	//if (!TRAJ_SUCCESS(err))
+	//	ERROUT(err);
+	
+	err=strat_leave_fruits();
+end:
+	return err;
+}
+uint8_t goto_basket_path_down(void)
+{
+//printf_P("Down\n");
+	int8_t err;
+	int16_t x;
+	err=goto_and_avoid (COLOR_X(FIRE_3_X),FIRE_3_Y,TRAJ_FLAGS_STD,TRAJ_FLAGS_STD);	
+	//if (!TRAJ_SUCCESS(err))
+	//	ERROUT(err);
+	err=goto_and_avoid (COLOR_X(FIRE_2_X),FIRE_2_Y,TRAJ_FLAGS_STD,TRAJ_FLAGS_STD);
+	//if (!TRAJ_SUCCESS(err))
+	//	ERROUT(err);
+	if(opponents_are_in_area(COLOR_X(3000),800,COLOR_X(2250),0)){
+		strat_leave_fruits_from_fresco();
+	}else{
+		strat_leave_fruits_from_home_red();
 	}
 	
 end:
 	return err;
 }
 
+uint8_t strat_wipe_out(void){
+	int16_t x,y,x_final,y_final;
+	int8_t err,first_point=0, direction=0;
+	
+	#define H1_RADIUS 150
+	#define MARGIN 10
 
-
-uint8_t position_exchange_main_up(void)
-{
-	#define PROTECT_H1_X 400
-	#define PROTECT_H1_Y 1600
-	#define BASKET_INIT_X_UP 	 2700
-	#define BASKET_INIT_Y_UP 	 543
-	//#define BASKET_INIT_Y 	 ROBOT_WIDTH/2+350
 	
-	int8_t err;
-	int16_t x;
+	//printf_P("WIPE_OUT\n");
+		if(x_is_more_than(COLOR_X(CENTER_X)))
+		{
+			if(y_is_more_than(CENTER_Y+50)){
+				//RIGHT-UP 4
+				if(opponents_are_in_area(COLOR_X(CENTER_X+H1_RADIUS+ROBOT_WIDTH+MARGIN), CENTER_Y+50+H1_RADIUS+ROBOT_WIDTH+MARGIN,COLOR_X(CENTER_X),CENTER_Y+50)){
+					if(!x_is_more_than(COLOR_X(2100))&&y_is_more_than(1600))
+					{
+						first_point=1;
+					}else{
+						first_point=3;
+						}
+				}else{
+					first_point=4;
+					
+				}
+				
+			}else{
+				//RIGHT-DOWN 3
+				if(opponents_are_in_area(COLOR_X(CENTER_X+H1_RADIUS+ROBOT_WIDTH-MARGIN),CENTER_Y+50 ,COLOR_X(CENTER_X),CENTER_Y+50-H1_RADIUS-ROBOT_WIDTH-MARGIN)){
+					first_point=4;
+				}else{
+					first_point=3;
+				}
+				
 	
-	bt_robot_2nd_goto_xy_abs(COLOR_X(FIRE_1_X),FIRE_1_Y);
-	bt_robot_2nd_wait_end();
-	bt_robot_2nd_goto_xy_abs(COLOR_X(PROTECT_H1_X),PROTECT_H1_Y);
-	bt_robot_2nd_wait_end();
-	bt_robot_2nd_bt_protect_h1();
-	//bt_robot_2nd_wait_end();
+			}
+		}
+		else {
+			if(y_is_more_than(CENTER_Y+50)){
+				//LEFT-UP 1
+				if(opponents_are_in_area(COLOR_X(CENTER_X),CENTER_Y+50+H1_RADIUS+ROBOT_WIDTH+MARGIN ,COLOR_X(CENTER_X-H1_RADIUS-ROBOT_WIDTH-MARGIN),CENTER_Y+50)){
+					if(x_is_more_than(COLOR_X(900))&&y_is_more_than(1600))
+					{
+						first_point=4;
+					}else{
+						first_point=2;
+					}
+				}else{
+					first_point=1;
+				}
+				
+			
+			}else{
+				//LEFT-DOWN 2
+				if(opponents_are_in_area(COLOR_X(CENTER_X),CENTER_Y+50 ,COLOR_X(CENTER_X-H1_RADIUS-ROBOT_WIDTH-MARGIN),CENTER_Y+50-H1_RADIUS-ROBOT_WIDTH-MARGIN)){
+					first_point=1;
+				}else{
+					first_point=2;
+				}
+			}
+		}
+		switch(first_point){
+			
+			case 1:
+				x=CENTER_X-H1_RADIUS-ROBOT_WIDTH/2-MARGIN;
+				y=CENTER_Y+50+H1_RADIUS+ROBOT_WIDTH/2+MARGIN;
+				
+				if(opponents_are_in_area(COLOR_X(CENTER_X),CENTER_Y+50 ,COLOR_X(CENTER_X-H1_RADIUS-ROBOT_WIDTH-MARGIN),CENTER_Y+50-H1_RADIUS-ROBOT_WIDTH-MARGIN)){
+					x_final=CENTER_X+H1_RADIUS+ROBOT_WIDTH/2+MARGIN;
+					y_final=CENTER_Y+50+H1_RADIUS+ROBOT_WIDTH/2+MARGIN;
+					//printf_P("LEFT-UP OPP\n");
+					direction=0;
+				}else{
+					x_final=CENTER_X-H1_RADIUS-ROBOT_WIDTH/2-MARGIN;
+					y_final=CENTER_Y+50-H1_RADIUS-ROBOT_WIDTH/2-MARGIN;
+					//printf_P("LEFT-UP NO OPP\n");
+					direction=1;
+				}
+			break;
+			case 2:
+				x=CENTER_X-H1_RADIUS-ROBOT_WIDTH/2-MARGIN;
+				y=CENTER_Y+50-H1_RADIUS-ROBOT_WIDTH/2-MARGIN;
+				if(opponents_are_in_area(COLOR_X(CENTER_X+H1_RADIUS+ROBOT_WIDTH-MARGIN),CENTER_Y+50 ,COLOR_X(CENTER_X),CENTER_Y+50-H1_RADIUS-ROBOT_WIDTH-MARGIN)){
+					x_final=CENTER_X-H1_RADIUS-ROBOT_WIDTH/2-MARGIN;
+					y_final=CENTER_Y+50+H1_RADIUS+ROBOT_WIDTH/2+MARGIN;
+					//printf_P("LEFT-DOWN OPP\n");
+					direction=0;
+				}else{
+					x_final=CENTER_X+H1_RADIUS+ROBOT_WIDTH/2+MARGIN;
+					y_final=CENTER_Y+50-H1_RADIUS-ROBOT_WIDTH/2-MARGIN;
+					//printf_P("LEFT-DOWN NO OPP\n");
+					direction=1;
+				}
+			break;
+			case 3:
+				x=CENTER_X+H1_RADIUS+ROBOT_WIDTH/2+MARGIN;
+				y=CENTER_Y+50-H1_RADIUS-ROBOT_WIDTH/2-MARGIN;
+				if(opponents_are_in_area(COLOR_X(CENTER_X+H1_RADIUS+ROBOT_WIDTH+MARGIN), CENTER_Y+50+H1_RADIUS+ROBOT_WIDTH+MARGIN,COLOR_X(CENTER_X),CENTER_Y+50)){
+					x_final=CENTER_X-H1_RADIUS-ROBOT_WIDTH/2-MARGIN;
+					y_final=CENTER_Y+50-H1_RADIUS-ROBOT_WIDTH/2-MARGIN;
+					//printf_P("RIGHT-DOWN OPP\n");
+					direction=0;
+				}else{
+					x_final=CENTER_X+H1_RADIUS+ROBOT_WIDTH/2+MARGIN;
+					y_final=CENTER_Y+50+H1_RADIUS+ROBOT_WIDTH/2+MARGIN;
+					//printf_P("RIGHT-DOWN NO OPP\n");
+					direction=1;
+				}
+			break;
+			case 4:
+				x=CENTER_X+H1_RADIUS+ROBOT_WIDTH/2+MARGIN;
+				y=CENTER_Y+50+H1_RADIUS+ROBOT_WIDTH/2+MARGIN;
+				if(opponents_are_in_area(COLOR_X(CENTER_X),CENTER_Y+50+H1_RADIUS+ROBOT_WIDTH+MARGIN ,COLOR_X(CENTER_X-H1_RADIUS-ROBOT_WIDTH-MARGIN),CENTER_Y+50)){
+					x_final=CENTER_X+H1_RADIUS+ROBOT_WIDTH/2+MARGIN;
+					y_final=CENTER_Y+50-H1_RADIUS-ROBOT_WIDTH/2-MARGIN;
+					//printf_P("RIGHT-UP OPP\n");
+					direction=0;
+				}else{
+					x_final=CENTER_X-H1_RADIUS-ROBOT_WIDTH/2-MARGIN;
+					y_final=CENTER_Y+50+H1_RADIUS+ROBOT_WIDTH/2+MARGIN;
+					//printf_P("RIGHT-UP NO OPP\n");
+					direction=1;
+				}
 	
-	
-	err=goto_and_avoid (COLOR_X(FIRE_3_X),FIRE_3_Y,TRAJ_FLAGS_STD,TRAJ_FLAGS_STD);	
-	if (!TRAJ_SUCCESS(err))
+				//printf_P("RIGHT-UP\n");
+			break;
+		}
+		goto_and_avoid (x,y,TRAJ_FLAGS_STD,TRAJ_FLAGS_SMALL_DIST);
+		err = wait_traj_end(TRAJ_FLAGS_NO_NEAR);
+		if (!TRAJ_SUCCESS(err))
 			ERROUT(err);
-	
-	err=goto_and_avoid (COLOR_X(FIRE_5_X),FIRE_5_Y,TRAJ_FLAGS_STD,TRAJ_FLAGS_STD);
-	if (!TRAJ_SUCCESS(err))
-			ERROUT(err);
-	
-	
-	err=goto_and_avoid (COLOR_X(FIRE_6_X),FIRE_6_Y,TRAJ_FLAGS_STD,TRAJ_FLAGS_STD);	
-	if (!TRAJ_SUCCESS(err))
-			ERROUT(err);
-	
-	
-	err=goto_and_avoid (COLOR_X(BASKET_INIT_X_UP),BASKET_INIT_Y_UP,TRAJ_FLAGS_STD,TRAJ_FLAGS_SMALL_DIST);
-	if (!TRAJ_SUCCESS(err))
-			ERROUT(err);
+		i2c_slavedspic_mode_stick ( COLOR_INVERT(I2C_STICK_TYPE_LEFT),
+										 I2C_STICK_MODE_PUSH_FIRE, 0);
+		i2c_slavedspic_wait_ready();
+		//printf_P("Stick \n");
 		
-	err=goto_and_avoid (COLOR_X(BASKET_INIT_X_UP-700),BASKET_INIT_Y_UP,TRAJ_FLAGS_STD,TRAJ_FLAGS_SMALL_DIST);
-	if (!TRAJ_SUCCESS(err))
+		
+		if (direction==1){
+			trajectory_goto_forward_xy_abs (&mainboard.traj, x_final,y_final);
+			//printf_P("forward \n");
+			}
+		else{
+			trajectory_goto_backward_xy_abs (&mainboard.traj, x_final,y_final);
+			//printf_P("backward \n");
+			}
+		err = wait_traj_end(TRAJ_FLAGS_NO_NEAR);
+		if (!TRAJ_SUCCESS(err))
 			ERROUT(err);
 	
+	end:
+	return err;	
 	
-	x = 2600 - ROBOT_WIDTH/2;
-	err=goto_and_avoid (COLOR_X(x),position_get_y_s16(&mainboard.pos),TRAJ_FLAGS_STD,TRAJ_FLAGS_SMALL_DIST);
-	if (!TRAJ_SUCCESS(err))
-			ERROUT(err);
 	
-	err=strat_leave_fruits();
-	
-end:
-	return err;
+
+
 }
 
-
-uint8_t position_exchange_main_down(void)
-{
-	#define PROTECT_H1_X 400
-	#define PROTECT_H1_Y 1600
-	#define BASKET_INIT_X_DOWN 	 1650
-	#define BASKET_INIT_Y_DOWN 	 543
-	//#define BASKET_INIT_Y 	 ROBOT_WIDTH/2+350
-	int8_t err;
-	int16_t x;
-	
-		
-	bt_robot_2nd_goto_xy_abs(COLOR_X(FIRE_1_X),FIRE_1_Y);
-	bt_robot_2nd_wait_end();
-	bt_robot_2nd_goto_xy_abs(COLOR_X(PROTECT_H1_X),PROTECT_H1_Y);
-	bt_robot_2nd_wait_end();
-	bt_robot_2nd_bt_protect_h1();
-	bt_robot_2nd_wait_end();
-	
-	
-	err=goto_and_avoid (COLOR_X(FIRE_3_X),FIRE_3_Y,TRAJ_FLAGS_STD,TRAJ_FLAGS_STD);	
-	if (!TRAJ_SUCCESS(err))
-			ERROUT(err);
-	
-	err=goto_and_avoid (COLOR_X(FIRE_2_X),FIRE_2_Y,TRAJ_FLAGS_STD,TRAJ_FLAGS_STD);
-	if (!TRAJ_SUCCESS(err))
-			ERROUT(err);
-	
-	err=goto_and_avoid (COLOR_X(BASKET_INIT_X_DOWN),BASKET_INIT_Y_DOWN,TRAJ_FLAGS_STD,TRAJ_FLAGS_SMALL_DIST);
-	printf_P("err:%d\n",err);
-	if (!TRAJ_SUCCESS(err))
-			ERROUT(err);
-		
-	err=goto_and_avoid (COLOR_X(BASKET_INIT_X_DOWN+700),BASKET_INIT_Y_DOWN,TRAJ_FLAGS_STD,TRAJ_FLAGS_SMALL_DIST);
-	printf_P("err:%d\n",err);
-	if (!TRAJ_SUCCESS(err))
-			ERROUT(err);
-	
-	
-	x = 1900 + ROBOT_WIDTH/2;
-	err=goto_and_avoid (COLOR_X(x),position_get_y_s16(&mainboard.pos),TRAJ_FLAGS_STD,TRAJ_FLAGS_SMALL_DIST);
-	printf_P("err:%d\n",err);
-	if (!TRAJ_SUCCESS(err))
-			ERROUT(err);
-	
-	err=strat_leave_fruits();
-	
-end:
-	return err;
-}

@@ -583,9 +583,9 @@ while True:
                 toggle_color()
 	    elif k == "a":
 		set_arm()
-	    elif k == "l":
-		set_lstick()
 	    elif k == "r":
+		set_lstick()
+	    elif k == "l":
 		set_rstick()
 	    elif k == "p":
 		set_steam_shovel()

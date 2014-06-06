@@ -405,24 +405,29 @@ uint8_t strat_main(void)
     strat_infos.zones[ZONE_BASKET_1].flags |= ZONE_AVOID;
     strat_infos.zones[ZONE_FIRE_4].flags |= ZONE_AVOID;
     strat_infos.zones[ZONE_HEART_3].flags |= ZONE_AVOID;
-	
+
 	strat_homologation();
 	while(1);
 	
+	/*
     do{
         err = strat_begin();
     }while((err & END_RESERVED) == 0);
 
+    strat_limit_speed_enable ();*/
     strat_limit_speed_enable ();
 	
+    /* auto-play 
     /* auto-play */
     printf_P(PSTR("\r\n\r\nStrat smart\r\n"));
     do{
         err = strat_smart();
     }while((err & END_TIMER) == 0);
+	*/
 
    strat_exit();
    return 0;
+   
 }
 
 

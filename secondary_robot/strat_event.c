@@ -133,6 +133,77 @@ void strat_goto_xy_abs_event (void *data)
 	/* return value */
 	bt_status_set_cmd_ret (err);
 }
+void strat_goto_forward_xy_abs_event (void *data)
+{
+	int16_t *arg = (int16_t*)data;
+	uint8_t err;
+ 
+	trajectory_goto_forward_xy_abs(&mainboard.traj, arg[0], arg[1]);
+	err = wait_traj_end(TRAJ_FLAGS_STD);
+
+	if (err != END_TRAJ && err != END_NEAR)
+		strat_hardstop();
+
+	/* return value */
+	bt_status_set_cmd_ret (err);
+}
+void strat_goto_backward_xy_abs_event (void *data)
+{
+	int16_t *arg = (int16_t*)data;
+	uint8_t err;
+ 
+	trajectory_goto_backward_xy_abs(&mainboard.traj, arg[0], arg[1]);
+	err = wait_traj_end(TRAJ_FLAGS_STD);
+
+	if (err != END_TRAJ && err != END_NEAR)
+		strat_hardstop();
+
+	/* return value */
+	bt_status_set_cmd_ret (err);
+}
+void strat_goto_avoid_event (void *data)
+{
+	int16_t *arg = (int16_t*)data;
+	uint8_t err;
+ 
+	goto_and_avoid(arg[0], arg[1],  TRAJ_FLAGS_STD, TRAJ_FLAGS_NO_NEAR);
+	err = wait_traj_end(TRAJ_FLAGS_STD);
+
+	if (err != END_TRAJ && err != END_NEAR)
+		strat_hardstop();
+
+	/* return value */
+	bt_status_set_cmd_ret (err);
+}
+void strat_goto_avoid_forward_event (void *data)
+{
+	int16_t *arg = (int16_t*)data;
+	uint8_t err;
+ 
+	goto_and_avoid_forward(arg[0], arg[1],  TRAJ_FLAGS_STD, TRAJ_FLAGS_NO_NEAR);
+	err = wait_traj_end(TRAJ_FLAGS_STD);
+
+	if (err != END_TRAJ && err != END_NEAR)
+		strat_hardstop();
+
+	/* return value */
+	bt_status_set_cmd_ret (err);
+}
+void strat_goto_avoid_backward_event (void *data)
+{
+	int16_t *arg = (int16_t*)data;
+	uint8_t err;
+ 
+	goto_and_avoid_backward(arg[0], arg[1],  TRAJ_FLAGS_STD, TRAJ_FLAGS_NO_NEAR);
+	err = wait_traj_end(TRAJ_FLAGS_STD);
+
+	if (err != END_TRAJ && err != END_NEAR)
+		strat_hardstop();
+
+	/* return value */
+	bt_status_set_cmd_ret (err);
+}
+
 
 void strat_patrol_fresco_mamooth_event (void *data)
 {

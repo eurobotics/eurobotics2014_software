@@ -806,7 +806,7 @@ parse_pgm_inst_t cmd_goto2 = {
 static void cmd_bt_goto_parsed(void * parsed_result, void * data)
 {
 	struct cmd_goto_result * res = parsed_result;
-
+	uint8_t err;
 	/* TODO comment functions */
 
 	interrupt_traj_reset();
@@ -833,28 +833,20 @@ static void cmd_bt_goto_parsed(void * parsed_result, void * data)
 		bt_trajectory_goto_xy_abs(res->arg2, res->arg3, res->arg4);
 	}
 	else if (!strcmp_P(res->arg1, PSTR("avoid"))) {
-		//bt_goto_and_avoid(res->arg2, res->arg3, res->arg4);
-		//err = bt_goto_and_avoid(res->arg2, res->arg3, TRAJ_FLAGS_STD, TRAJ_FLAGS_NO_NEAR);
-		//if (err != END_TRAJ && err != END_NEAR)
-		//	strat_hardstop();
+		bt_goto_and_avoid(res->arg2, res->arg3,res->arg4);
 	}
 	else if (!strcmp_P(res->arg1, PSTR("avoid_fw"))) {
-		//bt_goto_and_avoid_forward(res->arg2, res->arg3, res->arg4);
-		//err = bt_goto_and_avoid_forward(res->arg2, res->arg3, TRAJ_FLAGS_STD, TRAJ_FLAGS_NO_NEAR);
-		//if (err != END_TRAJ && err != END_NEAR)
-		//	strat_hardstop();
+		bt_goto_and_avoid_forward(res->arg2, res->arg3, res->arg4);
 	}
 	else if (!strcmp_P(res->arg1, PSTR("avoid_bw"))) {
-		//bt_goto_and_avoid_backward(res->arg2, res->arg3, res->arg4);
-		//err = bt_goto_and_avoid_backward(res->arg2, res->arg3, TRAJ_FLAGS_STD, TRAJ_FLAGS_NO_NEAR);
-		//if (err != END_TRAJ && err != END_NEAR)
-		//	strat_hardstop();
+		bt_goto_and_avoid_backward(res->arg2, res->arg3, res->arg4);
+		
 	}
 	else if (!strcmp_P(res->arg1, PSTR("xy_abs_fow"))) {
-		//bt_trajectory_goto_forward_xy_abs(res->arg2, res->arg3, res->arg4);
+		bt_trajectory_goto_forward_xy_abs(res->arg2, res->arg3, res->arg4);
 	}
 	else if (!strcmp_P(res->arg1, PSTR("xy_abs_back"))) {
-		//bt_trajectory_goto_backward_xy_abs(res->arg2, res->arg3, res->arg4);
+		bt_trajectory_goto_backward_xy_abs(res->arg2, res->arg3, res->arg4);
 	}
 	else if (!strcmp_P(res->arg1, PSTR("da_rel"))) {
 		//bt_trajectory_d_a_rel(res->arg2, res->arg3, res->arg4);

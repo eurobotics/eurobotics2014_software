@@ -189,6 +189,60 @@ void bt_set_color (uint8_t color)
        schedule event */
 	mainboard.our_color = color;
 }
+void bt_trajectory_goto_forward_xy_abs (int16_t x, int16_t y, int16_t args_checksum)
+{
+	/* check args checksum */
+	if ((x+y) == args_checksum) {
+
+		/* set ACK */
+		bt_status_set_cmd_ack (0);
+
+		/* execute command: can be a variable assigment, non blocking funtion 
+		   or a single o periodical schedule event if it's a blocking funtion */
+
+		/**
+		 * schedule events have a data array asigned where the arguments are 
+		 * passed to the final function 
+		 */
+		mainboard.strat_event_data[0] = x;
+		mainboard.strat_event_data[1] = y;
+
+		strat_event_schedule_single (strat_goto_forward_xy_abs_event,
+							 (void *)mainboard.strat_event_data);
+	}
+	else {
+		/* set ACK */
+		bt_status_set_cmd_ack (END_ERROR);
+
+	}
+}
+void bt_trajectory_goto_backward_xy_abs (int16_t x, int16_t y, int16_t args_checksum)
+{
+	/* check args checksum */
+	if ((x+y) == args_checksum) {
+
+		/* set ACK */
+		bt_status_set_cmd_ack (0);
+
+		/* execute command: can be a variable assigment, non blocking funtion 
+		   or a single o periodical schedule event if it's a blocking funtion */
+
+		/**
+		 * schedule events have a data array asigned where the arguments are 
+		 * passed to the final function 
+		 */
+		mainboard.strat_event_data[0] = x;
+		mainboard.strat_event_data[1] = y;
+
+		strat_event_schedule_single (strat_goto_backward_xy_abs_event,
+							 (void *)mainboard.strat_event_data);
+	}
+	else {
+		/* set ACK */
+		bt_status_set_cmd_ack (END_ERROR);
+
+	}
+}
 
 void bt_trajectory_goto_xy_abs (int16_t x, int16_t y, int16_t args_checksum)
 {
@@ -217,7 +271,87 @@ void bt_trajectory_goto_xy_abs (int16_t x, int16_t y, int16_t args_checksum)
 
 	}
 }
+void bt_goto_and_avoid (int16_t x, int16_t y, int16_t args_checksum)
+{
+	/* check args checksum */
+	if ((x+y) == args_checksum) {
 
+		/* set ACK */
+		bt_status_set_cmd_ack (0);
+
+		/* execute command: can be a variable assigment, non blocking funtion 
+		   or a single o periodical schedule event if it's a blocking funtion */
+
+		/**
+		 * schedule events have a data array asigned where the arguments are 
+		 * passed to the final function 
+		 */
+		mainboard.strat_event_data[0] = x;
+		mainboard.strat_event_data[1] = y;
+
+		strat_event_schedule_single ( strat_goto_avoid_event,
+							 (void *)mainboard.strat_event_data);
+	}
+	else {
+		/* set ACK */
+		bt_status_set_cmd_ack (END_ERROR);
+
+	}
+}
+void bt_goto_and_avoid_forward (int16_t x, int16_t y, int16_t args_checksum)
+{
+	/* check args checksum */
+	if ((x+y) == args_checksum) {
+
+		/* set ACK */
+		bt_status_set_cmd_ack (0);
+
+		/* execute command: can be a variable assigment, non blocking funtion 
+		   or a single o periodical schedule event if it's a blocking funtion */
+
+		/**
+		 * schedule events have a data array asigned where the arguments are 
+		 * passed to the final function 
+		 */
+		mainboard.strat_event_data[0] = x;
+		mainboard.strat_event_data[1] = y;
+
+		strat_event_schedule_single ( strat_goto_avoid_forward_event,
+							 (void *)mainboard.strat_event_data);
+	}
+	else {
+		/* set ACK */
+		bt_status_set_cmd_ack (END_ERROR);
+
+	}
+}
+void bt_goto_and_avoid_backward (int16_t x, int16_t y, int16_t args_checksum)
+{
+	/* check args checksum */
+	if ((x+y) == args_checksum) {
+
+		/* set ACK */
+		bt_status_set_cmd_ack (0);
+
+		/* execute command: can be a variable assigment, non blocking funtion 
+		   or a single o periodical schedule event if it's a blocking funtion */
+
+		/**
+		 * schedule events have a data array asigned where the arguments are 
+		 * passed to the final function 
+		 */
+		mainboard.strat_event_data[0] = x;
+		mainboard.strat_event_data[1] = y;
+
+		strat_event_schedule_single ( strat_goto_avoid_backward_event,
+							 (void *)mainboard.strat_event_data);
+	}
+	else {
+		/* set ACK */
+		bt_status_set_cmd_ack (END_ERROR);
+
+	}
+}
 /////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////
 

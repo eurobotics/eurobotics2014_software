@@ -355,12 +355,10 @@ uint8_t opp1_y_is_more_than(int16_t y)
 	
 	if(get_opponent1_xy(&x_opp, &y_opp) == -1)
 		return 1;
-
 	if (y_opp > y)
 		return 1;
 	else
 		return 0;
-
 }
 /* return 1 if y > y_opp or opponent not there */
 uint8_t opp2_y_is_more_than(int16_t y)
