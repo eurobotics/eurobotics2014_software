@@ -418,11 +418,13 @@ void strat_opp_tracking (void);
 void strat_homologation(void);
 
 
-uint8_t position_exchange_main_down(void);
-uint8_t position_exchange_main_up(void);
-uint8_t robots_position_exchange(uint8_t protect_zone_num);
+uint8_t goto_basket_path_down(void);
+uint8_t goto_basket_path_up(void);
+uint8_t goto_basket_best_path(uint8_t protect_zone_num);
 uint8_t strat_wipe_out(void);
 void strat_initial_move(void);
+uint8_t strat_leave_fruits_from_fresco(void);
+uint8_t strat_leave_fruits_from_home_red(void);
 
 #else /* HOST_VERSION_OA_TEST */
 

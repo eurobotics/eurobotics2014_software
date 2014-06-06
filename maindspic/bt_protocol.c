@@ -307,6 +307,8 @@ void bt_robot_2nd_cmd_no_wait_ack (uint8_t cmd_id, int16_t arg0, int16_t arg1)
 #define BT_NET							12	
 #define BT_DO_OPP_FIRES					13
 #define BT_PROTECT_HEART_1				14 	
+#define BT_GOTO_FW_XY_ABS				15
+#define BT_GOTO_BW_XY_ABS				16
 
     uint8_t flags;
 	//DEBUG (E_USER_BT_PROTO, "TX cmd: id %d arg0 %d arg1 %d", cmd_id, arg0, arg1);
@@ -326,7 +328,10 @@ void bt_robot_2nd_cmd_no_wait_ack (uint8_t cmd_id, int16_t arg0, int16_t arg1)
 
 	else if (cmd_id == BT_GOTO_XY_ABS)
 		bt_send_ascii_cmd (robot_2nd.link_id, "bt_goto xy_abs %d %d %d", arg0, arg1, (arg0 + arg1));
-
+	else if (cmd_id == BT_GOTO_FW_XY_ABS)
+		bt_send_ascii_cmd (robot_2nd.link_id, "bt_goto xy_abs_fow %d %d %d", arg0, arg1, (arg0 + arg1));
+	else if (cmd_id == BT_GOTO_BW_XY_ABS)
+		bt_send_ascii_cmd (robot_2nd.link_id, "bt_goto xy_abs_back %d %d %d", arg0, arg1, (arg0 + arg1));
 	else if (cmd_id == BT_GOTO_XY_REL)
 		bt_send_ascii_cmd (robot_2nd.link_id, "bt_goto xy_rel %d %d %d", arg0, arg1, (arg0 + arg1));
 
@@ -345,6 +350,12 @@ void bt_robot_2nd_cmd_no_wait_ack (uint8_t cmd_id, int16_t arg0, int16_t arg1)
 	else if (cmd_id == BT_PATROL_FRESCO_MAMOOTH){
 		bt_send_ascii_cmd (robot_2nd.link_id, "bt_task patrol_fr_mam %d %d %d", arg0, arg1, (arg0 + arg1));
 	}
+	else if (cmd_id == BT_GOTO_AVOID)
+		bt_send_ascii_cmd (robot_2nd.link_id, "bt_goto avoid %d %d %d", arg0, arg1, (arg0 + arg1));
+	else if (cmd_id == BT_GOTO_AVOID_FW)
+		bt_send_ascii_cmd (robot_2nd.link_id, "bt_goto avoid_fw %d %d %d", arg0, arg1, (arg0 + arg1)); 
+	else if (cmd_id == BT_GOTO_AVOID_BW)
+		bt_send_ascii_cmd (robot_2nd.link_id, "bt_goto avoid_bw %d %d %d", arg0, arg1, (arg0 + arg1));
 	else if (cmd_id == BT_PATROL)
 	{
 		//bt_send_ascii_cmd (robot_2nd.link_id, "subtraj patrol %d %d %d %d", arg0, arg1, arg2, arg3);
@@ -429,11 +440,27 @@ inline uint8_t bt_robot_2nd_autopos (void) {
 inline uint8_t bt_robot_2nd_goto_xy_abs (int16_t x, int16_t y) {
 	return bt_robot_2nd_cmd (BT_GOTO_XY_ABS, x, y);
 }
-
 /* goto xy_rel */
 inline uint8_t bt_robot_2nd_goto_xy_rel (int16_t x, int16_t y) {
 	return bt_robot_2nd_cmd (BT_GOTO_XY_REL, x, y);
 }
+inline uint8_t bt_robot_2nd_goto_forward_xy_abs (int16_t x, int16_t y) {
+	return bt_robot_2nd_cmd (BT_GOTO_FW_XY_ABS, x, y); 
+}
+inline uint8_t bt_robot_2nd_goto_backward_xy_abs (int16_t x, int16_t y) {
+	return bt_robot_2nd_cmd (BT_GOTO_BW_XY_ABS, x, y);
+}
+
+inline uint8_t bt_robot_2nd_goto_and_avoid (int16_t x, int16_t y) {
+	return bt_robot_2nd_cmd (BT_GOTO_AVOID, x, y);
+}
+inline uint8_t bt_robot_2nd_goto_and_avoid_forward (int16_t x, int16_t y) {
+	return bt_robot_2nd_cmd (BT_GOTO_AVOID_FW, x, y);
+}
+inline uint8_t bt_robot_2nd_goto_and_avoid_backward(int16_t x, int16_t y) {
+	return bt_robot_2nd_cmd (BT_GOTO_AVOID_BW, x, y);
+}
+
 inline uint8_t bt_robot_2nd_bt_task_mamooth (int16_t arg1, int16_t arg2) {
 	return bt_robot_2nd_cmd (BT_MAMOOTH, arg1, arg2);
 }

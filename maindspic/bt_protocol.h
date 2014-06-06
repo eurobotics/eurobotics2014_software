@@ -67,7 +67,9 @@ uint8_t bt_robot_2nd_set_color (void);
 
 /* goto xy_abs */
 uint8_t bt_robot_2nd_goto_xy_abs (int16_t x, int16_t y);
-
+uint8_t bt_robot_2nd_goto_forward_xy_abs (int16_t x, int16_t y);
+uint8_t bt_robot_2nd_goto_backward_xy_abs (int16_t x, int16_t y);
+ 
 /* goto xy_rel */
 uint8_t bt_robot_2nd_goto_xy_rel (int16_t x, int16_t y);
 
@@ -84,5 +86,9 @@ uint8_t bt_robot_2nd_bt_protect_h1();
 uint8_t bt_robot_2nd_bt_net();
 uint8_t bt_robot_2nd_bt_fresco();
 uint8_t bt_robot_2nd_autopos (void);
+
+uint8_t bt_robot_2nd_goto_and_avoid (int16_t x, int16_t y);
+uint8_t bt_robot_2nd_goto_and_avoid_forward (int16_t x, int16_t y);
+uint8_t bt_robot_2nd_goto_and_avoid_backward (int16_t x, int16_t y);
 
 #endif

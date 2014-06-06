@@ -44,6 +44,16 @@ void bt_set_color (uint8_t color);
 
 void bt_trajectory_goto_xy_abs (int16_t x, int16_t y, int16_t args_checksum);
 
+void bt_trajectory_goto_backward_xy_abs (int16_t x, int16_t y, int16_t args_checksum);
+
+void bt_trajectory_goto_forward_xy_abs (int16_t x, int16_t y, int16_t args_checksum);
+
+void bt_goto_and_avoid (int16_t x, int16_t y, int16_t args_checksum);
+
+void bt_goto_and_avoid_forward (int16_t x, int16_t y, int16_t args_checksum);
+
+void bt_goto_and_avoid_backward (int16_t x, int16_t y, int16_t args_checksum);
+
 void bt_fresco(void);
 
 void bt_mamooth(int16_t balls_mamooth_1, int16_t balls_mamooth_2, int16_t args_checksum);

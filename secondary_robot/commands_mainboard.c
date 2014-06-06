@@ -251,6 +251,7 @@ static void cmd_opponent_parsed(void *parsed_result, void *data)
 			printf_P(PSTR("x=%d y=%d, d=%d a=%d\r\n"), x, y, d, a);
 	#endif
 	
+	
 	//	us = time_get_us2();
 	//	while(time_get_us2()-us < 200000L) {
 	//		beacon_opponent_pulling();

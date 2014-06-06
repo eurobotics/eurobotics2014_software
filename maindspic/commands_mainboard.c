@@ -963,23 +963,23 @@ static void cmd_robot_2nd_goto_parsed(void * parsed_result, void * data)
     }
     else if (!strcmp_P(res->arg1, PSTR("avoid")))
     {
-        //err = bt_robot_2nd_goto_and_avoid(res->arg2, res->arg3, TRAJ_FLAGS_STD, TRAJ_FLAGS_NO_NEAR);
+        err = bt_robot_2nd_goto_and_avoid(res->arg2, res->arg3);
     }
     else if (!strcmp_P(res->arg1, PSTR("avoid_fw")))
     {
-        //err = bt_robot_2nd_goto_and_avoid_forward(res->arg2, res->arg3, TRAJ_FLAGS_STD, TRAJ_FLAGS_NO_NEAR);
+        err = bt_robot_2nd_goto_and_avoid_forward(res->arg2, res->arg3);
     }
     else if (!strcmp_P(res->arg1, PSTR("avoid_bw")))
     {
-        //err = bt_robot_2nd_goto_and_avoid_backward(res->arg2, res->arg3, TRAJ_FLAGS_STD, TRAJ_FLAGS_NO_NEAR);
+        err = bt_robot_2nd_goto_and_avoid_backward(res->arg2, res->arg3);
     }
     else if (!strcmp_P(res->arg1, PSTR("xy_abs_fow")))
     {
-        //err = bt_robot_2nd_goto_forward_xy_abs(res->arg2, res->arg3);
+        err = bt_robot_2nd_goto_forward_xy_abs(res->arg2, res->arg3);
     }
     else if (!strcmp_P(res->arg1, PSTR("xy_abs_back")))
     {
-        //err = bt_robot_2nd_goto_backward_xy_abs(res->arg2, res->arg3);
+        err = bt_robot_2nd_goto_backward_xy_abs(res->arg2, res->arg3);
     }
     else if (!strcmp_P(res->arg1, PSTR("da_rel")))
     {
