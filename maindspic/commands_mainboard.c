@@ -1071,9 +1071,9 @@ static void cmd_robot_2nd_bt_task_parsed(void * parsed_result, void * data)
     {
         err=bt_robot_2nd_bt_patrol_fr_mam(res->arg2, res->arg3);
     }
-    else if (!strcmp_P(res->arg1, PSTR("protect_h1")))
+    else if (!strcmp_P(res->arg1, PSTR("protect_h")))
     {
-        err=bt_robot_2nd_bt_protect_h1();
+        err=bt_robot_2nd_bt_protect_h(res->arg2);
     }
     else if (!strcmp_P(res->arg1, PSTR("net")))
     {
@@ -1096,7 +1096,7 @@ parse_pgm_token_string_t cmd_robot_2nd_bt_task_arga = TOKEN_STRING_INITIALIZER(s
 
 prog_char str_robot_2nd_bt_task_arg0[] = "bt_task";
 parse_pgm_token_string_t cmd_robot_2nd_bt_task_arg0 = TOKEN_STRING_INITIALIZER(struct cmd_robot_2nd_bt_task_result, arg0, str_robot_2nd_bt_task_arg0);
-prog_char str_robot_2nd_bt_task_arg1[] = "mamooth#fresco#net#protect_h1#patrol_fr_mam";
+prog_char str_robot_2nd_bt_task_arg1[] = "mamooth#fresco#net#protect_h#patrol_fr_mam";
 parse_pgm_token_string_t cmd_robot_2nd_bt_task_arg1 = TOKEN_STRING_INITIALIZER(struct cmd_robot_2nd_bt_task_result, arg1, str_robot_2nd_bt_task_arg1);
 parse_pgm_token_num_t cmd_robot_2nd_bt_task_arg2 = TOKEN_NUM_INITIALIZER(struct cmd_robot_2nd_bt_task_result, arg2, INT32);
 parse_pgm_token_num_t cmd_robot_2nd_bt_task_arg3 = TOKEN_NUM_INITIALIZER(struct cmd_robot_2nd_bt_task_result, arg3, INT32);

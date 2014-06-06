@@ -92,7 +92,7 @@ uint8_t strat_begin(void)
 	for(zone_num=0; zone_num<ZONES_SEQUENCE_LENGTH; zone_num++)
 	{
 		/* goto zone */
-		goto_zone(zone_num);
+		strat_goto_zone(zone_num);
 
 		/* work on zone */
 		strat_dump_infos(__FUNCTION__);

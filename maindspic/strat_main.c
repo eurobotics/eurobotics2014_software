@@ -315,8 +315,7 @@ uint8_t strat_work_on_zone(uint8_t zone_num)
 		{
 			case ZONE_TREE_1:
 			case ZONE_TREE_2:
-				err = strat_harvest_fruits (COLOR_X (strat_infos.zones[zone_num].x),
-													strat_infos.zones[zone_num].y, 0);
+				err = strat_harvest_fruits (COLOR_X (strat_infos.zones[zone_num].x), strat_infos.zones[zone_num].y, 0);
 				if(TRAJ_SUCCESS(err))
 				{
 					strat_infos.harvested_trees++;
@@ -326,8 +325,7 @@ uint8_t strat_work_on_zone(uint8_t zone_num)
 
 			case ZONE_TREE_3:
 			case ZONE_TREE_4:
-				err = strat_harvest_fruits (COLOR_X (strat_infos.zones[zone_num].x),
-													strat_infos.zones[zone_num].y, 1);
+				err = strat_harvest_fruits (COLOR_X (strat_infos.zones[zone_num].x), strat_infos.zones[zone_num].y, 1);
 				if(TRAJ_SUCCESS(err))
 				{
 					strat_infos.harvested_trees++;
@@ -377,7 +375,7 @@ uint8_t strat_work_on_zone(uint8_t zone_num)
 				
 			case ZONE_BASKET_1:
 			case ZONE_BASKET_2:
-				err = robots_position_exchange(zone_num);
+				err = goto_basket_best_path(zone_num);
 				
 				/* update strat_infos */
 				if(TRAJ_SUCCESS(err))
@@ -405,7 +403,7 @@ void state_debug_wait_key_pressed(void)
 
 void recalculate_priorities(void)
 {
-	#ifdef NOTYET
+	#if 0
 	uint8_t zone_num;
 	
 	for(zone_num=0; zone_num<ZONES_MAX; zone_num++)

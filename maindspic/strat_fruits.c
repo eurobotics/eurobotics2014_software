@@ -76,7 +76,7 @@
  * border.
  */
  
-#if 0
+//#if 0
 uint8_t strat_calib_tree(int16_t dist, uint8_t flags)
 {
 	int32_t p = pid_get_gain_P(&mainboard.angle.pid);
@@ -300,7 +300,7 @@ end:
     strat_limit_speed_enable();
     return err;
 }
-#endif
+//#endif
 
 
 /* leave fruits from trees on basket*/

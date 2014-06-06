@@ -176,7 +176,7 @@ static void i2cproto_next_state(uint8_t inc)
 })
 
 /* wait one cycle of pulling or timeout ,
- * usefull to syncronize processes        */
+ * useful to synchronize processes        */
 void i2cproto_wait_update(void)
 {
 	uint8_t poll_num;

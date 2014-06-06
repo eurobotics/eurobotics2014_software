@@ -52,9 +52,9 @@
 #define PRIO_M_TORCH_2 							ZONE_PRIO_20
 #define PRIO_BASKET_1 							ZONE_PRIO_0
 #define PRIO_BASKET_2						ZONE_PRIO_0
-#define PRIO_MAMOOTH_1 							ZONE_PRIO_80
-#define PRIO_MAMOOTH_2						ZONE_PRIO_80
-#define PRIO_FRESCO						ZONE_PRIO_80
+#define PRIO_MAMOOTH_1 							ZONE_PRIO_0 	//ZONE_PRIO_80
+#define PRIO_MAMOOTH_2						ZONE_PRIO_0	 //ZONE_PRIO_80
+#define PRIO_FRESCO						ZONE_PRIO_0	 //ZONE_PRIO_80
 #define PRIO_HEART_1						ZONE_PRIO_40
 #define PRIO_HEART_2_UP						ZONE_PRIO_0
 #define PRIO_HEART_2_LEFT						ZONE_PRIO_0
@@ -442,7 +442,7 @@ uint8_t strat_pickup_mobile_torch_top (uint8_t zone_num);
 uint8_t strat_pickup_mobile_torch_mid (uint8_t zone_num);
 
 /* pickup mobile torch, bottom fire */
-inline uint8_t strat_pickup_mobile_torch_bot (uint8_t zone_num);
+uint8_t strat_pickup_mobile_torch_bot (uint8_t zone_num);
 
 /* goto heart of fire */
 uint8_t strat_goto_heart_fire (uint8_t zone_num);
