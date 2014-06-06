@@ -35,6 +35,10 @@ int32_t encoders_update_beacon_speed(void * number);
 /* read actual beacon speed */
 int32_t encoders_get_beacon_speed(void * dummy);
 
+uint8_t blade_hide (void);
+
+uint8_t blade_push_fire (void);
+
 
 #endif
 

@@ -549,7 +549,7 @@ uint8_t __strat_obstacle(uint8_t which)
 	if (ABS(mainboard.speed_d) < 250)
 		return 0;
 
-#ifndef HOST_VERSION
+#if 0
 	/* opponent is in front of us */
 	if (mainboard.speed_d > 0 && (sensor_get(S_OBS_FRONT_R) || sensor_get(S_OBS_FRONT_L))) {
 		DEBUG(E_USER_STRAT, "opponent front");

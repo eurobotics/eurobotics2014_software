@@ -657,7 +657,7 @@ void strat_homologation(void)
 	uint8_t i=0;
 	#define ZONES_SEQUENCE_LENGTH 6
 	uint8_t zones_sequence[ZONES_SEQUENCE_LENGTH] = 						
-	{ZONE_TORCH_1,ZONE_FIRE_1,ZONE_FIRE_3,ZONE_TORCH_2,ZONE_TORCH_3,ZONE_FIRE_5};
+	{ZONE_FIRE_1,ZONE_FIRE_3,ZONE_TORCH_2,ZONE_FIRE_5,ZONE_FIRE_6,ZONE_HEART_1};
 	
 	/* Secondary robot */
 	bt_robot_2nd_bt_patrol_fr_mam(6,0);
@@ -672,10 +672,9 @@ void strat_homologation(void)
 		strat_dump_infos(__FUNCTION__);
 		strat_infos.current_zone=-1;
 		strat_infos.goto_zone=i;
-		err = goto_and_avoid(COLOR_X(strat_infos.zones[i].init_x), strat_infos.zones[i].init_y,  TRAJ_FLAGS_STD, TRAJ_FLAGS_NO_NEAR);
-		err = wait_traj_end(TRAJ_FLAGS_SMALL_DIST);
-		strat_infos.last_zone=strat_infos.current_zone;
-		strat_infos.goto_zone=-1;
+
+		strat_goto_zone (zones_sequence[i]);
+		err = wait_traj_end(TRAJ_FLAGS_STD);
 		if (!TRAJ_SUCCESS(err)) {
 			strat_infos.current_zone=-1;
 			printf_P(PSTR("Can't reach zone %s.\r\n"), numzone2name[zones_sequence[i]]);
@@ -683,6 +682,10 @@ void strat_homologation(void)
 		else{
 			strat_infos.current_zone=i;
 		}
+
+		strat_infos.last_zone=strat_infos.current_zone;
+		strat_infos.goto_zone=-1;
+
 
 		/* work on zone */
 		strat_dump_infos(__FUNCTION__);
@@ -699,16 +702,6 @@ void strat_homologation(void)
 
 uint8_t goto_basket_best_path(uint8_t protect_zone_num)
 {
-
-	/*bt_robot_2nd_goto_xy_abs(COLOR_X(FIRE_1_X),FIRE_1_Y);
-	bt_robot_2nd_wait_end();
-	bt_robot_2nd_goto_xy_abs(COLOR_X(PROTECT_H1_X),PROTECT_H1_Y);
-	bt_robot_2nd_wait_end();
-	bt_robot_2nd_bt_protect_h1();
-	bt_robot_2nd_wait_end();*/
-	
-	#define PROTECT_H1_X 400
-	#define PROTECT_H1_Y 1600
 	int8_t err;	
 	int8_t opp1_there, opp2_there;
 	int16_t opp_x, opp_y;
@@ -758,7 +751,7 @@ uint8_t goto_basket_best_path(uint8_t protect_zone_num)
 			
 		}
 	}
-end:
+//end:
 	return err;
 }
 uint8_t goto_basket_path_up(void)
@@ -792,21 +785,21 @@ uint8_t goto_basket_path_up(void)
 	}
 	
 	
-	end:
+//	end:
 		return err;
 }
 uint8_t strat_leave_fruits_from_home_red(){
 	//printf_P("Home red\n");
-	#define BASKET_INIT_X 	 2700
-	#define BASKET_INIT_Y 	 543
+	#define BASKET_INIT_X_HOME 	 2700
+	#define BASKET_INIT_Y_HOME 	 543
 	
 	int8_t err;
 	int16_t x;
 	
-	err=goto_and_avoid (COLOR_X(BASKET_INIT_X),BASKET_INIT_Y,TRAJ_FLAGS_STD,TRAJ_FLAGS_SMALL_DIST);	
+	err=goto_and_avoid (COLOR_X(BASKET_INIT_X_HOME),BASKET_INIT_Y_HOME,TRAJ_FLAGS_STD,TRAJ_FLAGS_SMALL_DIST);
 	//if (!TRAJ_SUCCESS(err))
 	//	ERROUT(err);
-	err=goto_and_avoid (COLOR_X(BASKET_INIT_X-300),BASKET_INIT_Y,TRAJ_FLAGS_STD,TRAJ_FLAGS_SMALL_DIST);
+	err=goto_and_avoid (COLOR_X(BASKET_INIT_X_HOME-300),BASKET_INIT_Y_HOME,TRAJ_FLAGS_STD,TRAJ_FLAGS_SMALL_DIST);
 	//if (!TRAJ_SUCCESS(err))
 	//	ERROUT(err); 
 		
@@ -816,20 +809,20 @@ uint8_t strat_leave_fruits_from_home_red(){
 	//	ERROUT(err);
 	
 	err=strat_leave_fruits();
-end:
+//end:
 	return err;
 }
 uint8_t strat_leave_fruits_from_fresco(){
 	//printf_P("Fresco\n");
-	#define BASKET_INIT_X 	 1650
-	#define BASKET_INIT_Y 	 543
+	#define BASKET_INIT_X_FRESCO 	 1650
+	#define BASKET_INIT_Y_FRESCO 	 543
 	int8_t err;
 	int16_t x;
 	
-	err=goto_and_avoid (COLOR_X(BASKET_INIT_X),BASKET_INIT_Y,TRAJ_FLAGS_STD,TRAJ_FLAGS_SMALL_DIST);
+	err=goto_and_avoid (COLOR_X(BASKET_INIT_X_FRESCO),BASKET_INIT_Y_FRESCO,TRAJ_FLAGS_STD,TRAJ_FLAGS_SMALL_DIST);
 	//if (!TRAJ_SUCCESS(err))
 	//	ERROUT(err);
-	err=goto_and_avoid (COLOR_X(BASKET_INIT_X+300),BASKET_INIT_Y,TRAJ_FLAGS_STD,TRAJ_FLAGS_SMALL_DIST);
+	err=goto_and_avoid (COLOR_X(BASKET_INIT_X_FRESCO+300),BASKET_INIT_Y_FRESCO,TRAJ_FLAGS_STD,TRAJ_FLAGS_SMALL_DIST);
 	//if (!TRAJ_SUCCESS(err))
 	//		ERROUT(err);
 	x = 1900 + ROBOT_WIDTH/2;
@@ -839,14 +832,14 @@ uint8_t strat_leave_fruits_from_fresco(){
 	//	ERROUT(err);
 	
 	err=strat_leave_fruits();
-end:
+//end:
 	return err;
 }
 uint8_t goto_basket_path_down(void)
 {
 //printf_P("Down\n");
 	int8_t err;
-	int16_t x;
+//	int16_t x;
 	err=goto_and_avoid (COLOR_X(FIRE_3_X),FIRE_3_Y,TRAJ_FLAGS_STD,TRAJ_FLAGS_STD);	
 	//if (!TRAJ_SUCCESS(err))
 	//	ERROUT(err);
@@ -859,7 +852,7 @@ uint8_t goto_basket_path_down(void)
 		strat_leave_fruits_from_home_red();
 	}
 	
-end:
+//end:
 	return err;
 }
 

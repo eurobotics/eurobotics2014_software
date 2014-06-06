@@ -66,7 +66,9 @@ void bt_patrol(int16_t x1, int16_t y1,int16_t x2, int16_t y2, int16_t args_check
 
 void bt_protect_h(uint8_t heart);
 
+void bt_strat_exit (void);
 
+void bt_strat_init (void);
 
 /* TODO bt_trajectory_XXXX and bt_goto_avoid_XXXX functions */
 

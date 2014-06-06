@@ -25,7 +25,7 @@
 
 #include <clock_time.h>
 /* compilation flavours */
-//#define HOMOLOGATION
+#define HOMOLOGATION
 
 /* area */
 #define AREA_X 3000

@@ -275,29 +275,17 @@ void strat_exit(void)
 	IRQ_LOCK(flags);
 	mainboard.flags &= ~(DO_CS);
 	IRQ_UNLOCK(flags);
-	//dac_mc_set(LEFT_MOTOR, 0);
-	//dac_mc_set(RIGHT_MOTOR, 0);
+	pwm_mc_set(LEFT_MOTOR, 0);
+	pwm_mc_set(RIGHT_MOTOR, 0);
 #endif
 
 	/* stop beacon */
 	IRQ_LOCK(flags);
 	mainboard.flags &= ~(DO_BEACON);
 	IRQ_UNLOCK(flags);
-	//beacon_cmd_beacon_off();
-
-	/* slavespic exit TODO 2014 */
-  //i2c_slavedspic_mode_turbine_blow(0);
-  //i2c_slavedspic_wait_ready();
-
-	/* turn off other devices (lasers...) */
-
-	/* stop beacon */
-    /*
-	beacon_cmd_beacon_off();
-	beacon_cmd_beacon_off();
-	beacon_cmd_beacon_off();
-	beacon_cmd_beacon_off();
-*/
+#ifndef HOST_VERSION
+	beacon_stop();
+#endif
 }
 
 /* called periodically */
@@ -357,7 +345,7 @@ uint8_t strat_main(void)
 #define BEGIN_FRESCO_Y	600
 
     uint8_t err = 0;
-	uint16_t old_spdd, old_spda;
+	//uint16_t old_spdd, old_spda;
 	static uint8_t mamooth_done =0;
 	static uint8_t state = 0;
 	

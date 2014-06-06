@@ -10,11 +10,11 @@ fi
 
 if [ "$1" == "sec" ] 
 then
-cd ~/eurobotics2014_software/secondary_robot/
+cd /media/datos/Datos/Proyectos/ARC_Eurobotics/eurobotics/eurobot/eurobot2014/software/secondary_robot/
 else
-cd ~/eurobotics2014_software/maindspic/
+cd /media/datos/Datos/Proyectos/ARC_Eurobotics/eurobotics/eurobot/eurobot2014/software/maindspic/
 fi
 make H=1
-python ~/eurobotics2014_software/maindspic/display.py &
+python /media/datos/Datos/Proyectos/ARC_Eurobotics/eurobotics/eurobot/eurobot2014/software/maindspic/display.py &
 
-gnome-terminal --title="SECONDARY ROBOT" --tab -e "bash -c ~/eurobotics2014_software/maindspic/main H=1" gnome-terminal --title="MAIN ROBOT" --tab -e "bash -c ~/eurobotics2014_software/secondary_robot/main H=1" 
+gnome-terminal --title="SECONDARY ROBOT" --tab -e "bash -c /media/datos/Datos/Proyectos/ARC_Eurobotics/eurobotics/eurobot/eurobot2014/software/maindspic/main H=1" gnome-terminal --title="MAIN ROBOT" --tab -e "bash -c /media/datos/Datos/Proyectos/ARC_Eurobotics/eurobotics/eurobot/eurobot2014/software/secondary_robot/main H=1" 

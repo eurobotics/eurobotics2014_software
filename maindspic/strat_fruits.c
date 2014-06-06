@@ -169,7 +169,7 @@ uint8_t strat_harvest_fruits(int16_t x, int16_t y, uint8_t clean_before)
 			    ERROUT(err);
 
 	    i2c_slavedspic_mode_stick ( stick_type,	 I2C_STICK_MODE_HIDE, 0);
-	    i2cproto_wait_update ();
+	    i2c_slavedspic_wait_ready();
 	    i2c_slavedspic_mode_stick ( 
          (stick_type == I2C_STICK_TYPE_RIGHT? I2C_STICK_TYPE_LEFT:I2C_STICK_TYPE_RIGHT),
      	 I2C_STICK_MODE_HIDE, 0);

@@ -125,6 +125,7 @@ int16_t simple_modulo_360(int16_t a)
 	return a;
 }
 
+
 /** do a modulo 2.pi -> [-Pi,+Pi], knowing that 'a' is in [-3Pi,+3Pi] */  
 /*
 double simple_modulo_2pi(double a)
@@ -136,7 +137,7 @@ double simple_modulo_2pi(double a)
 		a -= M_2PI;
 	}
 	return a;
-}*/
+} */
 
 /* return the distance to a point in the area */
 int16_t angle_abs_to_rel(int16_t a_abs)
@@ -458,33 +459,66 @@ uint8_t get_opponent_color(void)
 int8_t get_best_opponent1_xyda (int16_t *x, int16_t *y, int16_t *d, int16_t *a)
 {
 	uint8_t flags;
-	IRQ_LOCK(flags);
-	if (x != NULL)
-		*x = robot_2nd.opponent1_x;
-	if (y != NULL)
-		*y = robot_2nd.opponent1_y;
-	if (d != NULL)
-		*d = robot_2nd.opponent1_d;
-	if (a != NULL)
-		*a = robot_2nd.opponent1_a;
-	IRQ_UNLOCK(flags);	
 
+	if (beaconboard.opponent1_x == I2C_OPPONENT_NOT_THERE &&
+		beaconboard.opponent2_x == I2C_OPPONENT_NOT_THERE) 
+	{
+		IRQ_LOCK(flags);
+		if (x != NULL)
+			*x = robot_2nd.opponent1_x;
+		if (y != NULL)
+			*y = robot_2nd.opponent1_y;
+		if (d != NULL)
+			*d = robot_2nd.opponent1_d;
+		if (a != NULL)
+			*a = robot_2nd.opponent1_a;
+		IRQ_UNLOCK(flags);	
+	} 
+	else {
+		IRQ_LOCK(flags);
+		if (x != NULL)
+			*x = beaconboard.opponent1_x;
+		if (y != NULL)
+			*y = beaconboard.opponent1_y;
+		if (d != NULL)
+			*d = beaconboard.opponent1_d;
+		if (a != NULL)
+			*a = beaconboard.opponent1_a;
+		IRQ_UNLOCK(flags);	
+	}
 	return 0;
 }
 
 int8_t get_best_opponent2_xyda (int16_t *x, int16_t *y, int16_t *d, int16_t *a)
 {
 	uint8_t flags;
-	IRQ_LOCK(flags);
-	if (x != NULL)
-		*x = robot_2nd.opponent2_x;
-	if (y != NULL)
-		*y = robot_2nd.opponent2_y;
-	if (d != NULL)
-		*d = robot_2nd.opponent2_d;
-	if (a != NULL)
-		*a = robot_2nd.opponent2_a;
-	IRQ_UNLOCK(flags);	
+
+	if (beaconboard.opponent1_x == I2C_OPPONENT_NOT_THERE &&
+		beaconboard.opponent2_x == I2C_OPPONENT_NOT_THERE) 
+	{
+		IRQ_LOCK(flags);
+		if (x != NULL)
+			*x = robot_2nd.opponent2_x;
+		if (y != NULL)
+			*y = robot_2nd.opponent2_y;
+		if (d != NULL)
+			*d = robot_2nd.opponent2_d;
+		if (a != NULL)
+			*a = robot_2nd.opponent2_a;
+		IRQ_UNLOCK(flags);	
+	} 
+	else {
+		IRQ_LOCK(flags);
+		if (x != NULL)
+			*x = beaconboard.opponent2_x;
+		if (y != NULL)
+			*y = beaconboard.opponent2_y;
+		if (d != NULL)
+			*d = beaconboard.opponent2_d;
+		if (a != NULL)
+			*a = beaconboard.opponent2_a;
+		IRQ_UNLOCK(flags);	
+	}
 
 	return 0;
 }

@@ -154,6 +154,7 @@ uint8_t strat_patrol_fresco_mamooth(uint8_t balls_mamooth_1, uint8_t balls_mamoo
 	
 	if(initialized==0)
 	{
+        blade_push_fire ();
 		strat_initial_move();
 		initialized=1;
 		printf_P("initialized");
@@ -195,6 +196,8 @@ uint8_t strat_patrol_fresco_mamooth(uint8_t balls_mamooth_1, uint8_t balls_mamoo
 			return strat_patrol_between(COLOR_X(BEGIN_FRESCO_X),300,COLOR_X(BEGIN_FRESCO_X),900);
 		}
 	}
+
+    return 0;
 }
 
 
@@ -257,8 +260,8 @@ void strat_initial_move(void)
 uint8_t strat_paint_fresco(void)
 {
 	static uint8_t state = 0;
-	uint16_t old_spdd, old_spda, temp_spdd, temp_spda;
-	int16_t opp_d, opp_a,opp2_d,opp2_a;
+	uint16_t old_spdd, old_spda;
+	//int16_t opp_d, opp_a,opp2_d,opp2_a;
 	uint8_t err = 0;
 #define BEGIN_LINE_Y 	450
 #define BEGIN_FRESCO_X	1295
@@ -375,7 +378,7 @@ uint8_t strat_patrol_between(int16_t x1, int16_t y1,int16_t x2, int16_t y2)
 	if (!TRAJ_SUCCESS(err))
 		ERROUT(err);*/
 	
-end:
+//end:
 	strat_set_speed(old_spdd, old_spda);	
 	return err;
 }

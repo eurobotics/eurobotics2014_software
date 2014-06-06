@@ -73,6 +73,7 @@
 #include "robotsim.h"
 #include "strat_base.h"
 #include "ax12_user.h"
+#include "beacon.h"
 
 
 struct genboard gen;
@@ -242,7 +243,7 @@ int main(void)
       DO_POS | DO_POWER | DO_BD;
 #else
   mainboard.flags = DO_ENCODERS  | DO_RS |
-      DO_POS | DO_POWER | DO_BD;// | DO_CS ;
+      DO_POS | DO_POWER | DO_BD| DO_CS ;
 #endif
 
    beaconboard.opponent1_x = I2C_OPPONENT_NOT_THERE;
@@ -340,7 +341,10 @@ int main(void)
 #ifndef HOST_VERSION
    /* SERVOS AX12 */
    ax12_user_init();
+
 #endif
+
+
 
    /* all cs management */
    maindspic_cs_init();
@@ -411,6 +415,10 @@ int main(void)
    /* process commands, never returns */
    //cmdline_interact(NULL);
 
+#ifndef HOST_VERSION
+    blade_hide ();
+	beacon_start ();
+#endif
 	cmdline_init();
 
 	/* command line event */

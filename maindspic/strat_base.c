@@ -147,7 +147,7 @@ uint8_t strat_goto_xy_force(int16_t x, int16_t y)
 
 	while (1) {
 #ifdef TWO_OPPONENTS
-		err = get_opponent_xyda(&opp_x, &opp_y,
+		err = get_opponent1_xyda(&opp_x, &opp_y,
 					&opp_d, &opp_a);
 
 		err2 = get_opponent2_xyda(&opp2_x, &opp2_y,
@@ -158,7 +158,7 @@ uint8_t strat_goto_xy_force(int16_t x, int16_t y)
 		if (opp_d < 600 || opp2_d < 600) /* XXX i don't understood */
 			break;
 #else
-		err = get_opponent_xyda(&opp_x, &opp_y,
+		err = get_opponent1_xyda(&opp_x, &opp_y,
 					&opp_d, &opp_a);
 
 		if (err == -1)
@@ -583,7 +583,7 @@ uint8_t __strat_obstacle(uint8_t which)
 #endif
 
 #else
-	ret = get_opponent_xyda(&opp_x, &opp_y,&opp_d, &opp_a);
+	ret = get_opponent1_xyda(&opp_x, &opp_y,&opp_d, &opp_a);
 #endif
 
 	/* no opponent detected */

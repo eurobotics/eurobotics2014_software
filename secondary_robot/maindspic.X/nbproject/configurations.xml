@@ -47,6 +47,8 @@
         <itemPath>../ax12_user.h</itemPath>
         <itemPath>../bt_protocol.h</itemPath>
         <itemPath>../strat_event.c</itemPath>
+        <itemPath>../beacon.h</itemPath>
+        <itemPath>../beacon_calib.h</itemPath>
       </logicalFolder>
       <logicalFolder name="ax12" displayName="ax12" projectFiles="true">
         <itemPath>../../libs/aversive4dspic/modules/devices/servo/ax12/ax12.h</itemPath>
@@ -172,6 +174,8 @@
         <itemPath>../../maindspic/strat_avoid.c</itemPath>
         <itemPath>../ax12_user.c</itemPath>
         <itemPath>../bt_protocol.c</itemPath>
+        <itemPath>../beacon.c</itemPath>
+        <itemPath>../beacon_calib.c</itemPath>
       </logicalFolder>
       <logicalFolder name="ax12" displayName="ax12" projectFiles="true">
         <itemPath>../../libs/aversive4dspic/modules/devices/servo/ax12/ax12.c</itemPath>

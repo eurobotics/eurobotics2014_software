@@ -504,11 +504,36 @@ void bt_protect_h(uint8_t heart)
 /* TODO bt_trajectory_XXXX and bt_goto_avoid_XXXX functions */
 
 
+void bt_strat_exit (void)
+{
+	/* set ACK */
+	bt_status_set_cmd_ack (0);
+
+	/* execute command: can be a variable assigment, non blocking funtion 
+	   or a single o periodical schedule event if it's a blocking funtion */
+
+	/**
+	 * schedule events have a data array asigned where the arguments are 
+	 * passed to the final function 
+	 */
+	strat_exit();
+}
 
 
+void bt_strat_init (void)
+{
+	/* set ACK */
+	bt_status_set_cmd_ack (0);
 
+	/* execute command: can be a variable assigment, non blocking funtion 
+	   or a single o periodical schedule event if it's a blocking funtion */
 
-
+	/**
+	 * schedule events have a data array asigned where the arguments are 
+	 * passed to the final function 
+	 */
+	strat_init();
+}
 
 
 

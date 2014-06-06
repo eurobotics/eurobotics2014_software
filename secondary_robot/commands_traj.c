@@ -806,7 +806,7 @@ parse_pgm_inst_t cmd_goto2 = {
 static void cmd_bt_goto_parsed(void * parsed_result, void * data)
 {
 	struct cmd_goto_result * res = parsed_result;
-	uint8_t err;
+	//uint8_t err;
 	/* TODO comment functions */
 
 	interrupt_traj_reset();
@@ -975,6 +975,7 @@ parse_pgm_inst_t cmd_position_set = {
 	},
 };
 
+#if 0
 /**********************************************************/
 /* Subtraj*/
 
@@ -1010,6 +1011,7 @@ parse_pgm_inst_t cmd_subtraj = {
 		NULL,
 	},
 };
+#endif
 
 /**********************************************************/
 /* BT Task 1 - 2 PARAMETERS + CHECKSUM */
@@ -1039,13 +1041,19 @@ static void cmd_bt_task1_parsed(void *parsed_result, void *data)
 		bt_protect_h(res->arg2);
 		
 	}
+	else if (strcmp_P(res->arg1, PSTR("strat_exit")) == 0)
+		bt_strat_exit();
+	else if (strcmp_P(res->arg1, PSTR("strat_init")) == 0)
+		bt_strat_init();
+
+
 	//printf("next point\r\n");
 
 }
 
 prog_char str_bt_task1_arg0[] = "bt_task";
 parse_pgm_token_string_t cmd_bt_task1_arg0 = TOKEN_STRING_INITIALIZER(struct cmd_bt_task1_result, arg0, str_bt_task1_arg0);
-prog_char str_bt_task1_arg1[] = "mamooth#patrol_fr_mam#protect_h";
+prog_char str_bt_task1_arg1[] = "mamooth#patrol_fr_mam#protect_h#strat_exit#strat_init";
 parse_pgm_token_string_t cmd_bt_task1_arg1 = TOKEN_STRING_INITIALIZER(struct cmd_bt_task1_result, arg1, str_bt_task1_arg1);
 parse_pgm_token_num_t cmd_bt_task1_arg2 = TOKEN_NUM_INITIALIZER(struct cmd_bt_task1_result, arg2, INT32);
 parse_pgm_token_num_t cmd_bt_task1_arg3 = TOKEN_NUM_INITIALIZER(struct cmd_bt_task1_result, arg3, INT32);

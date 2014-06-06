@@ -230,7 +230,7 @@ void strat_fresco_event (void *data)
 void strat_patrol_event (void *data)
 {	
 	//int16_t *arg = (int16_t*)data;
-	uint8_t err;
+	uint8_t err = 0;
  
 	//err=strat_patrol_between(arg[0], arg[1],arg[2], arg[3]);
 

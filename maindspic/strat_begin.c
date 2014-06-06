@@ -54,6 +54,7 @@
 
 #include "../common/i2c_commands.h"
 #include "i2c_protocol.h"
+#include "bt_protocol.h"
 #include "main.h"
 #include "strat.h"
 #include "strat_base.h"

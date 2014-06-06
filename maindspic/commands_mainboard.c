@@ -265,7 +265,7 @@ static void cmd_opponent_parsed(void *parsed_result, void *data)
             printf("\n\r");
 
 #else
-            if (get_opponent_xyda(&x, &y, &d, &a) == -1)
+            if (get_opponent1_xyda(&x, &y, &d, &a) == -1)
                 printf_P(PSTR("No opponent\r\n"));
             else
                 printf_P(PSTR("x=%d y=%d, d=%d a=%d\r\n"), x, y, d, a);
@@ -444,32 +444,20 @@ retry:
     }
     else
     {
-        /* TODO beacon_cmd_wt11_call(); 
-        WAIT_COND_OR_TIMEOUT((beacon_connected == 1), 5000);
-        if (!beacon_connected)*/
-        if (0)
-        {
-            printf("Beacon connection FAIL, reseting local wt11\r\n");
-            /* TODO beacon_cmd_wt11_local_reset(); */
-            goto retry;
-        }
-        else
-        {
-            printf("Beacon connection SUCCESS!\r\n");
 retry_on:
-            /* TODO beacon_cmd_beacon_on_watchdog(); */
+        /* start beacon */
+		bt_beacon_set_on();
 
-            printf("is beacon running? (s/n)\n\r");
-            c = -1;
-            while (c == -1)
-            {
-                c = cmdline_getchar();
-            }
-            if (c == 'n')
-            {
-                wait_ms(100);
-                goto retry_on;
-            }
+        printf("is beacon running? (s/n)\n\r");
+        c = -1;
+        while (c == -1)
+        {
+            c = cmdline_getchar();
+        }
+        if (c == 'n')
+        {
+            wait_ms(100);
+            goto retry_on;
         }
     }
 #endif	

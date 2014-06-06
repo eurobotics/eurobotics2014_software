@@ -147,13 +147,15 @@ static void do_cs(void *dummy)
 			pwm_mc_set(LEFT_MOTOR, 0);
 			pwm_mc_set(RIGHT_MOTOR, 0);
 
+			beacon_stop ();
+
 			/* kill strat */
 			//strat_exit();
 
 			printf_P(PSTR("END OF TIME\r\n"));
 	
 			/* never returns */
-			//while(1);
+			while(1);
 		}
 	}
 #endif	

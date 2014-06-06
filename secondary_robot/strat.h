@@ -344,6 +344,7 @@ uint8_t strat_patrol_fresco_mamooth(uint8_t balls_mamooth_1, uint8_t balls_mamoo
 uint8_t strat_paint_fresco(void);
 uint8_t strat_patrol_between(int16_t x1, int16_t y1,int16_t x2, int16_t y2);
 uint8_t strat_shoot_mamooth(uint8_t balls_mamooth_1, uint8_t balls_mamooth_2);
+void strat_initial_move(void);
 
 /********************************************
  * in strat_event.c 
