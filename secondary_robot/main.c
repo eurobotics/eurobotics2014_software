@@ -312,7 +312,7 @@ int main(void)
    pwm_servo_init(&gen.pwm_servo_oc4, 4, 300, 2400);
    pwm_servo_enable();
 
-   pwm_servo_set(&gen.pwm_servo_oc1, 800);
+   pwm_servo_set(&gen.pwm_servo_oc1, 900);
    pwm_servo_set(&gen.pwm_servo_oc2, 0);
    pwm_servo_set(&gen.pwm_servo_oc3, 1200);
    pwm_servo_set(&gen.pwm_servo_oc4, 1300);
