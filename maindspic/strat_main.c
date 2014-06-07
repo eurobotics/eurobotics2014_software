@@ -551,7 +551,7 @@ uint8_t strat_smart(void)
 	//printf_P(PSTR("Zone: %d. Priority: %d\r\n"),zone_num,strat_infos.zones[zone_num].prio);
 		
 	if(zone_num == -1) {
-		printf_P(PSTR("No zone is found\r\n"));
+		//printf_P(PSTR("No zone is found\r\n"));
 		return END_TRAJ;
 	}
 
@@ -564,7 +564,7 @@ uint8_t strat_smart(void)
 		
 		err = strat_goto_zone(zone_num);
 		if (!TRAJ_SUCCESS(err)) {
-			printf_P(PSTR("Can't reach zone %d.\r\n"), zone_num);
+			//printf_P(PSTR("Can't reach zone %d.\r\n"), zone_num);
 			return END_TRAJ;
 		}
 		
@@ -575,7 +575,7 @@ uint8_t strat_smart(void)
 
 		err = strat_work_on_zone(zone_num);
 		if (!TRAJ_SUCCESS(err)) {
-			printf_P(PSTR("Work on zone %s fails.\r\n"), numzone2name[zone_num]);
+			//printf_P(PSTR("Work on zone %s fails.\r\n"), numzone2name[zone_num]);
 		}
 		else
 		{

@@ -546,6 +546,8 @@ static int8_t go_in_area(point_t *robot_pt)
 		NOTICE(E_USER_STRAT, "not in playground %"PRId32", %"PRId32"",
 		       (int32_t)robot_pt->x, (int32_t)robot_pt->y);
 
+	strat_set_bounding_box(1);
+#if 0
 		poly_area.l = 4;
 		poly_area.pts = poly_pts_area;
 		poly_pts_area[0].x = strat_infos.area_bbox.x1;
@@ -574,7 +576,9 @@ static int8_t go_in_area(point_t *robot_pt)
 		robot_pt->y = dst_pt.y;
 
 
+
 		return 1;
+#endif
 	}
 
 	return 0;
@@ -947,6 +951,7 @@ int8_t goto_and_avoid(int16_t x, int16_t y,
 	void * p_retry;
 	p_retry = &&retry;
 
+	strat_set_bounding_box(0);
 	
 #ifndef HOST_VERSION_OA_TEST	
 	DEBUG(E_USER_STRAT, "%s(%d,%d) flags_i=%x flags_f=%x direct=%d",
