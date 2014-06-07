@@ -614,6 +614,7 @@ static uint8_t __strat_pickup_mobile_torch (uint8_t zone_num, uint8_t level)
 
 	/* store fire */
     i2c_slavedspic_mode_store_fire(I2C_SLAVEDSPIC_SUCKER_TYPE_LONG);
+	i2c_slavedspic_wait_ready();
 
 end:
 	strat_set_speed(old_spdd, old_spda);	

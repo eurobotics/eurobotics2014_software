@@ -100,11 +100,12 @@ uint8_t blade_push_fire (void) {
 #endif
     return 0;
 }
-#ifndef HOST_VERSION
+
 void shoot_net (void)
 {
+#ifndef HOST_VERSION
    pwm_servo_set(&gen.pwm_servo_oc1, 300);
-}
 #endif
+}
 
 

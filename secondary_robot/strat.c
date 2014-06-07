@@ -122,17 +122,30 @@ struct strat_infos strat_infos = {
 void strat_set_bounding_box(uint8_t type)
 {
 
-	strat_infos.area_bbox.x1 = OBS_CLERANCE;
-	strat_infos.area_bbox.x2 = 3000 - OBS_CLERANCE;
+	if (type == 0)
+	{
+
+		strat_infos.area_bbox.x1 = OBS_CLERANCE;
+		strat_infos.area_bbox.x2 = 3000 - OBS_CLERANCE;
 	
-	strat_infos.area_bbox.y1 = OBS_CLERANCE + 300;
-	strat_infos.area_bbox.y2 = 2000 - OBS_CLERANCE;
+		strat_infos.area_bbox.y1 = OBS_CLERANCE + 300;
+		strat_infos.area_bbox.y2 = 2000 - OBS_CLERANCE;
+	}
+	else
+	{
+		strat_infos.area_bbox.x1 = 0;
+		strat_infos.area_bbox.x2 = 3000;
+	
+		strat_infos.area_bbox.y1 = 0;
+		strat_infos.area_bbox.y2 = 2000;
+
+	}
 
 	polygon_set_boundingbox(strat_infos.area_bbox.x1,
 				strat_infos.area_bbox.y1,
 				strat_infos.area_bbox.x2,
 				strat_infos.area_bbox.y2);
-
+	
 #ifdef HOST_VERSION_OA_TEST
 
   printf("boundingbox at: %d %d %d %d\n", 
@@ -224,7 +237,7 @@ void strat_dump_infos(const char *caller)
 void strat_reset_infos(void)
 {
 	/* bounding box */
-	strat_set_bounding_box(mainboard.our_color);
+	strat_set_bounding_box(0);
 		
 	strat_infos.current_zone = ZONES_MAX;
 	strat_infos.goto_zone = ZONES_MAX;
