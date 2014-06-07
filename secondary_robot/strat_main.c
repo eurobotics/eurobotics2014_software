@@ -161,7 +161,7 @@ uint8_t strat_patrol_fresco_mamooth(uint8_t balls_mamooth_1, uint8_t balls_mamoo
 	if(initialized==0)
 	{
         blade_push_fire ();
-		strat_initial_move();
+		//strat_initial_move();
 		initialized=1;
 		printf_P("initialized");
 	}
@@ -206,7 +206,7 @@ uint8_t strat_patrol_fresco_mamooth(uint8_t balls_mamooth_1, uint8_t balls_mamoo
     return 0;
 }
 
-
+#if 0
 void strat_initial_move(void)
 {
 #define BEGIN_LINE_Y 	450
@@ -261,7 +261,7 @@ void strat_initial_move(void)
 		}
 	}
 }
-
+#endif
 
 uint8_t strat_paint_fresco(void)
 {
@@ -664,6 +664,63 @@ end:
     return err;
 }
 
+
+/* goto mamooth */
+uint8_t strat_goto_mamooth (void) 
+{
+    int16_t x, y;
+	uint8_t err = 0;
+	static int8_t init = 0;
+
+#define INIT_MAMOOTH_Y 	460
+#define INIT_MAMOOTH_X	750
+
+	/* position depending on color */
+    x = COLOR_X(INIT_MAMOOTH_X);
+    y = INIT_MAMOOTH_Y;
+
+
+	/* go with avoid */
+	err = goto_and_avoid_forward (x, y, TRAJ_FLAGS_STD, TRAJ_FLAGS_NO_NEAR);
+    if (!TRAJ_SUCCESS(err))
+		ERROUT(err);
+
+
+end:
+    return err;
+}
+
+/* goto mamooth */
+uint8_t __strat_shoot_mamooth (void) 
+{
+    int16_t x, y;
+	uint8_t err = 0;
+	static int8_t init = 0;
+
+#define INIT_MAMOOTH_Y 	460
+#define INIT_MAMOOTH_X	750
+
+	/* position depending on color */
+    x = COLOR_X(INIT_MAMOOTH_X);
+    y = INIT_MAMOOTH_Y;
+
+	
+	trajectory_a_abs (&mainboard.traj, -90);
+	err = wait_traj_end(TRAJ_FLAGS_SMALL_DIST);
+	if (!TRAJ_SUCCESS(err))
+			ERROUT(err);
+
+#ifndef HOST_VERSION
+	pwm_servo_set(&gen.pwm_servo_oc3, SERVO_SHOOT_POS_UP);
+	pwm_servo_set(&gen.pwm_servo_oc4, SERVO_SHOOT_POS_DOWN);
+#endif
+	time_wait_ms(1000);
+
+
+end:
+    return err;
+}
+
 uint8_t strat_goto_and_paint_fresco (void)
 {
 	volatile uint8_t err = 0;
@@ -686,6 +743,35 @@ uint8_t strat_goto_and_paint_fresco (void)
 			 err = strat_paint_fresco2();
 		}
 	}
+
+	/* goto mamooth */
+	err = strat_goto_mamooth ();
+	if (!TRAJ_SUCCESS(err))
+			ERROUT(err);
+
+
+	/* shoot mamooth */
+	err =  __strat_shoot_mamooth ();
+	if (!TRAJ_SUCCESS(err))
+			ERROUT(err);
+
+
+	/* go with avoid */
+	err = goto_and_avoid_forward (COLOR_X(1000), 1000, TRAJ_FLAGS_STD, TRAJ_FLAGS_NO_NEAR);
+    if (!TRAJ_SUCCESS(err))
+		ERROUT(err);
+
+	/* turn to mamooth */
+    trajectory_turnto_xy (&mainboard.traj, COLOR_X(INIT_MAMOOTH_X), INIT_MAMOOTH_Y);
+	err = wait_traj_end (TRAJ_FLAGS_SMALL_DIST);
+	if (!TRAJ_SUCCESS(err))
+		ERROUT(err);
+
+	while ((time_get_s() < MATCH_TIME+2));
+	shoot_net();
+
+	strat_exit();
+	
 
 #if 0
 	while ((err & END_INTR) == 0) 

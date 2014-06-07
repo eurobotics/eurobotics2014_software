@@ -103,7 +103,7 @@ uint8_t blade_push_fire (void) {
 #ifndef HOST_VERSION
 void shoot_net (void)
 {
-   pwm_servo_set(&gen.pwm_servo_oc1, 500);
+   pwm_servo_set(&gen.pwm_servo_oc1, 300);
 }
 #endif
 

@@ -386,6 +386,11 @@ uint8_t strat_goto_fresco (void);
 uint8_t strat_paint_fresco2 (void);
 uint8_t strat_goto_and_paint_fresco (void);
 
+uint8_t strat_goto_mamooth (void);
+
+/* goto mamooth */
+uint8_t __strat_shoot_mamooth (void);
+
 
 #else /* HOST_VERSION_OA_TEST */
 
