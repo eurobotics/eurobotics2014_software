@@ -122,9 +122,11 @@ void beacon_init(void)
     /* clear data structures */
     memset(&beacon, 0, sizeof(struct beacon));
     beacon.opponent1_x = I2C_OPPONENT_NOT_THERE;
+	beaconboard.opponent1_x = I2C_OPPONENT_NOT_THERE;
 #ifdef TWO_OPPONENTS
     beacon.opponent2_x = I2C_OPPONENT_NOT_THERE;
-    beacon.tracking_opp1_x = beacon.tracking_opp1_y = I2C_OPPONENT_NOT_THERE;
+	beaconboard.opponent2_x = I2C_OPPONENT_NOT_THERE;    
+	beacon.tracking_opp1_x = beacon.tracking_opp1_y = I2C_OPPONENT_NOT_THERE;
     beacon.tracking_opp2_x = beacon.tracking_opp2_y = I2C_OPPONENT_NOT_THERE;
 #endif
 #ifdef ROBOT_2ND
@@ -331,8 +333,10 @@ void beacon_stop(void)
 
     /* no opponent there */
     beacon.opponent1_x = I2C_OPPONENT_NOT_THERE;
+	beaconboard.opponent1_x = I2C_OPPONENT_NOT_THERE;
 #ifdef TWO_OPPONENTS
     beacon.opponent2_x = I2C_OPPONENT_NOT_THERE;
+	beaconboard.opponent2_x = I2C_OPPONENT_NOT_THERE;
 #endif
 #ifdef ROBOT_2ND
     beacon.robot_2nd_x = I2C_OPPONENT_NOT_THERE;
@@ -667,6 +671,11 @@ void sensor_calc(uint8_t sensor)
         beacon.opponent1_y = result_y;
         beacon.opponent1_angle = local_angle;
         beacon.opponent1_dist = local_dist;
+
+		beaconboard.opponent1_x = beacon.opponent1_x;
+		beaconboard.opponent1_y = beacon.opponent1_y;
+		beaconboard.opponent1_a = beacon.opponent1_a;
+		beaconboard.opponent1_d = beacon.opponent1_d;
         IRQ_UNLOCK(flags);
 
         /* final results */
@@ -726,10 +735,10 @@ void sensor_calc(uint8_t sensor)
             beacon.opponent1_angle = local_angle;
             beacon.opponent1_dist = local_dist;
 
-			beaconboard.opponent1_x;
-			beaconboard.opponent1_y;
-			beaconboard.opponent1_a;
-			beaconboard.opponent1_d;
+			beaconboard.opponent1_x = beacon.opponent1_x;
+			beaconboard.opponent1_y = beacon.opponent1_y;
+			beaconboard.opponent1_a = beacon.opponent1_angle;
+			beaconboard.opponent1_d = beacon.opponent1_dist;
             IRQ_UNLOCK(flags);
 
             /* reset tracking watchdog counter */
@@ -742,10 +751,10 @@ void sensor_calc(uint8_t sensor)
             beacon.opponent2_angle = local_angle;
             beacon.opponent2_dist = local_dist;
 
-			beaconboard.opponent2_x;
-			beaconboard.opponent2_y;
-			beaconboard.opponent2_a;
-			beaconboard.opponent2_d;
+			beaconboard.opponent2_x = beacon.opponent2_x;
+			beaconboard.opponent2_y = beacon.opponent2_y;
+			beaconboard.opponent2_a = beacon.opponent2_angle;
+			beaconboard.opponent2_d = beacon.opponent2_dist;
             IRQ_UNLOCK(flags);
 
             /* reset tracking watchdog counter */
@@ -758,6 +767,7 @@ void sensor_calc(uint8_t sensor)
         else {
             //BEACON_DEBUG("opponent 1 not there");
             beacon.opponent1_x = I2C_OPPONENT_NOT_THERE;
+			beaconboard.opponent1_x = I2C_OPPONENT_NOT_THERE;
         }
 
         if(beacon.tracking_opp2_counts < 10)
@@ -765,6 +775,7 @@ void sensor_calc(uint8_t sensor)
         else {
             //BEACON_DEBUG("opponent 2 not there");
             beacon.opponent2_x = I2C_OPPONENT_NOT_THERE;
+			beaconboard.opponent2_x = I2C_OPPONENT_NOT_THERE;
         }
 
         BEACON_NOTICE("opp1 (%.3ld, %.4ld, %.4ld, %.4ld) "
@@ -793,8 +804,10 @@ error:
         if(sensor == IR_SENSOR_180_DEG) {
             IRQ_LOCK(flags);
             beacon.opponent1_x = I2C_OPPONENT_NOT_THERE;
+			beaconboard.opponent1_x = I2C_OPPONENT_NOT_THERE;
 #ifdef TWO_OPPONENTS
             beacon.opponent2_x = I2C_OPPONENT_NOT_THERE;
+            beaconboard.opponent2_x = I2C_OPPONENT_NOT_THERE;
 #endif
             IRQ_UNLOCK(flags);
 

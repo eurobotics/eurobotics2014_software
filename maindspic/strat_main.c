@@ -660,7 +660,8 @@ void strat_homologation(void)
 	{ZONE_FIRE_1,ZONE_FIRE_3,ZONE_TORCH_2,ZONE_FIRE_5,ZONE_FIRE_6,ZONE_HEART_1};
 	
 	/* Secondary robot */
-	bt_robot_2nd_bt_patrol_fr_mam(6,0);
+	//bt_robot_2nd_bt_patrol_fr_mam(6,0);
+    bt_robot_2nd_bt_fresco();
 	time_wait_ms(2000);
 	trajectory_d_rel(&mainboard.traj,250);
 	err = wait_traj_end(TRAJ_FLAGS_SMALL_DIST);

@@ -372,10 +372,10 @@ int main(void)
 
    /* log setup */
     gen.logs[0] = E_USER_STRAT;
-    gen.logs[1] = E_USER_BEACON;
+    //gen.logs[1] = E_USER_BEACON;
     //gen.logs[2] = E_USER_I2C_PROTO;
     //gen.logs[3] = E_OA;
-    gen.logs[2] = E_USER_BT_PROTO;
+    //gen.logs[2] = E_USER_BT_PROTO;
     gen.log_level = 5;
 
    /* reset strat infos */

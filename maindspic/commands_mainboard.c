@@ -344,8 +344,8 @@ static void cmd_init_parsed(void *parsed_result, void *data)
 	/* open bt links */
 #ifndef HOST_VERSION
 	wt11_reset_mux();
-	wt11_open_link_mux(robot_2nd_addr, &robot_2nd.link_id);
 	wt11_open_link_mux(beacon_addr, &beaconboard.link_id);
+	wt11_open_link_mux(robot_2nd_addr, &robot_2nd.link_id);
 #else
 	robot_2nd.link_id = 0;
 	beaconboard.link_id = 1;
@@ -432,7 +432,7 @@ static void cmd_start_parsed(void *parsed_result, void *data)
 
 #ifndef HOST_VERSION
     int8_t c;
-retry:
+//retry:
     printf_P(PSTR("Press a key when beacon ready, 'q' for skip \r\n"));
     c = -1;
     while (c == -1) {

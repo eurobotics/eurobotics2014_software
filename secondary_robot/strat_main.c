@@ -55,7 +55,7 @@
 #include <parse.h>
 
 #include "../common/i2c_commands.h"
-#include "../common/bt_commands.h"
+//#include "../common/bt_commands.h"
 
 #include "i2c_protocol.h"
 #include "main.h"
@@ -75,6 +75,10 @@
 	} while(0)
 
 /* Add here the main strategic, the inteligence of robot */
+
+#define BT_MAMOOTH_DONE		1
+#define BT_OPP_FIRES_DONE	2
+#define BT_FRESCO_DONE		4
 
 
 /* auto possition depending on color */
@@ -102,7 +106,7 @@ void strat_auto_position (void)
 	strat_reset_pos(DO_NOT_SET_POS, BASKET_WIDTH + ROBOT_CENTER_TO_BACK, 90);
 
 	/* prepare to x axis */
-	trajectory_d_rel(&mainboard.traj, 45);
+	trajectory_d_rel(&mainboard.traj, 60);
 	err = wait_traj_end(END_INTR|END_TRAJ);
 	if (err == END_INTR)
 		goto intr;
@@ -124,7 +128,7 @@ void strat_auto_position (void)
 	strat_reset_pos(COLOR_X(ROBOT_CENTER_TO_BACK), DO_NOT_SET_POS, COLOR_A_ABS(0));
 	
 	/* goto start position */
-	trajectory_d_rel(&mainboard.traj, 175);
+	trajectory_d_rel(&mainboard.traj, 150);
 	err = wait_traj_end(END_INTR|END_TRAJ);
 	if (err == END_INTR)
 		goto intr;
@@ -265,9 +269,9 @@ uint8_t strat_paint_fresco(void)
 	uint16_t old_spdd, old_spda;
 	//int16_t opp_d, opp_a,opp2_d,opp2_a;
 	uint8_t err = 0;
-#define BEGIN_LINE_Y 	450
+#define BEGIN_LINE_Y 	460
 #define BEGIN_FRESCO_X	1295
-#define BEGIN_FRESCO_Y	450
+#define BEGIN_FRESCO_Y	460
 
 
 	switch (state)
@@ -535,14 +539,16 @@ uint8_t strat_goto_fresco (void)
 
 retry:
 	if (init == 0) {
-		init = 1;
 
 		/* goto in front of fresco */
 		trajectory_goto_forward_xy_abs (&mainboard.traj,x,y);
 	    err = wait_traj_end(TRAJ_FLAGS_STD);
+		time_wait_ms (3000);
 
         if (!TRAJ_SUCCESS(err))
 		   goto retry;
+		else
+			init=1;
 	}
 	else {
 		/* go with avoid */
@@ -603,6 +609,8 @@ uint8_t strat_paint_fresco2 (void)
 	/* task flag done */
 	robot_2nd.done_flags |= BT_FRESCO_DONE;
 
+	while(robots_are_near());
+
 	/* check opponent */
 	if (opponent1_is_infront() || opponent2_is_infront())
 	{
@@ -621,6 +629,13 @@ scape:
 		if (!TRAJ_SUCCESS(err))
 			ERROUT(err);
 
+	while(robots_are_near());
+
+		strat_get_speed(&old_spdd, &old_spda);
+		strat_set_speed(SPEED_DIST_VERY_SLOW, SPEED_ANGLE_VERY_SLOW);
+
+		time_wait_ms(8000);
+
 		/* return to start position */
 		strat_set_speed(old_spdd, old_spda);
 		trajectory_goto_forward_xy_abs (&mainboard.traj,  COLOR_X(1650), BEGIN_FRESCO_Y);
@@ -636,6 +651,9 @@ scape:
 		err = wait_traj_end(TRAJ_FLAGS_SMALL_DIST);
 		if (!TRAJ_SUCCESS(err))
 				ERROUT(err);
+
+
+	while(robots_are_near());
 
 		/* return to start position */
 		strat_set_speed(old_spdd, old_spda);
