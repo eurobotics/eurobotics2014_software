@@ -408,13 +408,14 @@ end:
 /* goto mobile torch */
 uint8_t strat_goto_mobile_torch (uint8_t zone_num)
 {
-    int16_t robot_x, robot_y, x, y;
+    int16_t robot_x, robot_y, x, y, x1, y2;
     double temp_x, temp_y;
 	uint8_t err = 0;
+	uint16_t a_abs;
 
-#define MOBIL_TORCH_X_OFFSET    (25.0) //45
+#define MOBIL_TORCH_X_OFFSET    (45.0) //45
 #define MOBIL_TORCH_Y_OFFSET    (255.0)
-//#define DIST_MOBIL_TORCH_SAFE	(360.0)
+#define DIST_MOBIL_TORCH_SAFE	(360.0)
 #define K_DIST_SAFE				(1.4)
 
     /* depending on robot and mobiel torch position */
@@ -445,9 +446,58 @@ uint8_t strat_goto_mobile_torch (uint8_t zone_num)
     i2c_slavedspic_mode_ready_for_pickup_fire(I2C_SLAVEDSPIC_SUCKER_TYPE_LONG,
                                               I2C_SLAVEDSPIC_LEVEL_FIRE_TORCH_TOP);
 
-    /* go near */
-    err = goto_and_avoid (x, y, TRAJ_FLAGS_STD, TRAJ_FLAGS_NO_NEAR);
+	x1 = x;
+	y2 = y;
 
+ 	x = COLOR_X(strat_infos.zones[zone_num].x);
+    y = strat_infos.zones[zone_num].y;
+
+   /* top */
+    temp_x = -MOBIL_TORCH_X_OFFSET;
+    temp_y = MOBIL_TORCH_Y_OFFSET;
+
+    /* bottom-right */
+    if ((robot_y < y) && (robot_x > x))
+        rotate(&temp_x, &temp_y, RAD(-120));
+
+    /* bottom-left */
+    else if ((robot_y < y) && (robot_x < x))
+        rotate(&temp_x, &temp_y, RAD(120));
+
+    x += temp_x;
+    y += temp_y;
+
+    /* go near */
+    err = goto_and_avoid_forward (x1, y2, TRAJ_FLAGS_STD, TRAJ_FLAGS_NO_NEAR);
+	if (!TRAJ_SUCCESS(err))
+	   ERROUT(err);
+
+ 
+
+	trajectory_goto_forward_xy_abs(&mainboard.traj, x, y);
+	err = wait_traj_end (TRAJ_FLAGS_SMALL_DIST);
+	if (!TRAJ_SUCCESS(err))
+		ERROUT(err);
+	   
+	/* turn to infront of torch */
+    /* top */
+	a_abs = 270;
+
+    /* bottom-right */
+    if ((robot_y < y) && (robot_x > x))
+		a_abs = 120;
+    /* bottom-left */
+    else if ((robot_y < y) && (robot_x < x))
+		a_abs = 30;
+
+	printf ("a_abs = %d\n\f", a_abs);
+
+	trajectory_a_abs (&mainboard.traj, a_abs);
+	err = wait_traj_end (TRAJ_FLAGS_SMALL_DIST);
+	if (!TRAJ_SUCCESS(err))
+		ERROUT(err);
+
+end:
     /* TODO XXX if error put arm in safe position */
 	return err;
 }
@@ -469,7 +519,8 @@ static uint8_t __strat_pickup_mobile_torch (uint8_t zone_num, uint8_t level)
     int16_t x, y, robot_x, robot_y;
 	uint8_t color;
 	uint16_t a_abs;
-	double a_rel_rad, d_rel, d;
+	//double a_rel_rad, d_rel, d;
+    double temp_x, temp_y;
 
     x = COLOR_X(strat_infos.zones[zone_num].x);
     y = strat_infos.zones[zone_num].y;
@@ -481,11 +532,32 @@ static uint8_t __strat_pickup_mobile_torch (uint8_t zone_num, uint8_t level)
 	strat_get_speed (&old_spdd, &old_spda);
     strat_limit_speed_disable ();
 	strat_set_speed (SPEED_DIST_SLOW,SPEED_ANGLE_FAST);
-   
 
+	/* go to pickup position */
+#if 0
+    /* top */
+    temp_x = -MOBIL_TORCH_X_OFFSET;
+    temp_y = MOBIL_TORCH_Y_OFFSET;
+
+    /* bottom-right */
+    if ((robot_y < y) && (robot_x > x))
+        rotate(&temp_x, &temp_y, RAD(-120));
+
+    /* bottom-left */
+    else if ((robot_y < y) && (robot_x < x))
+        rotate(&temp_x, &temp_y, RAD(120));
+
+    x += temp_x;
+    y += temp_y;
+
+	trajectory_goto_xy_abs(&mainboard.traj, x, y);
+	err = wait_traj_end (TRAJ_FLAGS_SMALL_DIST);
+	if (!TRAJ_SUCCESS(err))
+		ERROUT(err);
+	   
 	/* turn to infront of torch */
     /* top */
-	a_abs = -90;
+	a_abs = 270;
 
     /* bottom-right */
     if ((robot_y < y) && (robot_x > x))
@@ -494,11 +566,14 @@ static uint8_t __strat_pickup_mobile_torch (uint8_t zone_num, uint8_t level)
     else if ((robot_y < y) && (robot_x < x))
 		a_abs = 30;
 
+	printf ("a_abs = %d\n\f", a_abs);
+
 	trajectory_a_abs (&mainboard.traj, a_abs);
 	err = wait_traj_end (TRAJ_FLAGS_SMALL_DIST);
 	if (!TRAJ_SUCCESS(err))
 		ERROUT(err);
-
+#endif
+#if 0
     /* go over fires if we are not yet */
 	abs_xy_to_rel_da(x, y, &d_rel, &a_rel_rad);
 	d = d_rel * cos(a_rel_rad);
@@ -511,6 +586,7 @@ static uint8_t __strat_pickup_mobile_torch (uint8_t zone_num, uint8_t level)
         if (!TRAJ_SUCCESS(err))
            ERROUT(err);    
     }
+#endif
 
     /* ready for pickup */
     i2c_slavedspic_wait_ready();
@@ -734,5 +810,26 @@ end:
     strat_limit_speed_enable();
     return err;
 }
+
+#if 0
+uint8_t strat_harvest_mobile_torch (uint8_t zone_num) 
+{
+	uint8_t flags;
+
+	/* pickup top fire */
+	IRQ_LOCK(flags);
+	nb_stored_fires_saved = mainboard.nb_stored_fires;
+	IRQ_UNLOCK(flags);
+		
+	err = strat_pickup_mobile_torch_top (zone_num);
+	i2c_slavedspic_wait_ready();
+	i2c_slavedspic_wait_ready();
+
+	if (manboard.nb_stored_fires <= nb_stored_fires_saved)
+	
+
+}
+#endif
+
 
 
