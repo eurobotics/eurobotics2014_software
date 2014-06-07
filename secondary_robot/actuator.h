@@ -39,6 +39,8 @@ uint8_t blade_hide (void);
 
 uint8_t blade_push_fire (void);
 
+void shoot_net (void);
+
 
 #endif
 

@@ -101,4 +101,9 @@ uint8_t blade_push_fire (void) {
     return 0;
 }
 
+void shoot_net (void)
+{
+   pwm_servo_set(&gen.pwm_servo_oc1, 500);
+}
+
 
