@@ -345,9 +345,10 @@ uint8_t strat_patrol_between(int16_t x1, int16_t y1,int16_t x2, int16_t y2)
 {	
 	#define REFERENCE_DISTANCE_TO_ROBOT 800
 	int16_t opp1_x, opp1_y, opp2_x, opp2_y;
+	static int16_t opp1_y_saved, opp_y_saved;
 	uint16_t old_spdd, old_spda;
 	uint8_t err = 0;
-	int16_t d,d2,a,a2;
+	int16_t d1,d2,a1,a2;
 
 	/* save speed */
 	strat_get_speed (&old_spdd, &old_spda);
@@ -356,16 +357,20 @@ uint8_t strat_patrol_between(int16_t x1, int16_t y1,int16_t x2, int16_t y2)
 	/* get robot coordinates */
 	get_opponent1_xy(&opp1_x, &opp1_y);
 	get_opponent2_xy(&opp2_x, &opp2_y);
-	get_opponent1_da(&d,&a);
+	get_opponent1_da(&d1,&a1);
 	get_opponent2_da(&d2,&a2);
 	
-	if(d<(REFERENCE_DISTANCE_TO_ROBOT) && d>0)
+	if(d1<(REFERENCE_DISTANCE_TO_ROBOT) && d1>0)
 	{
 		if((opp1_y_is_more_than(y1)&&!opp1_y_is_more_than(y2))||(!opp1_y_is_more_than(y1)&&opp1_y_is_more_than(y2)))
 		{
 			//trajectory_goto_xy_abs(&mainboard.traj,(x1+x2)/2,opp1_y);
-			err = goto_and_avoid ((x1+x2)/2, opp1_y,TRAJ_FLAGS_STD, TRAJ_FLAGS_NO_NEAR);
+			//err = goto_and_avoid ((x1+x2)/2, opp1_y,TRAJ_FLAGS_STD, TRAJ_FLAGS_NO_NEAR);
+			opp_y_saved = opp1_y;
 		}
+
+		//err = goto_and_avoid ((x1+x2)/2, opp1_y_saved,TRAJ_FLAGS_STD, TRAJ_FLAGS_NO_NEAR);
+		
 	}
 	
 	else if(d2<(REFERENCE_DISTANCE_TO_ROBOT) && d2>0)
@@ -373,15 +378,19 @@ uint8_t strat_patrol_between(int16_t x1, int16_t y1,int16_t x2, int16_t y2)
 		if((opp2_y_is_more_than(y1)&&!opp2_y_is_more_than(y2))||(!opp2_y_is_more_than(y1)&&opp2_y_is_more_than(y2)))
 		{
 			//trajectory_goto_xy_abs(&mainboard.traj,(x1+x2)/2,opp2_y); 
-			err = goto_and_avoid ((x1+x2)/2, opp2_y,TRAJ_FLAGS_STD, TRAJ_FLAGS_NO_NEAR);
+			//err = goto_and_avoid ((x1+x2)/2, opp2_y,TRAJ_FLAGS_STD, TRAJ_FLAGS_NO_NEAR);
+			opp_y_saved = opp2_y;
 		}
+
 	}
 	
-	/*err = test_traj_end(TRAJ_FLAGS_NO_NEAR);
+	time_wait_ms (100);
+
+	err = goto_and_avoid ((x1+x2)/2, opp_y_saved,TRAJ_FLAGS_STD, TRAJ_FLAGS_NO_NEAR);	
 	if (!TRAJ_SUCCESS(err))
-		ERROUT(err);*/
+		ERROUT(err);
 	
-//end:
+end:
 	strat_set_speed(old_spdd, old_spda);	
 	return err;
 }
@@ -391,7 +400,7 @@ uint8_t strat_shoot_mamooth(uint8_t balls_mamooth_1, uint8_t balls_mamooth_2)
     uint8_t err = 0;
 	static uint8_t state=0;
 
-#define BEGIN_LINE_Y 	460
+#define __BEGIN_LINE_Y 	460
 #define BEGIN_MAMOOTH_X	750
 #define SERVO_SHOOT_POS_UP 80
 #define SERVO_SHOOT_POS_DOWN 300
@@ -401,13 +410,13 @@ uint8_t strat_shoot_mamooth(uint8_t balls_mamooth_1, uint8_t balls_mamooth_2)
 		case 0:
 			if(balls_mamooth_1 > 0)
 			{	
-				trajectory_goto_forward_xy_abs (&mainboard.traj, COLOR_X(BEGIN_MAMOOTH_X), BEGIN_LINE_Y);
+				trajectory_goto_forward_xy_abs (&mainboard.traj, COLOR_X(BEGIN_MAMOOTH_X), __BEGIN_LINE_Y);
 				state++;
 				break;
 			}
 			else if(balls_mamooth_2 > 0)
 			{
-				trajectory_goto_forward_xy_abs (&mainboard.traj, COLOR_X(3000-BEGIN_MAMOOTH_X), BEGIN_LINE_Y);
+				trajectory_goto_forward_xy_abs (&mainboard.traj, COLOR_X(3000-BEGIN_MAMOOTH_X), __BEGIN_LINE_Y);
 				state=3;
 			}
 			break;
@@ -417,7 +426,7 @@ uint8_t strat_shoot_mamooth(uint8_t balls_mamooth_1, uint8_t balls_mamooth_2)
 			if(opponent1_is_infront()==0 && opponent2_is_infront()==0)
 			{
 				//err = test_traj_end(TRAJ_FLAGS_STD);
-				if ((abs(position_get_x_double(&mainboard.pos)-COLOR_X(BEGIN_MAMOOTH_X))<30) && (abs(position_get_y_double(&mainboard.pos)-BEGIN_LINE_Y)<30))
+				if ((abs(position_get_x_double(&mainboard.pos)-COLOR_X(BEGIN_MAMOOTH_X))<30) && (abs(position_get_y_double(&mainboard.pos)-__BEGIN_LINE_Y)<30))
 				{
 					trajectory_a_abs (&mainboard.traj, -90);
 					err = wait_traj_end(TRAJ_FLAGS_SMALL_DIST);
@@ -428,7 +437,7 @@ uint8_t strat_shoot_mamooth(uint8_t balls_mamooth_1, uint8_t balls_mamooth_2)
 			}
 			else
 			{
-				if ((abs(position_get_x_double(&mainboard.pos)-COLOR_X(BEGIN_MAMOOTH_X))<30) && (abs(position_get_y_double(&mainboard.pos)-BEGIN_LINE_Y)<30))
+				if ((abs(position_get_x_double(&mainboard.pos)-COLOR_X(BEGIN_MAMOOTH_X))<30) && (abs(position_get_y_double(&mainboard.pos)-__BEGIN_LINE_Y)<30))
 				{
 					trajectory_a_abs (&mainboard.traj, -90);
 					err = wait_traj_end(TRAJ_FLAGS_SMALL_DIST);
@@ -458,7 +467,7 @@ uint8_t strat_shoot_mamooth(uint8_t balls_mamooth_1, uint8_t balls_mamooth_2)
 			break;
 			
 		case 3:
-				trajectory_goto_forward_xy_abs (&mainboard.traj, COLOR_X(3000-BEGIN_MAMOOTH_X), BEGIN_LINE_Y);
+				trajectory_goto_forward_xy_abs (&mainboard.traj, COLOR_X(3000-BEGIN_MAMOOTH_X), __BEGIN_LINE_Y);
 				state++;
 				break;
 				
@@ -467,7 +476,7 @@ uint8_t strat_shoot_mamooth(uint8_t balls_mamooth_1, uint8_t balls_mamooth_2)
 			if(opponent1_is_infront()==0 && opponent2_is_infront()==0)
 			{
 				//err = test_traj_end(TRAJ_FLAGS_STD);
-				if ((abs(position_get_x_double(&mainboard.pos)-COLOR_X(3000-BEGIN_MAMOOTH_X))<30) && (abs(position_get_y_double(&mainboard.pos)-BEGIN_LINE_Y)<30))
+				if ((abs(position_get_x_double(&mainboard.pos)-COLOR_X(3000-BEGIN_MAMOOTH_X))<30) && (abs(position_get_y_double(&mainboard.pos)-__BEGIN_LINE_Y)<30))
 				{
 					trajectory_a_abs (&mainboard.traj, -90);
 					err = wait_traj_end(TRAJ_FLAGS_SMALL_DIST);
@@ -478,7 +487,7 @@ uint8_t strat_shoot_mamooth(uint8_t balls_mamooth_1, uint8_t balls_mamooth_2)
 			}
 			else
 			{
-				if ((abs(position_get_x_double(&mainboard.pos)-COLOR_X(3000-BEGIN_MAMOOTH_X))<30) && (abs(position_get_y_double(&mainboard.pos)-BEGIN_LINE_Y)<30))
+				if ((abs(position_get_x_double(&mainboard.pos)-COLOR_X(3000-BEGIN_MAMOOTH_X))<30) && (abs(position_get_y_double(&mainboard.pos)-__BEGIN_LINE_Y)<30))
 				{
 					trajectory_a_abs (&mainboard.traj, -90);
 					err = wait_traj_end(TRAJ_FLAGS_SMALL_DIST);
@@ -558,6 +567,7 @@ uint8_t strat_paint_fresco2 (void)
 #endif
     uint8_t err = 0;
 	uint16_t old_spdd, old_spda;
+	int16_t opp_d, opp_a;
 
 
 	/* save speed */
@@ -573,7 +583,8 @@ uint8_t strat_paint_fresco2 (void)
 			ERROUT(err);
 
 	/* check opp is not infront */
-	while (opponent1_is_behind() || opponent2_is_behind());
+	while ( (opponent1_is_behind() && (get_opponent1_da(&opp_d, &opp_a)!=-1)) || 
+			(opponent2_is_behind() && (get_opponent2_da(&opp_d, &opp_a)!=-1)) );
 
 	/* go to near fresco */
 	trajectory_goto_backward_xy_abs (&mainboard.traj,  COLOR_X(BEGIN_FRESCO_X), ROBOT_CENTER_TO_BACK + 100);
@@ -643,15 +654,50 @@ end:
 
 uint8_t strat_goto_and_paint_fresco (void)
 {
-	uint8_t err = 0;
+	volatile uint8_t err = 0;
+	int16_t opp_d, opp_a;
 
+
+	/* goto fresco */
 	err = strat_goto_fresco();
 	if (!TRAJ_SUCCESS(err))
 			ERROUT(err);
 
-	err = strat_paint_fresco2();
-	if (!TRAJ_SUCCESS(err))
-			ERROUT(err);
+	/* check opponent */	
+	if ((robot_2nd.done_flags & BT_FRESCO_DONE) == 0) {
+		if ((get_opponent1_da(&opp_d, &opp_a)!=-1) && (get_opponent2_da(&opp_d, &opp_a)!=-1)) {
+			err = strat_paint_fresco2();
+		}
+		else if ((opp1_x_is_more_than(1800) && opp2_x_is_more_than(1800)) ||
+				 !opp1_y_is_more_than(400) || !opp2_x_is_more_than(400) )
+		{
+			 err = strat_paint_fresco2();
+		}
+	}
+
+#if 0
+	while ((err & END_INTR) == 0) 
+	{
+		if ((robot_2nd.done_flags & BT_FRESCO_DONE) == 0)
+		{
+			if ((get_opponent1_da(&opp_d, &opp_a)!=-1) && (get_opponent2_da(&opp_d, &opp_a)!=-1)) {;
+				err = strat_paint_fresco2();
+			}
+			else if ((opp1_x_is_more_than(1800) && opp2_x_is_more_than(1800)) ||
+				     !opp1_y_is_more_than(400) || !opp2_x_is_more_than(400) )
+			{
+				 err = strat_paint_fresco2();
+			}
+
+			else {
+				err = strat_patrol_between(COLOR_X(BEGIN_FRESCO_X),300,COLOR_X(BEGIN_FRESCO_X),900);
+			}
+		}
+		else {
+			err = strat_patrol_between(COLOR_X(BEGIN_FRESCO_X),300,COLOR_X(BEGIN_FRESCO_X),900);
+		}
+	}
+#endif
 
 end:
 	return err;

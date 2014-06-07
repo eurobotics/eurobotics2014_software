@@ -73,9 +73,12 @@ void strat_event_schedule_single (void (*f)(void *), void * data)
 	int8_t ret;
 
 	/* stop robot */
+	IRQ_LOCK(flags);
 	interrupt_traj();
 	strat_hardstop();
+	IRQ_UNLOCK(flags);
 	
+
 	/* delete current event */
 	scheduler_del_event(mainboard.strat_event);
 
@@ -94,8 +97,10 @@ void strat_event_schedule_periodical(void (*f)(void *), void * data)
 	int8_t ret;
 
 	/* stop robot */
+	IRQ_LOCK(flags);
 	interrupt_traj();
 	strat_hardstop();
+	IRQ_UNLOCK(flags);
 
 
 	/* delete current event */

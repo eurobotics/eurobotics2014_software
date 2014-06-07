@@ -809,7 +809,7 @@ static void cmd_bt_goto_parsed(void * parsed_result, void * data)
 	//uint8_t err;
 	/* TODO comment functions */
 
-	interrupt_traj_reset();
+	//interrupt_traj_reset();
 
 	if (!strcmp_P(res->arg1, PSTR("a_rel"))) {
 		//bt_trajectory_a_rel(res->arg2, res->arg3);
