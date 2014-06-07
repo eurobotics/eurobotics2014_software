@@ -295,7 +295,7 @@ struct robot_2nd
 	//uint8_t cmd_args_checksum;		/* checksum of cmd arguments*/
 
 	/* strat info */
-	//uint16_t done_flags;
+	uint16_t done_flags;
 
   	/* robot position */
 	int16_t x;

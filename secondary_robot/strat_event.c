@@ -73,6 +73,7 @@ void strat_event_schedule_single (void (*f)(void *), void * data)
 	int8_t ret;
 
 	/* stop robot */
+	interrupt_traj();
 	strat_hardstop();
 	
 	/* delete current event */
@@ -93,7 +94,9 @@ void strat_event_schedule_periodical(void (*f)(void *), void * data)
 	int8_t ret;
 
 	/* stop robot */
+	interrupt_traj();
 	strat_hardstop();
+
 
 	/* delete current event */
 	scheduler_del_event(mainboard.strat_event);
@@ -112,6 +115,8 @@ void strat_event_schedule_periodical(void (*f)(void *), void * data)
 /* auto position event */
 void strat_auto_position_event (void *data)
 {
+	interrupt_traj_reset();
+
 	strat_auto_position ();
 
 	/* return value */
@@ -124,6 +129,8 @@ void strat_goto_xy_abs_event (void *data)
 	int16_t *arg = (int16_t*)data;
 	uint8_t err;
  
+	interrupt_traj_reset();
+
 	trajectory_goto_xy_abs(&mainboard.traj, arg[0], arg[1]);
 	err = wait_traj_end(TRAJ_FLAGS_STD);
 
@@ -138,6 +145,8 @@ void strat_goto_forward_xy_abs_event (void *data)
 	int16_t *arg = (int16_t*)data;
 	uint8_t err;
  
+	interrupt_traj_reset();
+
 	trajectory_goto_forward_xy_abs(&mainboard.traj, arg[0], arg[1]);
 	err = wait_traj_end(TRAJ_FLAGS_STD);
 
@@ -152,6 +161,8 @@ void strat_goto_backward_xy_abs_event (void *data)
 	int16_t *arg = (int16_t*)data;
 	uint8_t err;
  
+	interrupt_traj_reset();
+
 	trajectory_goto_backward_xy_abs(&mainboard.traj, arg[0], arg[1]);
 	err = wait_traj_end(TRAJ_FLAGS_STD);
 
@@ -166,6 +177,8 @@ void strat_goto_avoid_event (void *data)
 	int16_t *arg = (int16_t*)data;
 	uint8_t err;
  
+	interrupt_traj_reset();
+
 	goto_and_avoid(arg[0], arg[1],  TRAJ_FLAGS_STD, TRAJ_FLAGS_NO_NEAR);
 	err = wait_traj_end(TRAJ_FLAGS_STD);
 
@@ -180,6 +193,8 @@ void strat_goto_avoid_forward_event (void *data)
 	int16_t *arg = (int16_t*)data;
 	uint8_t err;
  
+	interrupt_traj_reset();
+
 	goto_and_avoid_forward(arg[0], arg[1],  TRAJ_FLAGS_STD, TRAJ_FLAGS_NO_NEAR);
 	err = wait_traj_end(TRAJ_FLAGS_STD);
 
@@ -194,6 +209,8 @@ void strat_goto_avoid_backward_event (void *data)
 	int16_t *arg = (int16_t*)data;
 	uint8_t err;
  
+	interrupt_traj_reset();
+
 	goto_and_avoid_backward(arg[0], arg[1],  TRAJ_FLAGS_STD, TRAJ_FLAGS_NO_NEAR);
 	err = wait_traj_end(TRAJ_FLAGS_STD);
 
@@ -209,6 +226,9 @@ void strat_patrol_fresco_mamooth_event (void *data)
 {
 	int16_t *arg = (int16_t*)data;
 	uint8_t err;
+
+	interrupt_traj_reset();
+
 	err=strat_patrol_fresco_mamooth(arg[0], arg[1]);
 
 	/* return value */
@@ -220,7 +240,11 @@ void strat_fresco_event (void *data)
 {
 	uint8_t err;
  
-	err=strat_paint_fresco();
+	interrupt_traj_reset();
+
+	//err=strat_paint_fresco();
+	err=strat_goto_and_paint_fresco();
+
 
 	/* return value */
 	bt_status_set_cmd_ret (END_TRAJ);
@@ -232,6 +256,8 @@ void strat_patrol_event (void *data)
 	//int16_t *arg = (int16_t*)data;
 	uint8_t err = 0;
  
+	interrupt_traj_reset();
+
 	//err=strat_patrol_between(arg[0], arg[1],arg[2], arg[3]);
 
 	/* return value */
@@ -243,6 +269,8 @@ void strat_mamooth_event (void *data)
 	int16_t *arg = (int16_t*)data;
 	uint8_t err;
  
+	interrupt_traj_reset();
+
 	err=strat_shoot_mamooth(arg[0], arg[1]);
 
 	/* return value */
@@ -254,6 +282,8 @@ void strat_protect_h_event (void *data)
 	uint8_t err;
 	int16_t *arg = (int16_t*)data;
  
+	interrupt_traj_reset();
+
 	if(arg[0]==3)
 		err=strat_patrol_between(COLOR_X(3000-400),1300,COLOR_X(3000-400),1800);
 	else
@@ -262,6 +292,9 @@ void strat_protect_h_event (void *data)
 	/* return value */
 	bt_status_set_cmd_ret (err);
 }
+
+
+
 
 void strat_net_event (void *data)
 {

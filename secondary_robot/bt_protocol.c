@@ -128,6 +128,7 @@ void bt_send_status (void)
 	ans.opponent2_x = beaconboard.opponent2_x;
 	ans.opponent2_y = beaconboard.opponent2_y;
 
+	ans.done_flags = robot_2nd.done_flags;
 	ans.color = mainboard.our_color;
 
 	/* XXX cmd feedback: must be filld by cmds */
@@ -371,7 +372,9 @@ void bt_fresco(void)
 	 */
 	// No arguments
 
-	strat_event_schedule_periodical (strat_fresco_event,
+	//strat_event_schedule_periodical (strat_fresco_event,
+	//					 (void *)mainboard.strat_event_data);
+	strat_event_schedule_single (strat_fresco_event,
 						 (void *)mainboard.strat_event_data);
 }
 

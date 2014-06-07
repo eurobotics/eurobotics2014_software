@@ -59,12 +59,10 @@ struct bt_robot_2nd_status_ans
 
 	/* strat info */
 	uint8_t color;
-//	uint16_t done_flags;
-//#define BT_DONE_MAMMUT_1	1
-//#define BT_DONE_MAMMUT_2	2
-//#define BT_DONE_FRESCO		4
-//#define BT_DONE_NET			8
-//#define BT_DONE_OPP_FIRES	16
+	uint8_t done_flags;
+#define BT_MAMOOTH_DONE		1
+#define BT_OPP_FIRES_DONE	2
+#define BT_FRESCO_DONE		4
 
 	/* robot position */
 	int16_t x;

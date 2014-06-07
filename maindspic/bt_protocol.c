@@ -589,7 +589,7 @@ void bt_robot_2nd_status_parser (int16_t c)
 			/* strat infos */
 			IRQ_LOCK(flags);
 			robot_2nd.color = ans.color;
-			//robot_2nd.done_flags = ans.done_flags;
+			robot_2nd.done_flags = ans.done_flags;
 			IRQ_UNLOCK(flags);
 
 			/* robot pos */

@@ -381,6 +381,12 @@ void strat_protect_h_event(void *data);
 void strat_patrol_fresco_mamooth_event(void *data);
 void strat_net_event (void *data);
 
+/* fresco */
+uint8_t strat_goto_fresco (void);
+uint8_t strat_paint_fresco2 (void);
+uint8_t strat_goto_and_paint_fresco (void);
+
+
 #else /* HOST_VERSION_OA_TEST */
 
 #define AREA_BBOX_6X5	0

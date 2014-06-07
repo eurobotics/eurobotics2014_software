@@ -55,6 +55,8 @@
 #include <parse.h>
 
 #include "../common/i2c_commands.h"
+#include "../common/bt_commands.h"
+
 #include "i2c_protocol.h"
 #include "main.h"
 #include "strat.h"
@@ -265,6 +267,7 @@ uint8_t strat_paint_fresco(void)
 	uint8_t err = 0;
 #define BEGIN_LINE_Y 	450
 #define BEGIN_FRESCO_X	1295
+#define BEGIN_FRESCO_Y	450
 
 
 	switch (state)
@@ -388,7 +391,7 @@ uint8_t strat_shoot_mamooth(uint8_t balls_mamooth_1, uint8_t balls_mamooth_2)
     uint8_t err = 0;
 	static uint8_t state=0;
 
-#define BEGIN_LINE_Y 	450
+#define BEGIN_LINE_Y 	460
 #define BEGIN_MAMOOTH_X	750
 #define SERVO_SHOOT_POS_UP 80
 #define SERVO_SHOOT_POS_DOWN 300
@@ -510,6 +513,149 @@ end:
 	return err;
 }
 
+/* goto fresco */
+uint8_t strat_goto_fresco (void) 
+{
+    int16_t x, y;
+	uint8_t err = 0;
+	static int8_t init = 0;
+
+	/* position depending on color */
+    x = COLOR_X(BEGIN_FRESCO_X);
+    y = BEGIN_LINE_Y;
+
+retry:
+	if (init == 0) {
+		init = 1;
+
+		/* goto in front of fresco */
+		trajectory_goto_forward_xy_abs (&mainboard.traj,x,y);
+	    err = wait_traj_end(TRAJ_FLAGS_STD);
+
+        if (!TRAJ_SUCCESS(err))
+		   goto retry;
+	}
+	else {
+		/* go with avoid */
+		err = goto_and_avoid_forward (x, y, TRAJ_FLAGS_STD, TRAJ_FLAGS_NO_NEAR);
+        if (!TRAJ_SUCCESS(err))
+			ERROUT(err);
+	}
+
+end:
+    return err;
+}
+
+/* paint fresco v2  */
+uint8_t strat_paint_fresco2 (void)
+{
+//#define DEBUG_STRAT_FIRES
+#ifdef DEBUG_STRAT_FIRES
+#define wait_press_key() state_debug_wait_key_pressed();
+	strat_infos.debug_step = 1;
+#else
+#define wait_press_key()
+#endif
+    uint8_t err = 0;
+	uint16_t old_spdd, old_spda;
+
+
+	/* save speed */
+	strat_get_speed (&old_spdd, &old_spda);
+    strat_limit_speed_disable ();
+	strat_set_speed (SPEED_DIST_SLOW,SPEED_ANGLE_FAST);
+   
+
+	/* turn to fresco */
+	trajectory_a_abs (&mainboard.traj, 90);
+	err = wait_traj_end(TRAJ_FLAGS_STD);
+	if (!TRAJ_SUCCESS(err))
+			ERROUT(err);
+
+	/* check opp is not infront */
+	while (opponent1_is_behind() || opponent2_is_behind());
+
+	/* go to near fresco */
+	trajectory_goto_backward_xy_abs (&mainboard.traj,  COLOR_X(BEGIN_FRESCO_X), ROBOT_CENTER_TO_BACK + 100);
+	err = wait_traj_end(TRAJ_FLAGS_SMALL_DIST);
+	if (!TRAJ_SUCCESS(err))
+			ERROUT(err);
+
+	/* set low speed */
+	strat_get_speed(&old_spdd, &old_spda);
+	strat_set_speed(SPEED_DIST_VERY_SLOW, SPEED_ANGLE_FAST);
+
+	/* paint fresco 1/1 */
+	trajectory_d_rel(&mainboard.traj, -200);
+	err = wait_traj_end(TRAJ_FLAGS_SMALL_DIST);
+
+	/* task flag done */
+	robot_2nd.done_flags |= BT_FRESCO_DONE;
+
+	/* check opponent */
+	if (opponent1_is_infront() || opponent2_is_infront())
+	{
+		/* scape */
+scape:
+		trajectory_d_rel(&mainboard.traj, ROBOT_CENTER_TO_BACK + 100);
+		err = wait_traj_end(TRAJ_FLAGS_SMALL_DIST);
+		if (!TRAJ_SUCCESS(err)) {
+			wait_ms (1000);
+			goto scape;
+		}
+
+		/* second way */
+		trajectory_goto_forward_xy_abs (&mainboard.traj,  COLOR_X(1650), ROBOT_CENTER_TO_BACK + 100);
+		err = wait_traj_end(TRAJ_FLAGS_SMALL_DIST);
+		if (!TRAJ_SUCCESS(err))
+			ERROUT(err);
+
+		/* return to start position */
+		strat_set_speed(old_spdd, old_spda);
+		trajectory_goto_forward_xy_abs (&mainboard.traj,  COLOR_X(1650), BEGIN_FRESCO_Y);
+		err = wait_traj_end(TRAJ_FLAGS_SMALL_DIST);
+		if (!TRAJ_SUCCESS(err))
+				ERROUT(err);
+
+	}
+	else {
+
+		/* paint fresco 2/2 */
+		trajectory_goto_forward_xy_abs (&mainboard.traj,  COLOR_X(BEGIN_FRESCO_X), ROBOT_CENTER_TO_BACK + 100);
+		err = wait_traj_end(TRAJ_FLAGS_SMALL_DIST);
+		if (!TRAJ_SUCCESS(err))
+				ERROUT(err);
+
+		/* return to start position */
+		strat_set_speed(old_spdd, old_spda);
+		trajectory_goto_forward_xy_abs (&mainboard.traj,  COLOR_X(BEGIN_FRESCO_X), BEGIN_FRESCO_Y);
+		err = wait_traj_end(TRAJ_FLAGS_SMALL_DIST);
+		if (!TRAJ_SUCCESS(err))
+				ERROUT(err);
+	}
+
+
+end:
+	strat_set_speed(old_spdd, old_spda);	
+    strat_limit_speed_enable();
+    return err;
+}
+
+uint8_t strat_goto_and_paint_fresco (void)
+{
+	uint8_t err = 0;
+
+	err = strat_goto_fresco();
+	if (!TRAJ_SUCCESS(err))
+			ERROUT(err);
+
+	err = strat_paint_fresco2();
+	if (!TRAJ_SUCCESS(err))
+			ERROUT(err);
+
+end:
+	return err;
+}
 
 
 
