@@ -418,8 +418,8 @@ if __name__ == "__main__":
         except IOError:
             pass
 
-    #device = "/dev/ttyUSB0"
-    device = "/dev/rfcomm0"
+    device = "/dev/ttyUSB1"
+    #device = "/dev/rfcomm0"
     if len(sys.argv) > 1:
         device = sys.argv[1]
     interp = Interp(device)
