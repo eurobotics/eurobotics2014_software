@@ -623,7 +623,7 @@ uint8_t __strat_obstacle(uint8_t which)
 		return 1;
 	}
 	/* XXX opponent is behind us */
-	if (mainboard.speed_d < 200 && (opp_a < 215 && opp_a > 145)) {
+	if (mainboard.speed_d < -200 && (opp_a < 215 && opp_a > 145)) {
 		DEBUG(E_USER_STRAT, "opponent behind d=%d, a=%d xrel=%d yrel=%d", 
 		      opp_d, opp_a, x_rel, y_rel);
 		sensor_obstacle_disable();

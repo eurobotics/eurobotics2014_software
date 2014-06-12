@@ -118,7 +118,7 @@ uint8_t strat_is_valid_zone(uint8_t zone_num)
 
 	if(strat_infos.zones[zone_num].type==ZONE_TYPE_BASKET)
 	{
-		if(strat_infos.harvested_trees==0) 
+		if(strat_infos.harvested_trees==0)
 			return 0;
 	}
 	else
@@ -130,11 +130,11 @@ uint8_t strat_is_valid_zone(uint8_t zone_num)
 		}
 	}
 
-	if((strat_infos.zones[zone_num].type==ZONE_TYPE_TREE) && ((strat_infos.zones[zone_num].flags & ZONE_CHECKED_OPP)==1))
+	/*if((strat_infos.zones[zone_num].type==ZONE_TYPE_TREE) && ((strat_infos.zones[zone_num].flags & ZONE_CHECKED_OPP)==1))
 	{
 		//printf_P("zone num: %d. CHECKED_OPP.\n");
 		return 0;
-	}
+	}*/
 		
 	return 1;
 }
@@ -145,7 +145,16 @@ int8_t strat_get_new_zone(void)
 	uint8_t prio_max = 0;
 	int8_t zone_num = -1;
 	int8_t i=0;
-	
+
+#if 0
+		if((strat_infos.zones[ZONE_TREE_1].flags & ZONE_CHECKED) && !(strat_infos.zones[ZONE_TREE_2].flags & ZONE_CHECKED))
+			return ZONE_TREE_2;
+
+
+		if((strat_infos.zones[ZONE_TREE_2].flags & ZONE_CHECKED) && !(strat_infos.zones[ZONE_TREE_1].flags & ZONE_CHECKED))
+			return ZONE_TREE_1;
+#endif	
+
 	/* evaluate zones */
 	for(i=0; i < ZONES_MAX; i++) 
 	{
@@ -163,9 +172,19 @@ int8_t strat_get_new_zone(void)
 			//printf_P("---zone num chosen: %d\n",zone_num);
 		}
 
+
+		if((strat_infos.zones[ZONE_TREE_1].flags & ZONE_CHECKED) && !(strat_infos.zones[ZONE_TREE_2].flags & ZONE_CHECKED))
+			zone_num= ZONE_TREE_2;
+
+
+		if((strat_infos.zones[ZONE_TREE_2].flags & ZONE_CHECKED) && !(strat_infos.zones[ZONE_TREE_1].flags & ZONE_CHECKED))
+			zone_num= ZONE_TREE_1;
+
+
         /* XXX force go to basket if timeout */
 		if((time_get_s() > 75) && (strat_infos.harvested_trees))
 			zone_num = ZONE_BASKET_2;
+
 	}
 
 	return zone_num;
@@ -224,11 +243,17 @@ uint8_t strat_goto_zone(uint8_t zone_num)
 		/* go */
 		if (zone_num == ZONE_TREE_1 || zone_num == ZONE_TREE_2 
 			|| zone_num == ZONE_TREE_3 || zone_num == ZONE_TREE_4) 	{
+
+			err = i2c_slavedspic_mode_hide_arm (I2C_SLAVEDSPIC_SUCKER_TYPE_LONG);
+
 			err = goto_and_avoid_forward (COLOR_X(strat_infos.zones[zone_num].init_x), 
 										strat_infos.zones[zone_num].init_y,  
 										TRAJ_FLAGS_STD, TRAJ_FLAGS_NO_NEAR);
 		}
 		else if (zone_num == ZONE_BASKET_2) 	{
+
+		err = i2c_slavedspic_mode_hide_arm (I2C_SLAVEDSPIC_SUCKER_TYPE_LONG);
+
 			if (opp1_x_is_more_than(3000-750) || opp2_x_is_more_than(3000-750) ) {
 				err = goto_and_avoid (COLOR_X(strat_infos.zones[zone_num].init_x - BASKET_OFFSET_SIDE), 
 											strat_infos.zones[zone_num].init_y,  
@@ -243,9 +268,15 @@ uint8_t strat_goto_zone(uint8_t zone_num)
 		}
 		else if (strat_infos.zones[zone_num].type == ZONE_TYPE_FIRE) {
 		err = strat_goto_orphan_fire (zone_num);
+		err = i2c_slavedspic_mode_hide_arm (I2C_SLAVEDSPIC_SUCKER_TYPE_LONG);
 		}
 		else if (strat_infos.zones[zone_num].type == ZONE_TYPE_TORCH) {
+			if(zone_num == ZONE_TORCH_3) {
+				err = strat_goto_orphan_fire (zone_num);
+				err = i2c_slavedspic_mode_hide_arm (I2C_SLAVEDSPIC_SUCKER_TYPE_LONG);
+			}
 		err = strat_goto_torch (zone_num);
+		err = i2c_slavedspic_mode_hide_arm (I2C_SLAVEDSPIC_SUCKER_TYPE_LONG);
 		}
 		else if (strat_infos.zones[zone_num].type == ZONE_TYPE_HEART) {
 		err = strat_goto_heart_fire (zone_num);
@@ -356,10 +387,13 @@ uint8_t strat_work_on_zone(uint8_t zone_num)
 			case ZONE_FIRE_6:
 			err = strat_harvest_orphan_fire (zone_num);
 				break;
+
+			case ZONE_TORCH_3:
+			err = strat_harvest_orphan_fire (zone_num);
+				break;
 				
 			case ZONE_TORCH_1:
 			case ZONE_TORCH_2:
-			case ZONE_TORCH_3:
 			case ZONE_TORCH_4:
 				err = strat_harvest_torch (zone_num);
 				break;
@@ -369,7 +403,7 @@ uint8_t strat_work_on_zone(uint8_t zone_num)
 				err = strat_make_puzzle_on_heart (zone_num);
 				if(TRAJ_SUCCESS(err))
 				{
-					strat_infos.zones[zone_num].prio=PRIO_HEART_AFTER_PUZZLE;
+					//strat_infos.zones[zone_num].prio=PRIO_HEART_AFTER_PUZZLE;
 					strat_infos.zones[zone_num].robot=SEC_ROBOT;
 				}
 				break;
@@ -397,8 +431,9 @@ uint8_t strat_work_on_zone(uint8_t zone_num)
 				{
 					strat_infos.harvested_trees=0;
 					strat_infos.zones[ZONE_BASKET_2].prio=ZONE_PRIO_0;
-					break;
+					strat_infos.zones[ZONE_BASKET_2].flags |= ZONE_CHECKED;
 				}
+				break;
 		}
 	}
 	
@@ -795,9 +830,6 @@ uint8_t goto_basket_path_up(void)
 	printf_P("UP\n");
 	int8_t err;
 	
-	err=goto_and_avoid (COLOR_X(FIRE_3_X),FIRE_3_Y,TRAJ_FLAGS_STD,TRAJ_FLAGS_STD);	
-	//if (!TRAJ_SUCCESS(err))
-	//	ERROUT(err);
 
 	err=goto_and_avoid (COLOR_X(FIRE_5_X),FIRE_5_Y,TRAJ_FLAGS_STD,TRAJ_FLAGS_STD);
 	//if (!TRAJ_SUCCESS(err))
@@ -806,11 +838,11 @@ uint8_t goto_basket_path_up(void)
 	err=goto_and_avoid (COLOR_X(FIRE_6_X),FIRE_6_Y,TRAJ_FLAGS_STD,TRAJ_FLAGS_STD);	
 	//if (!TRAJ_SUCCESS(err))
 	//	ERROUT(err);
-	if(opponents_are_in_area(COLOR_X(3000),800,COLOR_X(2250),0)){
-		strat_leave_fruits_from_fresco();
-	}else{
-		strat_leave_fruits_from_home_red();
-	}
+	//if(opponents_are_in_area(COLOR_X(3000),800,COLOR_X(2250),0)){
+		err=strat_leave_fruits_from_fresco();
+	//}else{
+	//	err=strat_leave_fruits_from_home_red();
+	//}
 	
 	
 //	end:
@@ -824,15 +856,15 @@ uint8_t strat_leave_fruits_from_home_red(){
 	int8_t err;
 	int16_t x;
 	
-	err=goto_and_avoid (COLOR_X(BASKET_INIT_X_HOME),BASKET_INIT_Y_HOME,TRAJ_FLAGS_STD,TRAJ_FLAGS_SMALL_DIST);
+	err=goto_and_avoid (COLOR_X(BASKET_INIT_X_HOME),BASKET_INIT_Y_HOME,TRAJ_FLAGS_STD,TRAJ_FLAGS_NO_NEAR);
 	//if (!TRAJ_SUCCESS(err))
 	//	ERROUT(err);
-	err=goto_and_avoid (COLOR_X(BASKET_INIT_X_HOME-300),BASKET_INIT_Y_HOME,TRAJ_FLAGS_STD,TRAJ_FLAGS_SMALL_DIST);
+	err=goto_and_avoid (COLOR_X(BASKET_INIT_X_HOME-300),BASKET_INIT_Y_HOME,TRAJ_FLAGS_STD,TRAJ_FLAGS_NO_NEAR);
 	//if (!TRAJ_SUCCESS(err))
 	//	ERROUT(err); 
 		
 	x = 2600 - ROBOT_WIDTH/2;
-	err=goto_and_avoid (COLOR_X(x),position_get_y_s16(&mainboard.pos),TRAJ_FLAGS_STD,TRAJ_FLAGS_SMALL_DIST);
+	err=goto_and_avoid (COLOR_X(x),position_get_y_s16(&mainboard.pos),TRAJ_FLAGS_STD,TRAJ_FLAGS_NO_NEAR);
 	//if (!TRAJ_SUCCESS(err))
 	//	ERROUT(err);
 	
@@ -847,14 +879,14 @@ uint8_t strat_leave_fruits_from_fresco(){
 	int8_t err;
 	int16_t x;
 	
-	err=goto_and_avoid (COLOR_X(BASKET_INIT_X_FRESCO),BASKET_INIT_Y_FRESCO,TRAJ_FLAGS_STD,TRAJ_FLAGS_SMALL_DIST);
+	err=goto_and_avoid (COLOR_X(BASKET_INIT_X_FRESCO),BASKET_INIT_Y_FRESCO,TRAJ_FLAGS_STD,TRAJ_FLAGS_NO_NEAR);
 	//if (!TRAJ_SUCCESS(err))
 	//	ERROUT(err);
-	err=goto_and_avoid (COLOR_X(BASKET_INIT_X_FRESCO+300),BASKET_INIT_Y_FRESCO,TRAJ_FLAGS_STD,TRAJ_FLAGS_SMALL_DIST);
+	err=goto_and_avoid (COLOR_X(BASKET_INIT_X_FRESCO+300),BASKET_INIT_Y_FRESCO,TRAJ_FLAGS_STD,TRAJ_FLAGS_NO_NEAR);
 	//if (!TRAJ_SUCCESS(err))
 	//		ERROUT(err);
 	x = 1900 + ROBOT_WIDTH/2;
-	err=goto_and_avoid (COLOR_X(x),position_get_y_s16(&mainboard.pos),TRAJ_FLAGS_STD,TRAJ_FLAGS_SMALL_DIST);
+	err=goto_and_avoid (COLOR_X(x),position_get_y_s16(&mainboard.pos),TRAJ_FLAGS_STD,TRAJ_FLAGS_NO_NEAR);
 	
 	//if (!TRAJ_SUCCESS(err))
 	//	ERROUT(err);
@@ -868,17 +900,15 @@ uint8_t goto_basket_path_down(void)
 //printf_P("Down\n");
 	int8_t err;
 //	int16_t x;
-	err=goto_and_avoid (COLOR_X(FIRE_3_X),FIRE_3_Y,TRAJ_FLAGS_STD,TRAJ_FLAGS_STD);	
-	//if (!TRAJ_SUCCESS(err))
-	//	ERROUT(err);
+
 	err=goto_and_avoid (COLOR_X(FIRE_2_X),FIRE_2_Y,TRAJ_FLAGS_STD,TRAJ_FLAGS_STD);
 	//if (!TRAJ_SUCCESS(err))
 	//	ERROUT(err);
-	if(opponents_are_in_area(COLOR_X(3000),800,COLOR_X(2250),0)){
-		strat_leave_fruits_from_fresco();
-	}else{
-		strat_leave_fruits_from_home_red();
-	}
+	//if(opponents_are_in_area(COLOR_X(3000),800,COLOR_X(2250),0)){
+		err=strat_leave_fruits_from_fresco();
+	//}else{
+	//	err=strat_leave_fruits_from_home_red();
+	//}
 	
 //end:
 	return err;

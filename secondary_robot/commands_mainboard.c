@@ -1044,7 +1044,7 @@ static void cmd_status_parsed(void * parsed_result, void *data)
 	robot_2nd.x = res->robot_x;
 	robot_2nd.y = res->robot_y;
 	robot_2nd.a_abs = res->robot_a_abs;
-	robot_2nd.a = (DEG(a) < 0? DEG(a)+360: a);
+	robot_2nd.a = (DEG(a) < 0? DEG(a)+360: DEG(a));
 	robot_2nd.d = d;
 	IRQ_UNLOCK(flags);
 
@@ -1056,7 +1056,7 @@ static void cmd_status_parsed(void * parsed_result, void *data)
 	IRQ_LOCK(flags);
 	robot_2nd.opponent1_x = res->opp1_x;
 	robot_2nd.opponent1_y = res->opp1_y;
-	robot_2nd.opponent1_a = (DEG(a) < 0? DEG(a)+360: a);
+	robot_2nd.opponent1_a = (DEG(a) < 0? DEG(a)+360: DEG(a));
 	robot_2nd.opponent1_d = d;
 	IRQ_UNLOCK(flags);
 
@@ -1068,7 +1068,7 @@ static void cmd_status_parsed(void * parsed_result, void *data)
 	IRQ_LOCK(flags);
 	robot_2nd.opponent2_x = res->opp2_x;
 	robot_2nd.opponent2_y = res->opp2_y;
-	robot_2nd.opponent2_a = (DEG(a) < 0? DEG(a)+360: a);
+	robot_2nd.opponent2_a = (DEG(a) < 0? DEG(a)+360: DEG(a));
 	robot_2nd.opponent2_d = d;
 	IRQ_UNLOCK(flags);
 

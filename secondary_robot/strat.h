@@ -148,7 +148,7 @@
 #define ACC_ANGLE 30 //90.
 
 /* default speeds */
-#define HOMOLOGATION_SPEED
+//#define HOMOLOGATION_SPEED
 #ifdef HOMOLOGATION_SPEED
 #define SPEED_DIST_FAST 			2000.
 #define SPEED_ANGLE_FAST 			2000.

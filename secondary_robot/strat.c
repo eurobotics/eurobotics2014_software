@@ -100,8 +100,8 @@ struct strat_infos strat_infos = {
     .zones[ZONE_FIRE_6]=        {ZONE_TYPE_FIRE, FIRE_6_X, FIRE_6_Y, 330, 470,  1085,    1115   , 400,  700,   ZONE_PRIO_40, 0 },
     .zones[ZONE_TORCH_1]=        {ZONE_TYPE_TORCH, TORCH_1_X, TORCH_1_Y, 2985, 3000,  730,    870   , 2600,  800,   ZONE_PRIO_40, 0 },
     .zones[ZONE_TORCH_2]=        {ZONE_TYPE_TORCH, TORCH_2_X, TORCH_2_Y, 1630, 1770,  1985,    2000   , 1700,  1600,   ZONE_PRIO_40, 0 },
-    .zones[ZONE_TORCH_3]=        {ZONE_TYPE_TORCH, TORCH_3_X, TORCH_3_Y, 1230, 1370,  1985,    2000   , 1300,  1600,   ZONE_PRIO_40, 0 },
-    .zones[ZONE_TORCH_4]=        {ZONE_TYPE_TORCH, TORCH_4_X, TORCH_4_Y, 0, 15,  900,    730   , 400,  800,   ZONE_PRIO_40, 0 },
+    .zones[ZONE_TORCH_3]=        {ZONE_TYPE_FIRE, TORCH_3_X, TORCH_3_Y, 1230, 1370,  1985,    2000   , 1300,  1600,   ZONE_PRIO_40, 0 },
+    .zones[ZONE_TORCH_4]=        {ZONE_TYPE_FIRE, TORCH_4_X, TORCH_4_Y, 0, 15,  900,    730   , 400,  800,   ZONE_PRIO_40, 0 },
     .zones[ZONE_MOBILE_TORCH_1]= {ZONE_TYPE_MOBILE_TORCH, MOBILE_TORCH_1_X, MOBILE_TORCH_1_Y, 820, 980,  1020,   1180   , 2100,  700,   ZONE_PRIO_40, 0 },
     .zones[ZONE_MOBILE_TORCH_2]= {ZONE_TYPE_MOBILE_TORCH, MOBILE_TORCH_2_X, MOBILE_TORCH_2_Y, 2020, 2180,  1020, 1180   , 900,  700,   ZONE_PRIO_40, 0 },
     .zones[ZONE_BASKET_1]=        {ZONE_TYPE_BASKET, BASKET_1_X, BASKET_1_Y, 1900, 2600,  0,    300   , 2300,  600,   ZONE_PRIO_40, 0 },
@@ -309,8 +309,8 @@ void strat_event(void *dummy)
 	 */
 
 	/* ignore when strat is not running */
-	if (strat_running == 0)
-		return;
+	//if (strat_running == 0)
+	//	return;
 
 	/* limit speed when opponent are close */
 	strat_limit_speed();

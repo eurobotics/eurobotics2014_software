@@ -366,8 +366,8 @@ void strat_event(void *dummy)
      */
 
     /* ignore when strat is not running */
-    if (strat_running == 0)
-        return;
+    //if (strat_running == 0)
+    //    return;
 
     /* limit speed when opponent are close */
     strat_limit_speed();
@@ -400,10 +400,12 @@ uint8_t strat_main(void)
     uint8_t err, i;
 
     // AVOID ZONES IN CURRENT STRATEGY
-    strat_infos.zones[ZONE_TORCH_4].flags |= ZONE_AVOID;
+    //strat_infos.zones[ZONE_TORCH_4].flags |= ZONE_AVOID;
+    strat_infos.zones[ZONE_M_TORCH_1].flags |= ZONE_AVOID;
     strat_infos.zones[ZONE_M_TORCH_2].flags |= ZONE_AVOID;
     strat_infos.zones[ZONE_BASKET_1].flags |= ZONE_AVOID;
-    strat_infos.zones[ZONE_FIRE_4].flags |= ZONE_AVOID;
+    //strat_infos.zones[ZONE_FIRE_4].flags |= ZONE_AVOID;
+    strat_infos.zones[ZONE_HEART_1].flags |= ZONE_AVOID;
     strat_infos.zones[ZONE_HEART_3].flags |= ZONE_AVOID;
 
 	

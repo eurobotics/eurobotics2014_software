@@ -608,12 +608,12 @@ uint8_t __strat_obstacle(uint8_t which)
 	if (opp_d > 800)
 		return 0;
 #else
-	if (opp_d > 600)
+	if (opp_d > 500)
 		return 0;
 #endif
 
 	/* XXX opponent is in front of us */
-	if (mainboard.speed_d > 300 && (opp_a > 325 || opp_a < 35)) {
+	if (mainboard.speed_d > 400 && (opp_a > 330 || opp_a < 30)) { //opp_a > 325 || opp_a < 35))
 		DEBUG(E_USER_STRAT, "opponent front d=%d, a=%d "
 		      "xrel=%d yrel=%d (speed_d=%d)", 
 		      opp_d, opp_a, x_rel, y_rel, mainboard.speed_d);
@@ -621,7 +621,7 @@ uint8_t __strat_obstacle(uint8_t which)
 		return 1;
 	}
 	/* XXX opponent is behind us */
-	if (mainboard.speed_d < 300 && (opp_a < 215 && opp_a > 145)) {
+	if (mainboard.speed_d < -400 && (opp_a < 210 && opp_a > 150)) { //(opp_a < 215 && opp_a > 145)
 		DEBUG(E_USER_STRAT, "opponent behind d=%d, a=%d xrel=%d yrel=%d", 
 		      opp_d, opp_a, x_rel, y_rel);
 		sensor_obstacle_disable();
@@ -640,8 +640,8 @@ uint8_t strat_obstacle(void)
 	else if(__strat_obstacle(OBSTACLE_OPP2))
 		return 1;
 #ifdef ROBOT_2ND
-	else if(__strat_obstacle(OBSTACLE_R2ND))
-		return 1;
+	//else if(__strat_obstacle(OBSTACLE_R2ND))
+	//	return 1;
 #endif
 #endif
 	else

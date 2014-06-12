@@ -236,7 +236,7 @@ void bt_beacon_status_parser (int16_t c)
 			IRQ_LOCK(flags);
 			beaconboard.opponent1_x = (int16_t)x;
 			beaconboard.opponent1_y = (int16_t)y;
-			beaconboard.opponent1_a = (int16_t)(DEG(a) < 0? DEG(a)+360: a);
+			beaconboard.opponent1_a = (int16_t)(DEG(a) < 0? DEG(a)+360: DEG(a));
 			beaconboard.opponent1_d = (int16_t)d;       
 			IRQ_UNLOCK(flags);
 
@@ -253,7 +253,7 @@ void bt_beacon_status_parser (int16_t c)
 			IRQ_LOCK(flags);
 			beaconboard.opponent2_x = (int16_t)x;
 			beaconboard.opponent2_y = (int16_t)y;
-			beaconboard.opponent2_a = (int16_t)(DEG(a) < 0? DEG(a)+360: a);
+			beaconboard.opponent2_a = (int16_t)(DEG(a) < 0? DEG(a)+360: DEG(a));
 			beaconboard.opponent2_d = (int16_t)d;       
 			IRQ_UNLOCK(flags);
 			#endif
@@ -605,7 +605,7 @@ void bt_robot_2nd_status_parser (int16_t c)
 			IRQ_LOCK(flags);
 			robot_2nd.x = (int16_t)x;
 			robot_2nd.y = (int16_t)y;
-			robot_2nd.a = (int16_t)(DEG(a) < 0? DEG(a)+360: a);
+			robot_2nd.a = (int16_t)(DEG(a) < 0? DEG(a)+360: DEG(a));
 			robot_2nd.a_abs = (int16_t)a_abs;
 			robot_2nd.d = (int16_t)d;       
 			IRQ_UNLOCK(flags);
@@ -622,7 +622,7 @@ void bt_robot_2nd_status_parser (int16_t c)
 			IRQ_LOCK(flags);
 			robot_2nd.opponent1_x = (int16_t)x;
 			robot_2nd.opponent1_y = (int16_t)y;
-			robot_2nd.opponent1_a = (int16_t)(DEG(a) < 0? DEG(a)+360: a);
+			robot_2nd.opponent1_a = (int16_t)(DEG(a) < 0? DEG(a)+360: DEG(a));
 			robot_2nd.opponent1_d = (int16_t)d;       
 			IRQ_UNLOCK(flags);
 
@@ -639,7 +639,7 @@ void bt_robot_2nd_status_parser (int16_t c)
 			IRQ_LOCK(flags);
 			robot_2nd.opponent2_x = (int16_t)x;
 			robot_2nd.opponent2_y = (int16_t)y;
-			robot_2nd.opponent2_a = (int16_t)(DEG(a) < 0? DEG(a)+360: a);
+			robot_2nd.opponent2_a = (int16_t)(DEG(a) < 0? DEG(a)+360: DEG(a));
 			robot_2nd.opponent2_d = (int16_t)d;       
 			IRQ_UNLOCK(flags);
 #endif

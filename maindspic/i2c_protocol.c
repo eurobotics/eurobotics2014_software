@@ -779,6 +779,7 @@ int8_t i2c_slavedspic_mode_ready_for_pickup_fire (uint8_t sucker_type, uint8_t l
 
 int8_t i2c_slavedspic_mode_pickup_fire (uint8_t sucker_type, uint8_t level)
 {
+#if 0
 	struct i2c_cmd_slavedspic_set_mode buf;
 
 	/* fill cmd structure */
@@ -790,10 +791,14 @@ int8_t i2c_slavedspic_mode_pickup_fire (uint8_t sucker_type, uint8_t level)
 
 	/* send command and return */
 	return i2c_send_command(I2C_SLAVEDSPIC_ADDR, (uint8_t*)&buf, sizeof(buf));
+#endif
+	return 0;
+
 }
 
 int8_t i2c_slavedspic_mode_store_fire (uint8_t sucker_type)
 {
+#if 0
 	struct i2c_cmd_slavedspic_set_mode buf;
 
 	/* fill cmd structure */
@@ -804,6 +809,8 @@ int8_t i2c_slavedspic_mode_store_fire (uint8_t sucker_type)
 
 	/* send command and return */
 	return i2c_send_command(I2C_SLAVEDSPIC_ADDR, (uint8_t*)&buf, sizeof(buf));
+#endif
+	return 0;
 }
 
 int8_t i2c_slavedspic_mode_load_fire (uint8_t sucker_type)

@@ -88,13 +88,14 @@ uint8_t strat_goto_orphan_fire (uint8_t zone_num)
     x = COLOR_X(strat_infos.zones[zone_num].x);
     y = strat_infos.zones[zone_num].y;
 
-    if ((zone_num == ZONE_FIRE_1) || (zone_num == ZONE_FIRE_6)) {
+    if ((zone_num == ZONE_FIRE_1) || (zone_num == ZONE_FIRE_6) || (zone_num == ZONE_TORCH_3)) {
         if (robot_y > y) {
             
             /* infront color */
             switch (zone_num) {
                 case ZONE_FIRE_1: color = COLOR_INVERT(I2C_COLOR_RED); break;
                 case ZONE_FIRE_6: color = COLOR_INVERT(I2C_COLOR_YELLOW); break;
+                case ZONE_TORCH_3: color = COLOR_INVERT(I2C_COLOR_RED); break;
                 default: color = COLOR_INVERT(I2C_COLOR_YELLOW);
             }
 
@@ -111,6 +112,7 @@ uint8_t strat_goto_orphan_fire (uint8_t zone_num)
             switch (zone_num) {
                 case ZONE_FIRE_1: color = COLOR_INVERT(I2C_COLOR_YELLOW); break;
                 case ZONE_FIRE_6: color = COLOR_INVERT(I2C_COLOR_RED); break;
+                case ZONE_TORCH_3: color = COLOR_INVERT(I2C_COLOR_RED); break;
                 default: color = COLOR_INVERT(I2C_COLOR_YELLOW);
             }
 
@@ -220,11 +222,12 @@ uint8_t strat_harvest_orphan_fire (uint8_t zone_num)
 		ERROUT(err);
 
     /* get the in front color */
-    if ((zone_num == ZONE_FIRE_1) || (zone_num == ZONE_FIRE_6)) {
+    if ((zone_num == ZONE_FIRE_1) || (zone_num == ZONE_FIRE_6)|| (zone_num == ZONE_TORCH_3)) {
         if (robot_y > y) {
             switch (zone_num) {
                 case ZONE_FIRE_1: color = COLOR_INVERT(I2C_COLOR_RED); break;
                 case ZONE_FIRE_6: color = COLOR_INVERT(I2C_COLOR_YELLOW); break;
+                case ZONE_TORCH_3: color = COLOR_INVERT(I2C_COLOR_RED); break;
                 default: color = COLOR_INVERT(I2C_COLOR_YELLOW);
             }
         }
@@ -232,6 +235,7 @@ uint8_t strat_harvest_orphan_fire (uint8_t zone_num)
             switch (zone_num) {
                 case ZONE_FIRE_1: color = COLOR_INVERT(I2C_COLOR_YELLOW); break;
                 case ZONE_FIRE_6: color = COLOR_INVERT(I2C_COLOR_RED); break;
+                case ZONE_TORCH_3: color = COLOR_INVERT(I2C_COLOR_RED); break;
                 default: color = COLOR_INVERT(I2C_COLOR_YELLOW);
             }
         } 
@@ -390,7 +394,7 @@ uint8_t strat_harvest_torch (uint8_t zone_num)
        mainboard.stored_fire_color[slavedspic.nb_stored_fires+1] = COLOR_INVERT(I2C_COLOR_YELLOW);
         
 	/* store fire */
-    i2c_slavedspic_mode_store_fire(I2C_SLAVEDSPIC_SUCKER_TYPE_LONG);
+    i2c_slavedspic_mode_store_fire(I2C_SLAVEDSPIC_SUCKER_TYPE_LONG);	
 
     /* XXX return inside boundinbox */
     trajectory_d_rel(&mainboard.traj, -DIST_TORCH_OVER);

@@ -318,7 +318,7 @@ void robotsim_update(void)
 				IRQ_LOCK(flags);
 				beaconboard.opponent1_x = oppx;
 				beaconboard.opponent1_y = oppy;
-				beaconboard.opponent1_a = DEG(oppa);
+				beaconboard.opponent1_a = (DEG(oppa) < 0? DEG(oppa)+360: DEG(oppa));
 				if (beaconboard.opponent1_a < 0)
 					beaconboard.opponent1_a += 360;
 				beaconboard.opponent1_d = oppd;
@@ -338,7 +338,7 @@ void robotsim_update(void)
 				IRQ_LOCK(flags);
 				beaconboard.opponent2_x = oppx;
 				beaconboard.opponent2_y = oppy;
-				beaconboard.opponent2_a = DEG(oppa);
+				beaconboard.opponent2_a = (DEG(oppa) < 0? DEG(oppa)+360: DEG(oppa));
 				if (beaconboard.opponent2_a < 0)
 					beaconboard.opponent2_a += 360;
 				beaconboard.opponent2_d = oppd;

@@ -77,16 +77,65 @@ uint8_t strat_begin(void)
 {  
 	uint8_t err;
 	uint8_t i=0;
+	#define TORCH_1_D_STICK 340
+	#define TORCH_1_A_STICK -80
 	#define ZONES_SEQUENCE_LENGTH 4
+
+    int16_t d;
+
 	uint8_t zones_sequence[ZONES_SEQUENCE_LENGTH] = 	
-	{ZONE_FIRE_1,ZONE_FIRE_3,ZONE_TORCH_2,ZONE_M_TORCH_1};
+	{ZONE_FIRE_1,ZONE_FIRE_3,ZONE_TORCH_3,ZONE_FIRE_5};
 	
 	/* Secondary robot */
     bt_robot_2nd_bt_fresco();
-	time_wait_ms(2000);
-	trajectory_d_rel(&mainboard.traj,250);
-	err = wait_traj_end(TRAJ_FLAGS_SMALL_DIST);
+	//time_wait_ms(2000);
+
+	//WAIT_COND_OR_TIMEOUT(robot_2nd_x_is_more_than(500),5000);
+
+
+	while(!robot_2nd_x_is_more_than(500));
+
+	//trajectory_d_rel(&mainboard.traj,250);
+	//err = wait_traj_end(TRAJ_FLAGS_SMALL_DIST);
 	
+
+	/* torch 1 */
+
+	d = TORCH_1_Y - position_get_y_s16(&mainboard.pos) - TORCH_1_D_STICK;
+	trajectory_d_rel(&mainboard.traj, d);
+	err = wait_traj_end(TRAJ_FLAGS_SMALL_DIST);
+	//if (!TRAJ_SUCCESS(err))
+	//		ERROUT(err);				
+
+	i2c_slavedspic_mode_stick ( COLOR_INVERT(I2C_STICK_TYPE_LEFT),
+										 I2C_STICK_MODE_PUSH_FIRE, 0);
+	i2c_slavedspic_wait_ready();
+
+
+	trajectory_a_rel (&mainboard.traj, COLOR_A_REL(TORCH_1_A_STICK));
+	err = wait_traj_end(TRAJ_FLAGS_NO_NEAR);
+	//if (!TRAJ_SUCCESS(err))
+	//		ERROUT(err);
+
+
+	i2c_slavedspic_mode_stick ( COLOR_INVERT(I2C_STICK_TYPE_LEFT),
+										 I2C_STICK_MODE_HIDE, 0);
+	//i2c_slavedspic_wait_ready();
+	strat_infos.zones[ZONE_TORCH_1].flags |= ZONE_CHECKED;
+
+	trajectory_a_abs (&mainboard.traj, COLOR_A_ABS(45));
+	err = wait_traj_end(TRAJ_FLAGS_NO_NEAR);
+	//if (!TRAJ_SUCCESS(err))
+	//		ERROUT(err);
+
+
+	trajectory_d_rel (&mainboard.traj, 400);
+	err = wait_traj_end(TRAJ_FLAGS_NO_NEAR);
+	//if (!TRAJ_SUCCESS(err))
+	//		ERROUT(err);
+
+
+
 	for(i=0; i<ZONES_SEQUENCE_LENGTH; i++)
 	{
 		/* goto zone */
