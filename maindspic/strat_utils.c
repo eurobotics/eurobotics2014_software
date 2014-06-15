@@ -460,9 +460,9 @@ int8_t get_best_opponent1_xyda (int16_t *x, int16_t *y, int16_t *d, int16_t *a)
 {
 	uint8_t flags;
 
-//	if (beaconboard.opponent1_x == I2C_OPPONENT_NOT_THERE &&
-//		beaconboard.opponent2_x == I2C_OPPONENT_NOT_THERE) 
-//	{
+	if (beaconboard.opponent1_x == I2C_OPPONENT_NOT_THERE &&
+		beaconboard.opponent2_x == I2C_OPPONENT_NOT_THERE) 
+	{
 		IRQ_LOCK(flags);
 		if (x != NULL)
 			*x = robot_2nd.opponent1_x;
@@ -473,8 +473,7 @@ int8_t get_best_opponent1_xyda (int16_t *x, int16_t *y, int16_t *d, int16_t *a)
 		if (a != NULL)
 			*a = robot_2nd.opponent1_a;
 		IRQ_UNLOCK(flags);	
-//	} 
-#if 0
+	} 
 	else {
 		IRQ_LOCK(flags);
 		if (x != NULL)
@@ -487,7 +486,6 @@ int8_t get_best_opponent1_xyda (int16_t *x, int16_t *y, int16_t *d, int16_t *a)
 			*a = beaconboard.opponent1_a;
 		IRQ_UNLOCK(flags);	
 	}
-#endif
 	return 0;
 }
 
@@ -495,9 +493,9 @@ int8_t get_best_opponent2_xyda (int16_t *x, int16_t *y, int16_t *d, int16_t *a)
 {
 	uint8_t flags;
 
-	//if (beaconboard.opponent1_x == I2C_OPPONENT_NOT_THERE &&
-	//	beaconboard.opponent2_x == I2C_OPPONENT_NOT_THERE) 
-	//{
+	if (beaconboard.opponent1_x == I2C_OPPONENT_NOT_THERE &&
+		beaconboard.opponent2_x == I2C_OPPONENT_NOT_THERE) 
+	{
 		IRQ_LOCK(flags);
 		if (x != NULL)
 			*x = robot_2nd.opponent2_x;
@@ -508,8 +506,7 @@ int8_t get_best_opponent2_xyda (int16_t *x, int16_t *y, int16_t *d, int16_t *a)
 		if (a != NULL)
 			*a = robot_2nd.opponent2_a;
 		IRQ_UNLOCK(flags);	
-	//}
-#if 0 
+	} 
 	else {
 		IRQ_LOCK(flags);
 		if (x != NULL)
@@ -522,7 +519,6 @@ int8_t get_best_opponent2_xyda (int16_t *x, int16_t *y, int16_t *d, int16_t *a)
 			*a = beaconboard.opponent2_a;
 		IRQ_UNLOCK(flags);	
 	}
-#endif
 	return 0;
 }
 

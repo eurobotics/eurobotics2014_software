@@ -241,7 +241,7 @@ static void beacon_update(void)
        IRQ_UNLOCK(flags);
 
        /* update robot mate */
-#if 0
+	   /* XXX update is also done by robot_2nd even */
        IRQ_LOCK(flags);
        if (robot_2nd.x == I2C_OPPONENT_NOT_THERE) {
                IRQ_UNLOCK(flags);
@@ -255,7 +255,6 @@ static void beacon_update(void)
                robot_2nd.a += 360;
        robot_2nd.d = oppd;
        IRQ_UNLOCK(flags);
-#endif
 }
 
 /* must be called periodically */
@@ -314,7 +313,7 @@ void robotsim_update(void)
 			abs_xy_to_rel_da(oppx, oppy, &oppd, &oppa);
 
 			/* limit to the real range */
-			if (oppd < 800) {
+			if (oppd < 700) {
 				IRQ_LOCK(flags);
 				beaconboard.opponent1_x = oppx;
 				beaconboard.opponent1_y = oppy;
@@ -334,7 +333,7 @@ void robotsim_update(void)
 			abs_xy_to_rel_da(oppx, oppy, &oppd, &oppa);
 
 			/* limit to the real range */
-			if (oppd < 800) {
+			if (oppd < 700) {
 				IRQ_LOCK(flags);
 				beaconboard.opponent2_x = oppx;
 				beaconboard.opponent2_y = oppy;

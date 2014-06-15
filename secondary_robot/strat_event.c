@@ -80,7 +80,8 @@ void strat_event_schedule_single (void (*f)(void *), void * data)
 	
 
 	/* delete current event */
-	scheduler_del_event(mainboard.strat_event);
+	if (mainboard.strat_event != -1)
+		scheduler_del_event(mainboard.strat_event);
 
 	/* add event */
 	IRQ_LOCK(flags);
@@ -104,7 +105,8 @@ void strat_event_schedule_periodical(void (*f)(void *), void * data)
 
 
 	/* delete current event */
-	scheduler_del_event(mainboard.strat_event);
+	if (mainboard.strat_event != -1)
+		scheduler_del_event(mainboard.strat_event);
 
 	/* add event */
 	IRQ_LOCK(flags);

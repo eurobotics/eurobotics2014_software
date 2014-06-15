@@ -602,7 +602,6 @@ retry:
 	pwm_servo_set(&gen.pwm_servo_oc4, SERVO_SHOOT_POS_DOWN);
 #endif
 	time_wait_ms(2000);
-	
 
 
 end:
