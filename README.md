@@ -1,9 +1,9 @@
-# Source code of Grosnik & Sesk‰pa robots
+# Source code of Grosnik & Sesk√§pa robots
 
-Grosnik & Sesk‰pa were made for Eurobot 2014, theme *Prehistorbot*. 
+Grosnik & Sesk√§pa were made for Eurobot 2014, theme *Prehistorbot*. 
 
 <p align="center">
-<img src="http://arc-robots.org/wp/wp-content/uploads/2014/11/IMG_20140329_170514_2560.jpg"
+<img src="http://arc-robots.org/wp-content/uploads/2014/11/IMG_20140329_170514_2560.jpg"
 width=600> 
 </p>
 
@@ -15,12 +15,12 @@ Check out more photos and videos of our robots at our [web page](http://arc-robo
 
 * Silvia Santano
 * Javier Rodriguez Puigvert
-* Javier BaliÒas Santos
+* Javier Bali√±as Santos
 
 # Copyright
 
 ![Eurobotics Engineering](./docs/logos/logo_eurobotics_eng.png)
-![AsociaciÛn de RobÛtica de Coslada (ARC)](./docs/logos/logo_arc.png)
+![Asociaci√≥n de Rob√≥tica de Coslada (ARC)](./docs/logos/logo_arc.png)
 # License
 
 This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version.
